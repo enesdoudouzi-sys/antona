@@ -107,6 +107,8 @@
   .tile.r{background:linear-gradient(145deg,#56c4ff,var(--read))}
   .tile.s{background:linear-gradient(145deg,#4fe0bf,var(--shape))}
   .tile.c{background:linear-gradient(145deg,#c9a4ff,var(--clock))}
+  .tile.e{background:linear-gradient(120deg,#6d7bff,#9b6bff);flex-direction:row;align-items:center;gap:.9rem}
+  .tile.e .emoji{font-size:2.2rem}
   .tile .mini{position:absolute;right:.7rem;bottom:.6rem;background:rgba(255,255,255,.22);border-radius:999px;
     padding:.12rem .55rem;font-size:.78rem;font-family:"Nunito",sans-serif;font-weight:800;z-index:1}
 
@@ -199,6 +201,11 @@
   .flystar{position:fixed;font-size:2.4rem;color:var(--star);pointer-events:none;z-index:50;animation:floatstar 1s ease-out forwards}
   @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
   :focus-visible{outline:.18rem solid var(--accent);outline-offset:.15rem}
+  .streak{display:flex;align-items:center;gap:.25rem;background:linear-gradient(145deg,#ffb347,#ff7a7a);color:#fff;
+    border-radius:999px;padding:.25rem .6rem;font-family:"Fredoka",sans-serif;font-size:.9rem;box-shadow:var(--shadow-sm);animation:pop .3s}
+  #mascot.bounce{animation:bounce .55s}
+  @keyframes bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-12px) scale(1.14)}60%{transform:translateY(0) scale(1)}80%{transform:scale(1.06)}100%{transform:scale(1)}}
+  #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -244,6 +251,7 @@
       <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
       <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
       <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
+      <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
   </div>
@@ -261,6 +269,7 @@
     <div class="bar">
       <button class="back" id="backBtn">← Zurück</button>
       <div class="progress"><i id="progBar"></i></div>
+      <div class="streak" id="streak" hidden>🔥 <span id="streakN">0</span></div>
       <div class="round" id="roundLbl">1/10</div>
     </div>
     <div class="card">
@@ -332,7 +341,11 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0}};}
+  function blankStats(){return {stars:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0}};}
+  profiles.forEach(function(p){ // alte Profile um neue Fächer ergänzen
+    if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};
+    ["math","read","shape","clock","english"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
+  });
 
   /* ---------- Sound (WebAudio) ---------- */
   var actx=null, soundOn=load("antona_sound",true);
@@ -350,25 +363,27 @@
   function sStar(){tone(1040,.1);setTimeout(function(){tone(1320,.12)},80);}
 
   /* ---------- Vorlesen: beste deutsche Stimme wählen ---------- */
-  var deVoice=null;
+  var deVoice=null,enVoice=null;
+  function bestVoice(list,prefs){
+    for(var i=0;i<prefs.length;i++)for(var j=0;j<list.length;j++)
+      if((list[j].name||"").indexOf(prefs[i])!==-1)return list[j];
+    var online=list.filter(function(v){return v.localService===false}); // Online-Stimmen klingen meist natürlicher
+    return online[0]||list[0];
+  }
   function chooseVoice(){
-    try{
-      var vs=window.speechSynthesis.getVoices();if(!vs||!vs.length)return;
+    try{var vs=window.speechSynthesis.getVoices();if(!vs||!vs.length)return;
       var de=vs.filter(function(v){return /^de(-|_|$)/i.test(v.lang||"");});
-      if(!de.length)return;
-      // bevorzugte, natürlich klingende Stimmen zuerst
-      var pref=["Google Deutsch","Microsoft Katja","Microsoft Hedda","Microsoft Anna","Anna","Petra","Katja","Vicki","Markus"];
-      for(var i=0;i<pref.length;i++)for(var j=0;j<de.length;j++)
-        if((de[j].name||"").indexOf(pref[i])!==-1){deVoice=de[j];return;}
-      var online=de.filter(function(v){return v.localService===false}); // Online-Stimmen klingen meist besser
-      deVoice=online[0]||de[0];
+      var en=vs.filter(function(v){return /^en(-|_|$)/i.test(v.lang||"");});
+      if(de.length)deVoice=bestVoice(de,["Google Deutsch","Microsoft Katja","Microsoft Hedda","Microsoft Anna","Anna","Petra","Katja","Vicki","Markus"]);
+      if(en.length)enVoice=bestVoice(en,["Google US English","Google UK English Female","Microsoft Aria","Microsoft Jenny","Microsoft Zira","Samantha","Aria"]);
     }catch(e){}
   }
   try{if("speechSynthesis"in window){chooseVoice();window.speechSynthesis.onvoiceschanged=chooseVoice;}}catch(e){}
-  function speak(t){try{if(!("speechSynthesis"in window))return;window.speechSynthesis.cancel();
-    if(!deVoice)chooseVoice();
-    var u=new SpeechSynthesisUtterance(t);u.lang="de-DE";if(deVoice)u.voice=deVoice;
-    u.rate=.92;u.pitch=1.12;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
+  function speak(t,lang){try{if(!("speechSynthesis"in window))return;window.speechSynthesis.cancel();
+    if(!deVoice&&!enVoice)chooseVoice();
+    var en=(lang&&lang.indexOf("en")===0);
+    var u=new SpeechSynthesisUtterance(t);u.lang=en?"en-US":"de-DE";var v=en?enVoice:deVoice;if(v)u.voice=v;
+    u.rate=en?.9:.92;u.pitch=1.1;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
 
   /* ---------- Maskottchen ---------- */
   function drawMascot(mood){
@@ -506,9 +521,31 @@
       options:uniq(correct,function(){return timeWords(1+rnd(12),pick(mins.concat([0,30])))},3),correct:correct,word:true,three:true};};}
   var CLOCK_LVL={1:{title:"Volle Stunden",desc:"3 Uhr, 7 Uhr …",set:[clockGen([0])]},2:{title:"Halbe Stunden",desc:"halb 4 …",set:[clockGen([0,30])]},3:{title:"Viertelstunden",desc:"Viertel nach/vor",set:[clockGen([0,15,30,45])]}};
 
+  /* ---------- ENGLISCH (hören & zuordnen) ---------- */
+  var EN_COLORS=[{de:"Rot",en:"Red",e:"🟥"},{de:"Blau",en:"Blue",e:"🟦"},{de:"Grün",en:"Green",e:"🟩"},{de:"Gelb",en:"Yellow",e:"🟨"},
+    {de:"Schwarz",en:"Black",e:"⬛"},{de:"Weiß",en:"White",e:"⬜"},{de:"Rosa",en:"Pink",e:"🟪"},{de:"Orange",en:"Orange",e:"🟧"}];
+  var EN_ANIMALS=[{de:"Hund",en:"Dog",e:"🐶"},{de:"Katze",en:"Cat",e:"🐱"},{de:"Fisch",en:"Fish",e:"🐟"},{de:"Vogel",en:"Bird",e:"🐦"},
+    {de:"Kuh",en:"Cow",e:"🐮"},{de:"Pferd",en:"Horse",e:"🐴"},{de:"Bär",en:"Bear",e:"🐻"},{de:"Ente",en:"Duck",e:"🦆"},{de:"Schwein",en:"Pig",e:"🐷"},{de:"Löwe",en:"Lion",e:"🦁"}];
+  var EN_NUM=[{n:1,en:"One"},{n:2,en:"Two"},{n:3,en:"Three"},{n:4,en:"Four"},{n:5,en:"Five"},{n:6,en:"Six"},{n:7,en:"Seven"},{n:8,en:"Eight"},{n:9,en:"Nine"},{n:10,en:"Ten"}];
+  function e_vocab(list){return function(){var it=pick(list),others=shuffle(list.filter(function(x){return x.en!==it.en})).slice(0,2),opts=shuffle([it].concat(others));
+    return{label:"Wie heißt das auf Englisch?",speak:it.en,speakLang:"en",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span><span style="font-size:1.05rem;color:var(--ink-soft);font-weight:800">'+it.de+'</span>';},
+      options:opts.map(function(o){return o.en}),correct:it.en,word:true,three:true};};}
+  function e_num(){var it=pick(EN_NUM),others=shuffle(EN_NUM.filter(function(x){return x.n!==it.n})).slice(0,2),opts=shuffle([it].concat(others));
+    return{label:"Welche Zahl auf Englisch?",speak:it.en,speakLang:"en",
+      render:function(z){z.className="question";z.innerHTML='<span style="font-size:3.4rem;font-family:\'Fredoka\',sans-serif">'+it.n+'</span>';},
+      options:opts.map(function(o){return o.en}),correct:it.en,word:true,three:true};}
+  var ENGLISH_LVL={
+    1:{title:"Farben (Colours)",desc:"Rot, Blau, Grün …",set:[e_vocab(EN_COLORS)]},
+    2:{title:"Tiere (Animals)",desc:"Hund, Katze, Fisch …",set:[e_vocab(EN_ANIMALS)]},
+    3:{title:"Zahlen (Numbers)",desc:"1 bis 10",set:[e_num]},
+    4:{title:"Alles gemischt",desc:"Farben, Tiere & Zahlen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num]}
+  };
+
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
-    shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"}};
-  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"}];
+    shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
+    english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"}};
+  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"}];
 
   var PRAISE=["Super!","Toll!","Richtig!","Klasse!","Bravo!","Stark!","Perfekt!","Juhu!"];
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
@@ -578,8 +615,8 @@
   /* ---------- Spiel ---------- */
   var state=null;
   function startGame(){
-    state={key:curGame,level:curLevel,round:0,correct:0,current:null,tries:0,earned:0,ans:0};
-    show("play");nextRound();
+    state={key:curGame,level:curLevel,round:0,correct:0,current:null,tries:0,earned:0,streak:0};
+    $("#streak").hidden=true;show("play");nextRound();
   }
   function nextRound(){
     if(state.round>=ROUNDS)return finish();
@@ -592,6 +629,7 @@
     q.render($("#qzone"));
     $("#feedback").textContent="";$("#feedback").className="feedback";
     buildAnswers(q);
+    if(q.speakLang)setTimeout(function(){speak(q.speak,q.speakLang);},250); // englisches Wort vorlesen
   }
   function buildAnswers(q){
     var box=$("#answers");box.innerHTML="";box.className="answers"+(q.three?" three":"");
@@ -600,19 +638,34 @@
       b.setAttribute("aria-label",opt);b.addEventListener("click",function(){choose(b,opt,q);});box.appendChild(b);});
   }
   function flyStar(x,y){var s=document.createElement("div");s.className="flystar";s.textContent="★";s.style.left=(x-15)+"px";s.style.top=(y-15)+"px";document.body.appendChild(s);setTimeout(function(){s.remove();},1000);}
+  function confetti(){
+    try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;}catch(e){}
+    var c=document.getElementById("confetti");
+    if(!c){c=document.createElement("canvas");c.id="confetti";document.body.appendChild(c);}
+    var ctx=c.getContext("2d"),W=c.width=innerWidth,H=c.height=innerHeight;
+    var cols=["#ff6b6b","#2aa7ff","#19b36b","#ffc02e","#b07bff","#ff8a3d"],P=[];
+    for(var i=0;i<130;i++)P.push({x:Math.random()*W,y:-20-Math.random()*H*.3,r:4+Math.random()*5,c:cols[i%cols.length],vy:2+Math.random()*3.5,vx:-1.2+Math.random()*2.4,rot:Math.random()*6,vr:-.2+Math.random()*.4});
+    var t0=Date.now();
+    (function frame(){var el=Date.now()-t0;ctx.clearRect(0,0,W,H);
+      P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore();});
+      if(el<2400)requestAnimationFrame(frame);else ctx.clearRect(0,0,W,H);})();
+  }
   function choose(btn,opt,q){
     if(btn.disabled)return;var p=active();
     if(opt===q.correct){
       btn.classList.add("good");drawMascot("happy");sCorrect();
+      var ms=$("#mascot");ms.classList.remove("bounce");void ms.offsetWidth;ms.classList.add("bounce");
       Array.prototype.forEach.call($("#answers").children,function(c){c.disabled=true;});
       $("#feedback").className="feedback ok";$("#feedback").innerHTML="⭐ "+pick(PRAISE);
       state.correct++;p.stats.correct++;
+      state.streak++;if(state.streak>=2){$("#streakN").textContent=state.streak;$("#streak").hidden=false;}
       if(state.tries===0){p.stats.stars++;state.earned++;sStar();var r=btn.getBoundingClientRect();flyStar(r.left+r.width/2,r.top);$("#starCount").textContent=p.stats.stars;}
       persist();speak(pick(PRAISE));
       $("#progBar").style.width=(state.round/ROUNDS*100)+"%";
       setTimeout(nextRound,900);
     } else {
       state.tries++;btn.classList.add("bad");btn.disabled=true;drawMascot("sad");sWrong();
+      state.streak=0;$("#streak").hidden=true;
       $("#feedback").className="feedback try";$("#feedback").textContent=pick(TRY);
       if(state.tries>=2){Array.prototype.forEach.call($("#answers").children,function(c){c.disabled=true;if(c.getAttribute("aria-label")===q.correct)c.classList.add("good");});
         $("#feedback").innerHTML="Die Lösung ist <b>"+q.correct+"</b>";setTimeout(nextRound,1600);}
@@ -628,7 +681,7 @@
     $("#doneEmoji").textContent=got>=9?"🏆":got>=6?"🎉":"🌟";
     $("#doneTitle").textContent=got>=9?"Fantastisch!":got>=6?"Super gemacht!":"Gut geübt!";
     $("#doneText").textContent="Du hast "+got+" von "+ROUNDS+" richtig und "+state.earned+" Sterne verdient.";
-    show("done");speak($("#doneTitle").textContent);
+    show("done");if(got>=6)confetti();speak($("#doneTitle").textContent);
   }
 
   /* ---------- Eltern-Bereich ---------- */
@@ -678,7 +731,7 @@
   $("#backBtn").addEventListener("click",function(){openLevels(state?state.key:curGame);});
   $("#homeBtn").addEventListener("click",enterHome);
   $("#againBtn").addEventListener("click",startGame);
-  $("#speakBtn").addEventListener("click",function(){if(state&&state.current)speak(state.current.speak);});
+  $("#speakBtn").addEventListener("click",function(){if(state&&state.current)speak(state.current.speak,state.current.speakLang);});
   $("#whoBtn").addEventListener("click",function(){renderProfiles();show("profiles");});
   $("#parentBtn").addEventListener("click",openParent);
   $("#parentBack").addEventListener("click",enterHome);
