@@ -349,9 +349,26 @@
   function sWrong(){tone(200,.18,"triangle");}
   function sStar(){tone(1040,.1);setTimeout(function(){tone(1320,.12)},80);}
 
-  /* ---------- Vorlesen ---------- */
+  /* ---------- Vorlesen: beste deutsche Stimme wählen ---------- */
+  var deVoice=null;
+  function chooseVoice(){
+    try{
+      var vs=window.speechSynthesis.getVoices();if(!vs||!vs.length)return;
+      var de=vs.filter(function(v){return /^de(-|_|$)/i.test(v.lang||"");});
+      if(!de.length)return;
+      // bevorzugte, natürlich klingende Stimmen zuerst
+      var pref=["Google Deutsch","Microsoft Katja","Microsoft Hedda","Microsoft Anna","Anna","Petra","Katja","Vicki","Markus"];
+      for(var i=0;i<pref.length;i++)for(var j=0;j<de.length;j++)
+        if((de[j].name||"").indexOf(pref[i])!==-1){deVoice=de[j];return;}
+      var online=de.filter(function(v){return v.localService===false}); // Online-Stimmen klingen meist besser
+      deVoice=online[0]||de[0];
+    }catch(e){}
+  }
+  try{if("speechSynthesis"in window){chooseVoice();window.speechSynthesis.onvoiceschanged=chooseVoice;}}catch(e){}
   function speak(t){try{if(!("speechSynthesis"in window))return;window.speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance(t);u.lang="de-DE";u.rate=.9;u.pitch=1.1;window.speechSynthesis.speak(u);}catch(e){}}
+    if(!deVoice)chooseVoice();
+    var u=new SpeechSynthesisUtterance(t);u.lang="de-DE";if(deVoice)u.voice=deVoice;
+    u.rate=.92;u.pitch=1.12;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
 
   /* ---------- Maskottchen ---------- */
   function drawMascot(mood){
