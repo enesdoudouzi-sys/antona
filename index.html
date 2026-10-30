@@ -241,7 +241,7 @@
     <p class="muted">Was möchtest du üben?</p>
     <div class="grid">
       <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
-      <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute & Wörter</span><span class="mini" id="best-read">★ 0</span></button>
+      <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
       <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
       <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
     </div>
@@ -435,7 +435,7 @@
   function r_anlaut(){var it=pick(WORDS),L=it.w.charAt(0).toUpperCase();
     return{label:"Mit welchem Buchstaben beginnt das Wort?",speak:"Mit welchem Buchstaben beginnt "+it.w+"?",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>'+it.w;},
-      options:uniq(L,function(){return pick("BHKMSATELINOFRUPDGZ".split(""))},3),correct:L,three:true};}
+      options:uniq(L,function(){return pick("BHKMSATELINOFRUPDGZÄÖÜ".split(""))},3),correct:L,three:true};}
   function r_word(){var right=pick(WORDS),others=shuffle(WORDS.filter(function(x){return x.w!==right.w})).slice(0,2),opts=shuffle([right].concat(others));
     return{label:"Welches Wort passt zum Bild?",speak:"Welches Wort passt zum Bild?",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+right.e+'</span>';},
@@ -445,10 +445,18 @@
     return{label:"Wie viele Silben hat das Wort?",speak:"Wie viele Silben hat "+it.w+"? Klatsche mit.",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>'+it.w;},
       options:uniq(n,function(){return 1+rnd(4)},3).map(String),correct:String(n),three:true};}
+  var SPECIAL=[{w:"Käse",e:"🧀",L:"ä"},{w:"Bär",e:"🐻",L:"ä"},{w:"Mädchen",e:"👧",L:"ä"},{w:"Löwe",e:"🦁",L:"ö"},
+    {w:"Vögel",e:"🐦",L:"ö"},{w:"Öl",e:"🫒",L:"ö"},{w:"Tür",e:"🚪",L:"ü"},{w:"Tüte",e:"🛍️",L:"ü"},{w:"Müll",e:"🗑️",L:"ü"},
+    {w:"Fuß",e:"🦶",L:"ß"},{w:"Straße",e:"🛣️",L:"ß"},{w:"Nuss",e:"🌰",L:"ß"}];
+  function r_umlaut(){var it=pick(SPECIAL);
+    return{label:"Welcher besondere Buchstabe steckt im Wort?",speak:"Welcher besondere Buchstabe steckt in "+it.w+"?",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>'+it.w;},
+      options:uniq(it.L,function(){return pick(["ä","ö","ü","ß"])},3),correct:it.L,three:true};}
   var READ_LVL={
     1:{title:"Anlaute",desc:"Erster Buchstabe",set:[r_anlaut]},
     2:{title:"Wörter erkennen",desc:"Wort zum Bild finden",set:[r_word,r_anlaut]},
-    3:{title:"Silben",desc:"Silben zählen",set:[r_syll,r_word]}
+    3:{title:"Silben",desc:"Silben zählen",set:[r_syll,r_word]},
+    4:{title:"Umlaute & ß",desc:"ä, ö, ü und ß",set:[r_umlaut]}
   };
 
   /* ---------- FORMEN & FARBEN ---------- */
