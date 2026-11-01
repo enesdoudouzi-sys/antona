@@ -126,6 +126,8 @@
   .tile.g .emoji{font-size:2.1rem}
   .tile.d{background:linear-gradient(120deg,#36c2a0,#5b6cff);flex-direction:row;align-items:center;gap:.9rem}
   .tile.d .emoji{font-size:2.1rem}
+  .tile.k{background:linear-gradient(120deg,#5ec26a,#2aa7ff);flex-direction:row;align-items:center;gap:.9rem}
+  .tile.k .emoji{font-size:2.1rem}
   /* Spiel */
   .gbadge{display:flex;align-items:center;gap:.3rem;background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:.3rem .7rem;font-family:"Fredoka",sans-serif;font-size:1rem;box-shadow:var(--shadow-sm)}
@@ -163,6 +165,9 @@
   .sq.sel{box-shadow:inset 0 0 0 4px #ffd23f}
   .sq.move::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(39,179,115,.65)}
   .sq.cap{box-shadow:inset 0 0 0 4px rgba(255,91,91,.8)}
+  .diffpick{display:flex;align-items:center;gap:.4rem;justify-content:center;margin:.3rem 0 .1rem;flex-wrap:wrap}
+  .diffpick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-weight:800;font-family:"Nunito",sans-serif;cursor:pointer;font-size:.9rem}
+  .diffpick button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
   .tile .mini{position:absolute;right:.7rem;bottom:.6rem;background:rgba(255,255,255,.22);border-radius:999px;
     padding:.12rem .55rem;font-size:.78rem;font-family:"Nunito",sans-serif;font-weight:800;z-index:1}
 
@@ -296,6 +301,7 @@
   :root[data-skin="pro"] .tile.c .emoji{background:#f0e8ff}
   :root[data-skin="pro"] .tile.e .emoji{background:#e6ecff}
   :root[data-skin="pro"] .tile.d .emoji{background:#e0faf6}
+  :root[data-skin="pro"] .tile.k .emoji{background:#e3f6e8}
   :root[data-skin="pro"] .tile.g .emoji{background:#fff2d9}
   :root[data-skin="pro"] .tile .name{color:var(--ink);text-shadow:none;font-size:1.15rem}
   :root[data-skin="pro"] .tile .sub{color:var(--ink-soft);opacity:1}
@@ -326,6 +332,7 @@
   :root[data-skin="neon"] .tile.e{background:linear-gradient(120deg,#00e5ff,#ff2e97);box-shadow:0 0 28px rgba(255,46,151,.45)}
   :root[data-skin="neon"] .tile.g{background:linear-gradient(120deg,#ffd23f,#ff6b9d);box-shadow:0 0 28px rgba(255,210,63,.45);color:#241a00}
   :root[data-skin="neon"] .tile.d{background:linear-gradient(120deg,#00e5ff,#9dff3d);box-shadow:0 0 28px rgba(0,229,255,.45);color:#042018}
+  :root[data-skin="neon"] .tile.k{background:linear-gradient(120deg,#27ff9e,#00e5ff);box-shadow:0 0 28px rgba(39,255,158,.4);color:#042018}
   :root[data-skin="neon"] .tile .name{text-shadow:0 2px 10px rgba(0,0,0,.4)}
   :root[data-skin="neon"] .progress>i{box-shadow:0 0 12px rgba(0,229,255,.8)}
   :root[data-skin="neon"] .question{text-shadow:0 0 16px rgba(0,229,255,.25)}
@@ -387,6 +394,7 @@
       <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
       <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
       <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
+      <button class="tile k" data-game="sach" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere, Körper, Jahreszeiten & Verkehr</span><span class="mini" id="best-sach">★ 0</span></button>
       <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
@@ -486,6 +494,8 @@
   <div id="schach" hidden style="flex:1;display:flex;flex-direction:column">
     <div class="bar"><button class="back" id="schBack">← Stopp</button><div class="spacer"></div>
       <div class="gbadge" id="schTurn">Du bist dran</div></div>
+    <div class="diffpick" id="schDiff"><span class="muted">Stärke:</span>
+      <button data-lv="1">Leicht</button><button data-lv="2">Mittel</button><button data-lv="3">Schwer</button></div>
     <div id="schBoard" class="chessboard"></div>
     <div id="schMsg" class="muted" style="text-align:center;margin-top:.6rem;min-height:1.2rem">Schlage den König 👑 des Computers!</div>
   </div>
@@ -561,11 +571,11 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0},history:{},ballonBest:0};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0,sach:0},history:{},ballonBest:0};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
-    ["math","read","shape","clock","english","denken"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
+    ["math","read","shape","clock","english","denken","sach"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 
@@ -815,11 +825,39 @@
     5:{title:"Alles gemischt",desc:"Muster, Reihen & Logik",set:[d_pattern,d_numseq,d_odd,d_same]}
   };
 
+  /* ---------- SACHKUNDE (Sachunterricht 2. Klasse) ---------- */
+  function qa(pool){return function(){var it=pick(pool),opts=shuffle(it.a.slice());
+    return{label:it.q,speak:it.q,render:function(z){z.className="question";z.innerHTML='<span class="em">'+(it.e||"🌍")+'</span>';},
+      options:opts,correct:it.a[0],word:true,three:true};};}
+  var SACH_TIERE=[{q:"Welches Tier macht Muh?",e:"🐮",a:["Kuh","Katze","Ente"]},{q:"Wo lebt ein Fisch?",e:"🐟",a:["Im Wasser","Im Baum","In der Luft"]},
+    {q:"Welches Tier kann fliegen?",e:"🐦",a:["Vogel","Hund","Schaf"]},{q:"Wie viele Beine hat eine Spinne?",e:"🕷️",a:["8","6","4"]},
+    {q:"Welches Tier hat einen Rüssel?",e:"🐘",a:["Elefant","Pferd","Hase"]},{q:"Was frisst ein Hase gern?",e:"🐰",a:["Karotten","Fleisch","Steine"]},
+    {q:"Welches Baby gehört zum Hund?",e:"🐶",a:["Welpe","Kalb","Küken"]},{q:"Wo wohnt die Biene?",e:"🐝",a:["Im Bienenstock","Im Meer","Unter der Erde"]}];
+  var SACH_KOERPER=[{q:"Womit siehst du?",e:"👁️",a:["Mit den Augen","Mit den Ohren","Mit der Nase"]},{q:"Womit hörst du?",e:"👂",a:["Mit den Ohren","Mit den Augen","Mit dem Mund"]},
+    {q:"Womit riechst du?",e:"👃",a:["Mit der Nase","Mit der Hand","Mit dem Fuß"]},{q:"Wie viele Finger hat eine Hand?",e:"✋",a:["5","4","10"]},
+    {q:"Was tust du vor dem Essen?",e:"🧼",a:["Hände waschen","Fernsehen","Springen"]},{q:"Wie oft Zähne putzen am Tag?",e:"🦷",a:["2-mal","Nie","Einmal pro Woche"]},
+    {q:"Was ist gesund?",e:"🍎",a:["Obst","Nur Süßigkeiten","Chips"]}];
+  var SACH_JAHR=[{q:"Wann schneit es?",e:"❄️",a:["Winter","Sommer","Frühling"]},{q:"Wann fallen bunte Blätter?",e:"🍂",a:["Herbst","Sommer","Winter"]},
+    {q:"Was ziehst du bei Regen an?",e:"🌧️",a:["Regenjacke","Badehose","Nichts"]},{q:"Wann ist es am wärmsten?",e:"☀️",a:["Sommer","Winter","Herbst"]},
+    {q:"Wie viele Jahreszeiten gibt es?",e:"🗓️",a:["4","2","12"]},{q:"Wann blühen die Blumen?",e:"🌷",a:["Frühling","Winter","Nie"]},
+    {q:"Wie viele Tage hat eine Woche?",e:"📅",a:["7","5","10"]}];
+  var SACH_VERKEHR=[{q:"Bei welcher Ampelfarbe darfst du gehen?",e:"🚦",a:["Grün","Rot","Gelb"]},{q:"Was tust du bei Rot?",e:"🚦",a:["Stehen bleiben","Schnell laufen","Winken"]},
+    {q:"Wo überquerst du sicher die Straße?",e:"🦓",a:["Am Zebrastreifen","Zwischen Autos","Überall"]},{q:"Was trägst du beim Radfahren?",e:"🚲",a:["Helm","Hut","Krone"]},
+    {q:"Vor dem Überqueren schaust du …",e:"👀",a:["Links und rechts","Nur nach oben","Gar nicht"]},{q:"Welche Farbe heißt Stopp?",e:"🔴",a:["Rot","Grün","Blau"]}];
+  var SACH_LVL={
+    1:{title:"Tiere & Natur",desc:"Tiere, Beine, Zuhause …",set:[qa(SACH_TIERE)]},
+    2:{title:"Mein Körper & Sinne",desc:"Sehen, hören, gesund sein",set:[qa(SACH_KOERPER)]},
+    3:{title:"Jahreszeiten & Wetter",desc:"Winter, Sommer, Regen …",set:[qa(SACH_JAHR)]},
+    4:{title:"Verkehr & Sicherheit",desc:"Ampel, Zebrastreifen, Helm",set:[qa(SACH_VERKEHR)]},
+    5:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[qa(SACH_TIERE.concat(SACH_KOERPER,SACH_JAHR,SACH_VERKEHR))]}
+  };
+
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
     shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
     english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"},
-    denken:{title:"Denken & Konzentration",lvl:DENK_LVL,color:"#00c2c2"}};
-  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"}];
+    denken:{title:"Denken & Konzentration",lvl:DENK_LVL,color:"#00c2c2"},
+    sach:{title:"Sachkunde",lvl:SACH_LVL,color:"#2bb673"}};
+  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"}];
 
   var PRAISE=["Super!","Toll!","Richtig!","Klasse!","Bravo!","Stark!","Perfekt!","Juhu!"];
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
@@ -1021,7 +1059,7 @@
   function migrateProfiles(){
     profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
       if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
-      ["math","read","shape","clock","english","denken"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
+      ["math","read","shape","clock","english","denken","sach"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
   }
   $("#syncShow").addEventListener("click",function(){
     try{var code=btoa(unescape(encodeURIComponent(JSON.stringify(profiles))));
@@ -1182,6 +1220,7 @@
       el.textContent=unoLabel(card);el.addEventListener("click",function(){playerPlayUno(card);});hand.appendChild(el);});}
   function playerPlayUno(card){if(UNO.over||UNO.turn!=="p"||UNO.pendingWild||!unoPlayable(card))return;
     var i=UNO.player.indexOf(card);if(i<0)return;UNO.player.splice(i,1);UNO.discard.push(card);sCorrect();
+    if(UNO.player.length===1)toast("UNO! 🎴");
     if(card.c==="W"){UNO.pendingWild=card;$("#unoColorPick").hidden=false;$("#unoInfo").textContent="Wähle eine Wunschfarbe.";renderUno();return;}
     UNO.color=card.c;applyUnoEffect(card.v,"p");}
   function unoChooseColor(c){if(!UNO.pendingWild)return;var card=UNO.pendingWild;UNO.pendingWild=null;UNO.color=c;$("#unoColorPick").hidden=true;applyUnoEffect(card.v,"p");}
@@ -1198,22 +1237,26 @@
     if(choices.length===0){unoDrawN(UNO.cpu,1);renderUno();choices=UNO.cpu.filter(unoPlayable);
       if(choices.length===0){UNO.turn="p";$("#unoInfo").textContent="Computer zieht. Du bist dran.";renderUno();return;}}
     var card=choices.filter(function(x){return x.c!=="W";})[0]||choices[0];
-    UNO.cpu.splice(UNO.cpu.indexOf(card),1);UNO.discard.push(card);
+    UNO.cpu.splice(UNO.cpu.indexOf(card),1);UNO.discard.push(card);sCorrect();
+    if(UNO.cpu.length===1)toast("Computer hat UNO!");
     if(card.c==="W"){var cnt={R:0,Y:0,G:0,B:0};UNO.cpu.forEach(function(x){if(cnt[x.c]!==undefined)cnt[x.c]++;});var best="R";UC.forEach(function(c){if(cnt[c]>cnt[best])best=c;});UNO.color=best;}
     else UNO.color=card.c;
     $("#unoInfo").textContent="Computer legt "+unoLabel(card)+(card.c==="W"?" (Farbe "+({R:"Rot",Y:"Gelb",G:"Grün",B:"Blau"}[UNO.color])+")":"")+".";
     applyUnoEffect(card.v,"c");}
-  function unoWin(who){UNO.over=true;$("#unoColorPick").hidden=true;if(who==="p")confetti();
+  function unoWin(who){UNO.over=true;$("#unoColorPick").hidden=true;if(who==="p"){confetti();sStar();}
     $("#unoInfo").innerHTML=(who==="p"?"🎉 Du hast gewonnen!":"Der Computer hat gewonnen.")+' &nbsp;<button class="next" id="unoAgain">Nochmal (🪙 6)</button>';
     renderUno();var p=active(),again=$("#unoAgain");if(again)again.addEventListener("click",function(){if(!p||(p.stats.coins||0)<6){openGames();return;}p.stats.coins-=6;persist();$("#coinCount").textContent=p.stats.coins;startUno();});}
 
   /* ---------- SCHACH (Kinder: König schlagen) ---------- */
-  var CH=null,PIECE={w:{p:"♙",n:"♘",b:"♗",r:"♖",q:"♕",k:"♔"},b:{p:"♟",n:"♞",b:"♝",r:"♜",q:"♛",k:"♚"}};
+  var CH=null,chLevel=2,PIECE={w:{p:"♙",n:"♘",b:"♗",r:"♖",q:"♕",k:"♔"},b:{p:"♟",n:"♞",b:"♝",r:"♜",q:"♛",k:"♚"}};
   function inb(r,c){return r>=0&&r<8&&c>=0&&c<8;}
   function startChess(){var b=[];for(var i=0;i<8;i++)b.push([null,null,null,null,null,null,null,null]);
     var back=["r","n","b","q","k","b","n","r"];
     for(var c=0;c<8;c++){b[0][c]={t:back[c],w:false};b[1][c]={t:"p",w:false};b[6][c]={t:"p",w:true};b[7][c]={t:back[c],w:true};}
-    CH={board:b,turn:"w",sel:null,over:false};$("#schMsg").textContent="Schlage den König 👑 des Computers!";$("#schTurn").textContent="Du bist dran";show("schach");renderChess();}
+    CH={board:b,turn:"w",sel:null,over:false};$("#schMsg").textContent="Schlage den König 👑 des Computers!";$("#schTurn").textContent="Du bist dran";
+    Array.prototype.forEach.call(document.querySelectorAll("#schDiff button"),function(x){x.setAttribute("aria-pressed",(+x.getAttribute("data-lv"))===chLevel);});
+    show("schach");renderChess();}
+  function underThreat(tr,tc){for(var r=0;r<8;r++)for(var c=0;c<8;c++){var p=CH.board[r][c];if(p&&p.w&&chMoves(r,c).some(function(m){return m[0]===tr&&m[1]===tc;}))return true;}return false;}
   function chMoves(r,c){var b=CH.board,p=b[r][c];if(!p)return [];var m=[],w=p.w;
     function add(tr,tc){if(!inb(tr,tc))return false;var q=b[tr][tc];if(q&&q.w===w)return false;m.push([tr,tc]);return !q;}
     if(p.t==="p"){var dir=w?-1:1,sr=w?6:1;
@@ -1241,8 +1284,21 @@
   function cpuChess(){if(CH.over)return;var all=[],VAL={p:1,n:3,b:3,r:5,q:9,k:100};
     for(var r=0;r<8;r++)for(var c=0;c<8;c++){var p=CH.board[r][c];if(p&&!p.w)chMoves(r,c).forEach(function(mm){var tgt=CH.board[mm[0]][mm[1]];all.push({f:[r,c],t:mm,val:tgt?VAL[tgt.t]:0});});}
     if(!all.length){CH.over=true;$("#schMsg").textContent="Der Computer kann nicht ziehen – du gewinnst! 🎉";return;}
-    all.sort(function(a,b){return b.val-a.val;});var best=all[0].val,top=all.filter(function(mm){return mm.val===best;});var mv=top[rnd(top.length)];
+    var mv;
+    if(chLevel===1){ // Leicht: meist zufällig
+      mv = Math.random()<0.65 ? all[rnd(all.length)] : pickBest(all,0);
+    } else if(chLevel===2){ // Mittel: bester Schlagzug, sonst zufällig
+      mv = pickBest(all,0);
+    } else { // Schwer: Schlagwert minus Risiko (1 Zug vorausschauen)
+      all.forEach(function(m){var b=CH.board,mov=b[m.f[0]][m.f[1]],tgt=b[m.t[0]][m.t[1]];
+        b[m.t[0]][m.t[1]]=mov;b[m.f[0]][m.f[1]]=null;
+        m.score=m.val-(underThreat(m.t[0],m.t[1])?VAL[mov.t]*0.9:0);
+        b[m.f[0]][m.f[1]]=mov;b[m.t[0]][m.t[1]]=tgt;});
+      var bs=-1e9;all.forEach(function(m){if(m.score>bs)bs=m.score;});
+      var topS=all.filter(function(m){return m.score===bs;});mv=topS[rnd(topS.length)];
+    }
     chMove(mv.f[0],mv.f[1],mv.t[0],mv.t[1]);}
+  function pickBest(all){var best=-1;all.forEach(function(m){if(m.val>best)best=m.val;});var top=all.filter(function(m){return m.val===best;});return top[rnd(top.length)];}
   function chWin(whiteWon){CH.over=true;CH.sel=null;if(whiteWon)confetti();var p=active();
     $("#schMsg").innerHTML=(whiteWon?"🎉 Du hast gewonnen!":"Der Computer gewinnt.")+' &nbsp;<button class="next" id="schAgain">Nochmal (🪙 6)</button>';
     var again=$("#schAgain");if(again)again.addEventListener("click",function(){if(!p||(p.stats.coins||0)<6){openGames();return;}p.stats.coins-=6;persist();$("#coinCount").textContent=p.stats.coins;startChess();});}
@@ -1254,9 +1310,10 @@
   $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
   $("#memBack").addEventListener("click",function(){MEM.on=false;openGames();});
   $("#unoBack").addEventListener("click",function(){if(UNO)UNO.over=true;openGames();});
-  $("#unoDraw").addEventListener("click",function(){if(!UNO||UNO.over||UNO.turn!=="p"||UNO.pendingWild)return;unoDrawN(UNO.player,1);renderUno();UNO.turn="c";$("#unoInfo").textContent="Du ziehst. Computer ist dran …";setTimeout(cpuUno,850);});
+  $("#unoDraw").addEventListener("click",function(){if(!UNO||UNO.over||UNO.turn!=="p"||UNO.pendingWild)return;tone(320,.1);unoDrawN(UNO.player,1);renderUno();UNO.turn="c";$("#unoInfo").textContent="Du ziehst. Computer ist dran …";setTimeout(cpuUno,850);});
   Array.prototype.forEach.call(document.querySelectorAll("#unoColorPick .ucol"),function(btn){btn.addEventListener("click",function(){unoChooseColor(btn.getAttribute("data-c"));});});
   $("#schBack").addEventListener("click",function(){if(CH)CH.over=true;openGames();});
+  Array.prototype.forEach.call(document.querySelectorAll("#schDiff button"),function(btn){btn.addEventListener("click",function(){chLevel=+btn.getAttribute("data-lv");startChess();});});
   $("#lvlBack").addEventListener("click",enterHome);
   $("#backBtn").addEventListener("click",function(){openLevels(state?state.key:curGame);});
   $("#homeBtn").addEventListener("click",enterHome);
