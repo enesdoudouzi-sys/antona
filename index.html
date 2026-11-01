@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-skin="neon">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -233,56 +233,59 @@
   @keyframes bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-12px) scale(1.14)}60%{transform:translateY(0) scale(1)}80%{transform:scale(1.06)}100%{transform:scale(1)}}
   #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
 
-  /* ====== ARCADE-NEON THEME (überschreibt das helle Design) ====== */
-  :root{
-    --bg:#070712 !important; --bg2:#12122e !important; --panel:#15153a !important;
-    --ink:#f4f3ff !important; --ink-soft:#a9a9dc !important; --line:rgba(255,255,255,.15) !important;
-    --accent:#00e5ff !important; --accent-2:#ff2e97 !important;
-    --math:#ff2e97 !important; --read:#00e5ff !important; --shape:#9dff3d !important; --clock:#b14bff !important;
-    --good:#27ff9e !important; --bad:#ff4d6d !important; --star:#ffd23f !important;
-    --shadow:0 .6rem 1.8rem rgba(0,0,0,.6) !important; --shadow-sm:0 .3rem 1rem rgba(0,0,0,.5) !important;
-    color-scheme:dark;
-  }
-  body{background:
+  /* ====== 3 DESIGNS (umschaltbar über 🎨) ====== */
+  /* Tokens je Design */
+  :root[data-skin="neon"]{ --bg:#070712; --bg2:#12122e; --panel:#15153a; --ink:#f4f3ff; --ink-soft:#a9a9dc; --line:rgba(255,255,255,.15);
+    --accent:#00e5ff; --accent-2:#ff2e97; --math:#ff2e97; --read:#00e5ff; --shape:#9dff3d; --clock:#b14bff; --good:#27ff9e; --bad:#ff4d6d; --star:#ffd23f;
+    --shadow:0 .6rem 1.8rem rgba(0,0,0,.6); --shadow-sm:0 .3rem 1rem rgba(0,0,0,.5); color-scheme:dark; }
+  :root[data-skin="soft"]{ --bg:#f5f7fc; --bg2:#eceff8; --panel:#ffffff; --ink:#28303f; --ink-soft:#747f98; --line:#e6eaf3;
+    --accent:#5b7cf0; --accent-2:#8a6cf0; --math:#ff7a90; --read:#4f9bf0; --shape:#2fb986; --clock:#9b7bf0; --good:#2bb673; --bad:#ff6b7d; --star:#f5b93c;
+    --shadow:0 .9rem 2rem -.8rem rgba(40,50,80,.22); --shadow-sm:0 .4rem 1rem -.4rem rgba(40,50,80,.18); color-scheme:light; }
+  :root[data-skin="sunny"]{ --bg:#fff6ec; --bg2:#ffe9d6; --panel:#fffdfa; --ink:#44352a; --ink-soft:#9b8676; --line:#f1e2d1;
+    --accent:#ff8a3d; --accent-2:#ff5d8f; --math:#ff6b6b; --read:#3aa7e0; --shape:#2fb98a; --clock:#b07bff; --good:#36b37e; --bad:#ff6b6b; --star:#ffc02e;
+    --shadow:0 .9rem 2rem -.8rem rgba(120,80,40,.2); --shadow-sm:0 .4rem 1rem -.4rem rgba(120,80,40,.16); color-scheme:light; }
+  /* Hintergrund je Design */
+  :root[data-skin="neon"] body{background:
     radial-gradient(1100px 560px at 50% -12%, rgba(0,229,255,.16), transparent 60%),
     radial-gradient(900px 520px at 108% 16%, rgba(255,46,151,.16), transparent 60%),
     radial-gradient(800px 500px at -8% 60%, rgba(177,75,255,.14), transparent 60%),
-    linear-gradient(180deg,#070712,#0c0c22) !important; background-attachment:fixed; color:var(--ink)}
-  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    linear-gradient(180deg,#070712,#0c0c22); background-attachment:fixed}
+  :root[data-skin="soft"] body{background:linear-gradient(180deg,#f5f7fc,#eceff8)}
+  :root[data-skin="sunny"] body{background:linear-gradient(180deg,#fff6ec,#ffe6cf)}
+  /* Design-Wechsel-Knopf sichtbar lassen */
+  #themeBtn{display:grid !important}
+  /* ---- NEON-Extras (nur im dunklen Design) ---- */
+  :root[data-skin="neon"] body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
     background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
     background-size:42px 42px; -webkit-mask-image:radial-gradient(circle at 50% 28%,#000 28%,transparent 82%); mask-image:radial-gradient(circle at 50% 28%,#000 28%,transparent 82%)}
-  .wrap{position:relative;z-index:1}
-  #themeBtn{display:none !important}
-  h2.title,.brand span{text-shadow:0 0 14px rgba(0,229,255,.4)}
-  .pill,.who,.iconbtn,.back,.gbadge{background:rgba(255,255,255,.06) !important;border:1px solid var(--line) !important;color:var(--ink) !important;box-shadow:0 0 12px rgba(0,229,255,.14) !important}
-  #starPill,#coinPill{border-color:rgba(255,210,63,.55) !important;box-shadow:0 0 16px rgba(255,210,63,.35) !important;font-family:"Fredoka",sans-serif}
-  .card,.sheet,.pcard,.opt,.lvl,.field input,.gate input,.avpick button{background:rgba(255,255,255,.05) !important;border:1px solid var(--line) !important;color:var(--ink) !important}
-  .card,.sheet{box-shadow:0 0 26px rgba(0,0,0,.45) !important}
-  .opt{box-shadow:0 0 14px rgba(0,0,0,.4) !important}
-  .opt.good{background:var(--good) !important;color:#04210f !important;box-shadow:0 0 24px rgba(39,255,158,.65) !important;border-color:transparent !important}
-  .opt.bad{background:var(--bad) !important;color:#2a0410 !important;box-shadow:0 0 24px rgba(255,77,109,.65) !important;border-color:transparent !important}
-  .next,.primary{background:linear-gradient(120deg,#00e5ff,#7c4dff) !important;color:#04121a !important;box-shadow:0 0 22px rgba(0,229,255,.55) !important}
-  .read-btn{background:var(--accent) !important;color:#04121a !important;box-shadow:0 0 16px rgba(0,229,255,.6) !important}
-  .tile{border:1px solid rgba(255,255,255,.2) !important}
-  .tile.m{background:linear-gradient(145deg,#ff78c4,#ff1e7a) !important;box-shadow:0 0 28px rgba(255,46,151,.5) !important}
-  .tile.r{background:linear-gradient(145deg,#64f1ff,#00b8e6) !important;box-shadow:0 0 28px rgba(0,229,255,.5) !important}
-  .tile.s{background:linear-gradient(145deg,#c9ff6e,#7ee600) !important;box-shadow:0 0 28px rgba(157,255,61,.45) !important;color:#07210a !important}
-  .tile.c{background:linear-gradient(145deg,#d2a2ff,#9a3dff) !important;box-shadow:0 0 28px rgba(177,75,255,.5) !important}
-  .tile.e{background:linear-gradient(120deg,#00e5ff,#ff2e97) !important;box-shadow:0 0 28px rgba(255,46,151,.45) !important}
-  .tile.g{background:linear-gradient(120deg,#ffd23f,#ff6b9d) !important;box-shadow:0 0 28px rgba(255,210,63,.45) !important;color:#241a00 !important}
-  .tile.d{background:linear-gradient(120deg,#00e5ff,#9dff3d) !important;box-shadow:0 0 28px rgba(0,229,255,.45) !important;color:#042018 !important}
-  .tile .name{text-shadow:0 2px 10px rgba(0,0,0,.4)}
-  .lvl .num{box-shadow:0 0 16px rgba(0,229,255,.55)}
-  .progress{background:rgba(255,255,255,.12) !important}
-  .progress>i{box-shadow:0 0 12px rgba(0,229,255,.8)}
-  .streak{box-shadow:0 0 18px rgba(255,140,80,.7) !important}
-  .question{text-shadow:0 0 16px rgba(0,229,255,.25)}
-  .gq{text-shadow:0 0 16px rgba(0,229,255,.45)}
-  #ballonArea{background:radial-gradient(circle at 50% 18%, #1c1c50, #070712) !important;border:1px solid var(--line) !important;box-shadow:inset 0 0 50px rgba(0,0,0,.65) !important}
-  .balloon{box-shadow:0 0 18px rgba(255,255,255,.18), inset -.4rem -.5rem 0 rgba(0,0,0,.2) !important}
-  .barmini{background:rgba(255,255,255,.12) !important}
-  .barmini>i{box-shadow:0 0 8px rgba(0,229,255,.7)}
-  .dangerbtn{box-shadow:0 0 14px rgba(255,77,109,.35) !important}
+  :root[data-skin="neon"] .wrap{position:relative;z-index:1}
+  :root[data-skin="neon"] h2.title,:root[data-skin="neon"] .brand span{text-shadow:0 0 14px rgba(0,229,255,.4)}
+  :root[data-skin="neon"] .pill,:root[data-skin="neon"] .who,:root[data-skin="neon"] .iconbtn,:root[data-skin="neon"] .back,:root[data-skin="neon"] .gbadge{background:rgba(255,255,255,.06);box-shadow:0 0 12px rgba(0,229,255,.14)}
+  :root[data-skin="neon"] #starPill,:root[data-skin="neon"] #coinPill{border-color:rgba(255,210,63,.55);box-shadow:0 0 16px rgba(255,210,63,.35)}
+  :root[data-skin="neon"] .card,:root[data-skin="neon"] .sheet,:root[data-skin="neon"] .pcard,:root[data-skin="neon"] .opt,:root[data-skin="neon"] .lvl,:root[data-skin="neon"] .field input,:root[data-skin="neon"] .gate input,:root[data-skin="neon"] textarea,:root[data-skin="neon"] .avpick button{background:rgba(255,255,255,.05)}
+  :root[data-skin="neon"] .card,:root[data-skin="neon"] .sheet{box-shadow:0 0 26px rgba(0,0,0,.45)}
+  :root[data-skin="neon"] .opt.good{color:#04210f;box-shadow:0 0 24px rgba(39,255,158,.65)}
+  :root[data-skin="neon"] .opt.bad{box-shadow:0 0 24px rgba(255,77,109,.65)}
+  :root[data-skin="neon"] .next,:root[data-skin="neon"] .primary{background:linear-gradient(120deg,#00e5ff,#7c4dff);color:#04121a;box-shadow:0 0 22px rgba(0,229,255,.55)}
+  :root[data-skin="neon"] .read-btn{box-shadow:0 0 16px rgba(0,229,255,.6)}
+  :root[data-skin="neon"] .tile.m{background:linear-gradient(145deg,#ff78c4,#ff1e7a);box-shadow:0 0 28px rgba(255,46,151,.5)}
+  :root[data-skin="neon"] .tile.r{background:linear-gradient(145deg,#64f1ff,#00b8e6);box-shadow:0 0 28px rgba(0,229,255,.5)}
+  :root[data-skin="neon"] .tile.s{background:linear-gradient(145deg,#c9ff6e,#7ee600);box-shadow:0 0 28px rgba(157,255,61,.45);color:#07210a}
+  :root[data-skin="neon"] .tile.c{background:linear-gradient(145deg,#d2a2ff,#9a3dff);box-shadow:0 0 28px rgba(177,75,255,.5)}
+  :root[data-skin="neon"] .tile.e{background:linear-gradient(120deg,#00e5ff,#ff2e97);box-shadow:0 0 28px rgba(255,46,151,.45)}
+  :root[data-skin="neon"] .tile.g{background:linear-gradient(120deg,#ffd23f,#ff6b9d);box-shadow:0 0 28px rgba(255,210,63,.45);color:#241a00}
+  :root[data-skin="neon"] .tile.d{background:linear-gradient(120deg,#00e5ff,#9dff3d);box-shadow:0 0 28px rgba(0,229,255,.45);color:#042018}
+  :root[data-skin="neon"] .tile .name{text-shadow:0 2px 10px rgba(0,0,0,.4)}
+  :root[data-skin="neon"] .progress>i{box-shadow:0 0 12px rgba(0,229,255,.8)}
+  :root[data-skin="neon"] .question{text-shadow:0 0 16px rgba(0,229,255,.25)}
+  :root[data-skin="neon"] .gq{text-shadow:0 0 16px rgba(0,229,255,.45)}
+  :root[data-skin="neon"] #ballonArea{background:radial-gradient(circle at 50% 18%, #1c1c50, #070712)}
+  :root[data-skin="neon"] .balloon{box-shadow:0 0 18px rgba(255,255,255,.18), inset -.4rem -.5rem 0 rgba(0,0,0,.2)}
+  /* Toast für Design-Wechsel */
+  .toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%) translateY(1rem);background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);box-shadow:var(--shadow);border-radius:999px;padding:.5rem 1rem;font-family:"Fredoka",sans-serif;
+    font-size:.95rem;opacity:0;transition:opacity .25s, transform .25s;z-index:80;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1018,13 +1021,18 @@
   $("#parentBtn").addEventListener("click",openParent);
   $("#parentBack").addEventListener("click",enterHome);
 
-  /* Thema */
-  var themeBtn=$("#themeBtn");
-  function applyTheme(t){if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");themeBtn.textContent="☀️";}
-    else if(t==="light"){document.documentElement.setAttribute("data-theme","light");themeBtn.textContent="🌙";}
-    else{document.documentElement.removeAttribute("data-theme");themeBtn.textContent=matchMedia("(prefers-color-scheme: dark)").matches?"☀️":"🌙";}}
-  var savedTheme=load("antona_theme","system");applyTheme(savedTheme);
-  themeBtn.addEventListener("click",function(){var cur=load("antona_theme","system");var next=cur==="dark"?"light":"dark";save("antona_theme",next);applyTheme(next);});
+  /* Design-Umschalter (3 Designs) */
+  var SKINS=["neon","soft","sunny"],SKIN_NAME={neon:"Neon (dunkel)",soft:"Soft (hell)",sunny:"Sonnig (warm)"};
+  function applySkin(s){if(SKINS.indexOf(s)<0)s="neon";document.documentElement.setAttribute("data-skin",s);}
+  var toastEl=null,toastT=0;
+  function toast(msg){if(!toastEl){toastEl=document.createElement("div");toastEl.className="toast";document.body.appendChild(toastEl);}
+    toastEl.textContent=msg;toastEl.classList.add("on");clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove("on");},1500);}
+  var skinBtn=$("#themeBtn");skinBtn.textContent="🎨";skinBtn.title="Design wechseln";skinBtn.setAttribute("aria-label","Design wechseln");
+  applySkin(load("antona_skin","neon"));
+  skinBtn.addEventListener("click",function(){
+    var cur=load("antona_skin","neon"),nx=SKINS[(SKINS.indexOf(cur)+1)%SKINS.length];
+    save("antona_skin",nx);applySkin(nx);toast("Design: "+SKIN_NAME[nx]);
+  });
 
   /* Start */
   drawMascot("idle");
