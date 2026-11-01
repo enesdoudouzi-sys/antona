@@ -171,10 +171,15 @@
   .sq.sel{box-shadow:inset 0 0 0 4px #ffd23f}
   .sq.move::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(39,179,115,.65)}
   .sq.cap{box-shadow:inset 0 0 0 4px rgba(255,91,91,.8)}
-  /* Kaufladen */
-  .shopwin{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;min-height:4.5rem}
-  .shopitem{display:flex;flex-direction:column;align-items:center;gap:.25rem;font-size:2.6rem}
+  /* Kaufladen & Kasse */
+  .shopitem{display:flex;flex-direction:column;align-items:center;gap:.25rem;font-size:2.4rem}
   .pricetag{font-family:"Fredoka",sans-serif;font-weight:700;font-size:1rem;background:var(--star);color:#4a3800;border-radius:.5rem;padding:.1rem .5rem}
+  .kunde{display:flex;align-items:center;gap:.7rem;width:100%}
+  .kundeAv{font-size:2.6rem;flex:none}
+  .theke{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;background:var(--bg2);border-radius:1rem;padding:.7rem;min-height:4rem;width:100%}
+  .kassenDisplay{font-family:"Fredoka",sans-serif;font-size:1.7rem;background:#15181c;color:#4dff88;border-radius:.6rem;padding:.3rem 1.2rem;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+  .terminal{background:var(--panel);border:2px solid var(--line);border-radius:.8rem;padding:.6rem 1.1rem;text-align:center;font-size:1.8rem;margin:.3rem auto;width:fit-content}
+  #kasseStep{width:100%;display:flex;flex-direction:column;align-items:center;gap:.4rem}
   .diffpick{display:flex;align-items:center;gap:.4rem;justify-content:center;margin:.3rem 0 .1rem;flex-wrap:wrap}
   .diffpick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-weight:800;font-family:"Nunito",sans-serif;cursor:pointer;font-size:.9rem}
   .diffpick button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
@@ -510,14 +515,15 @@
     <div id="schMsg" class="muted" style="text-align:center;margin-top:.6rem;min-height:1.2rem">Schlage den König 👑 des Computers!</div>
   </div>
 
-  <!-- KAUFLADEN -->
+  <!-- KAUFLADEN & KASSE -->
   <div id="shop" hidden style="flex:1;display:flex;flex-direction:column">
     <div class="bar"><button class="back" id="shopBack">← Stopp</button><div class="spacer"></div>
-      <div class="gbadge">🧾 <span id="shopScore">0</span>/8</div></div>
-    <div class="card" style="gap:1.1rem">
-      <div class="shopwin" id="shopItems"></div>
-      <div class="gq" id="shopQ" style="font-size:1.35rem">Was kostet alles zusammen?</div>
-      <div id="shopAns" class="answers three"></div>
+      <div class="gbadge">🧾 <span id="shopScore">0</span> Kunden</div></div>
+    <div class="card" style="gap:.9rem;justify-content:flex-start">
+      <div class="kunde"><span class="kundeAv" id="kundeAv">🧑</span><div class="bubble" id="kundeMsg" style="flex:1">Hallo!</div></div>
+      <div class="theke" id="theke"></div>
+      <div class="kassenDisplay" id="kassenDisplay">? €</div>
+      <div id="kasseStep"></div>
       <div id="shopFb" class="feedback" aria-live="polite"></div>
     </div>
   </div>
@@ -1113,7 +1119,7 @@
     {id:"memory",name:"Sternen-Memory",emoji:"🧠",cost:5,desc:"Finde die passenden Paare."},
     {id:"uno",name:"UNO (Kinder)",emoji:"🎴",cost:6,desc:"Karten gegen den Computer: Farbe oder Zahl passend legen."},
     {id:"schach",name:"Schach (Kinder)",emoji:"♟️",cost:6,desc:"Schlage den König des Computers."},
-    {id:"shop",name:"Kaufladen",emoji:"🛒",cost:0,desc:"Einkaufen & kassieren bis 100 € – verdiene Münzen!"}
+    {id:"shop",name:"Kaufladen & Kasse",emoji:"🛒",cost:0,desc:"Live gegen den Computer kassieren: Preis, Rückgeld, bar oder Karte."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -1327,33 +1333,60 @@
     $("#schMsg").innerHTML=(whiteWon?"🎉 Du hast gewonnen!":"Der Computer gewinnt.")+' &nbsp;<button class="next" id="schAgain">Nochmal (🪙 6)</button>';
     var again=$("#schAgain");if(again)again.addEventListener("click",function(){if(!p||(p.stats.coins||0)<6){openGames();return;}p.stats.coins-=6;persist();$("#coinCount").textContent=p.stats.coins;startChess();});}
 
-  /* ---------- KAUFLADEN (Einkaufen & Kassieren, bis 100 €) ---------- */
-  var SHOPITEMS=[{e:"🍎",p:3},{e:"🍌",p:2},{e:"🍞",p:4},{e:"🥛",p:3},{e:"🧀",p:6},{e:"🍫",p:2},{e:"🎈",p:5},{e:"🧸",p:12},{e:"🚗",p:9},{e:"⚽",p:8},{e:"📗",p:7},{e:"🧃",p:2},{e:"🍉",p:6},{e:"👟",p:19},{e:"🎒",p:24}];
-  var SHOP={on:false,round:0,score:0,total:8};
-  function startShop(){SHOP={on:true,round:0,score:0,total:8};$("#shopScore").textContent="0";show("shop");shopNext();}
-  function shopNext(){if(SHOP.round>=SHOP.total)return endShop();SHOP.round++;$("#shopFb").textContent="";$("#shopFb").className="feedback";
-    var n=1+rnd(3),items=shuffle(SHOPITEMS).slice(0,n),sum=items.reduce(function(a,b){return a+b.p;},0);
-    while(sum>100){items=shuffle(SHOPITEMS).slice(0,1+rnd(2));sum=items.reduce(function(a,b){return a+b.p;},0);}
-    var correct,qtext,change=Math.random()<0.5;
-    if(change){var steps=[10,20,50,100],paid=steps.filter(function(x){return x>sum;})[0]||100;correct=paid-sum;qtext="Bezahlt mit "+paid+" € – wie viel zurück?";}
-    else{correct=sum;qtext="Was kostet alles zusammen?";}
-    $("#shopQ").textContent=qtext;
-    var win=$("#shopItems");win.innerHTML="";items.forEach(function(it){var d=document.createElement("div");d.className="shopitem";d.innerHTML='<span>'+it.e+'</span><span class="pricetag">'+it.p+' €</span>';win.appendChild(d);});
-    var opts=uniq(correct,function(){var d=correct+(rnd(2)?1:-1)*(1+rnd(8));return d<0?correct+1+rnd(4):d;},3);
-    var box=$("#shopAns");box.innerHTML="";opts.forEach(function(v){var b=document.createElement("button");b.className="opt";b.textContent=v+" €";b.addEventListener("click",function(){shopAnswer(v===correct,b);});box.appendChild(b);});}
-  function shopAnswer(ok,btn){if(!SHOP.on)return;var p=active();
-    if(ok){SHOP.score++;$("#shopScore").textContent=SHOP.score;sCorrect();btn.classList.add("good");
-      Array.prototype.forEach.call($("#shopAns").children,function(c){c.disabled=true;});
-      if(p){p.stats.coins=(p.stats.coins||0)+1;persist();$("#coinCount").textContent=p.stats.coins;}
-      $("#shopFb").className="feedback ok";$("#shopFb").innerHTML="⭐ Richtig! +1 🪙";setTimeout(shopNext,850);}
-    else{sWrong();btn.classList.add("bad");btn.disabled=true;$("#shopFb").className="feedback try";$("#shopFb").textContent="Zähl noch mal nach.";}}
-  function endShop(){SHOP.on=false;confetti();$("#shopItems").innerHTML="";$("#shopQ").textContent="Kasse gemacht! 🧾";$("#shopAns").innerHTML="";
-    $("#shopFb").className="feedback ok";$("#shopFb").innerHTML=SHOP.score+" von "+SHOP.total+" richtig! &nbsp;<button class=\"next\" id=\"shopAgain\">Nochmal</button>";
-    var again=$("#shopAgain");if(again)again.addEventListener("click",startShop);}
+  /* ---------- KAUFLADEN & KASSE (Rollenspiel gegen den Computer) ---------- */
+  var SHOPITEMS=[{e:"🍎",p:3},{e:"🍌",p:2},{e:"🍞",p:4},{e:"🥛",p:3},{e:"🧀",p:6},{e:"🍫",p:2},{e:"🎈",p:5},{e:"🧸",p:12},{e:"🚗",p:9},{e:"⚽",p:8},{e:"📗",p:7},{e:"🧃",p:2},{e:"🍉",p:6},{e:"👟",p:19}];
+  var KUNDEN=["🧑","👩","👱","🧔","👵","👦","👧","🧕","👴","🧒"];
+  var KASSE={on:false,score:0,items:[],total:0,bill:0,method:"",step:""};
+  function startShop(){KASSE={on:true,score:0};$("#shopScore").textContent="0";show("shop");nextKunde();}
+  function nextKunde(){
+    $("#shopFb").textContent="";$("#shopFb").className="feedback";
+    var items=shuffle(SHOPITEMS).slice(0,1+rnd(3)),total=items.reduce(function(a,b){return a+b.p;},0);
+    while(total>60){items=shuffle(SHOPITEMS).slice(0,1+rnd(2));total=items.reduce(function(a,b){return a+b.p;},0);}
+    KASSE.items=items;KASSE.total=total;KASSE.step="total";
+    $("#kundeAv").textContent=pick(KUNDEN);$("#kundeMsg").textContent="Hallo! Das möchte ich kaufen. Was muss ich zahlen?";
+    var t=$("#theke");t.innerHTML="";items.forEach(function(it){var d=document.createElement("div");d.className="shopitem";d.innerHTML='<span>'+it.e+'</span><span class="pricetag">'+it.p+' €</span>';t.appendChild(d);});
+    $("#kassenDisplay").textContent="? €";
+    var opts=uniq(total,function(){var d=total+(rnd(2)?1:-1)*(1+rnd(6));return d<1?total+1:d;},3);
+    var box=$("#kasseStep");box.innerHTML='<div class="muted">Tippe den Gesamtpreis in die Kasse:</div>';
+    var row=document.createElement("div");row.className="answers three";
+    opts.forEach(function(v){var b=document.createElement("button");b.className="opt";b.textContent=v+" €";b.addEventListener("click",function(){
+      if(!KASSE.on)return;
+      if(v===total){sCorrect();$("#kassenDisplay").textContent=total+" €";askPay();}
+      else{sWrong();b.classList.add("bad");b.disabled=true;$("#shopFb").className="feedback try";$("#shopFb").textContent="Zähl die Preise zusammen.";}
+    });row.appendChild(b);});box.appendChild(row);
+  }
+  function askPay(){
+    $("#shopFb").textContent="";$("#shopFb").className="feedback";
+    KASSE.method=Math.random()<0.5?"karte":"bar";var box=$("#kasseStep");box.innerHTML="";
+    if(KASSE.method==="karte"){
+      $("#kundeMsg").textContent="Ich zahle mit Karte. 💳";
+      box.innerHTML='<div class="terminal">💳<div class="muted" style="font-size:.85rem">Karte bereit – bitte bestätigen</div></div>';
+      var btn=document.createElement("button");btn.className="next";btn.textContent="Karte akzeptieren ✅";
+      btn.addEventListener("click",function(){if(!KASSE.on)return;$("#kundeMsg").textContent="Danke! Zahlung erfolgreich. ✅";sStar();doneKunde();});
+      box.appendChild(btn);
+    } else {
+      var bills=[10,20,50],bill=bills.filter(function(x){return x>=KASSE.total;})[0]||50;KASSE.bill=bill;var change=bill-KASSE.total;
+      $("#kundeMsg").textContent="Ich zahle bar mit "+bill+" €. 💶";
+      box.innerHTML='<div class="muted">Gib das Rückgeld: '+bill+' € − '+KASSE.total+' €</div>';
+      var row=document.createElement("div");row.className="answers three";
+      var opts=uniq(change,function(){var d=change+(rnd(2)?1:-1)*(1+rnd(5));return d<0?change+1:d;},3);
+      opts.forEach(function(v){var b=document.createElement("button");b.className="opt";b.textContent=v+" €";b.addEventListener("click",function(){
+        if(!KASSE.on)return;
+        if(v===change){sStar();$("#kundeMsg").textContent="Danke, stimmt genau! 😊";doneKunde();}
+        else{sWrong();b.classList.add("bad");b.disabled=true;$("#shopFb").className="feedback try";$("#shopFb").textContent="Rechne "+bill+" − "+KASSE.total+".";}
+      });row.appendChild(b);});box.appendChild(row);
+    }
+  }
+  function doneKunde(){
+    KASSE.score++;$("#shopScore").textContent=KASSE.score;var p=active();
+    if(p){p.stats.coins=(p.stats.coins||0)+2;persist();$("#coinCount").textContent=p.stats.coins;}
+    $("#shopFb").className="feedback ok";$("#shopFb").innerHTML="✅ Kasse stimmt! +2 🪙";
+    var box=$("#kasseStep");box.innerHTML="";var nb=document.createElement("button");nb.className="next";nb.textContent="Nächster Kunde →";nb.addEventListener("click",function(){if(KASSE.on)nextKunde();});box.appendChild(nb);
+  }
 
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
-  $("#shopBack").addEventListener("click",function(){SHOP.on=false;openGames();});
+  $("#shopBack").addEventListener("click",function(){KASSE.on=false;openGames();});
   $("#gamesBack").addEventListener("click",enterHome);
   $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
   $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
