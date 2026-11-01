@@ -119,6 +119,8 @@
   .tile.e .emoji{font-size:2.2rem}
   .tile.g{background:linear-gradient(120deg,#ff9e45,#ff6b9d);flex-direction:row;align-items:center;gap:.9rem}
   .tile.g .emoji{font-size:2.1rem}
+  .tile.d{background:linear-gradient(120deg,#36c2a0,#5b6cff);flex-direction:row;align-items:center;gap:.9rem}
+  .tile.d .emoji{font-size:2.1rem}
   /* Spiel */
   .gbadge{display:flex;align-items:center;gap:.3rem;background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:.3rem .7rem;font-family:"Fredoka",sans-serif;font-size:1rem;box-shadow:var(--shadow-sm)}
@@ -266,6 +268,7 @@
   .tile.c{background:linear-gradient(145deg,#d2a2ff,#9a3dff) !important;box-shadow:0 0 28px rgba(177,75,255,.5) !important}
   .tile.e{background:linear-gradient(120deg,#00e5ff,#ff2e97) !important;box-shadow:0 0 28px rgba(255,46,151,.45) !important}
   .tile.g{background:linear-gradient(120deg,#ffd23f,#ff6b9d) !important;box-shadow:0 0 28px rgba(255,210,63,.45) !important;color:#241a00 !important}
+  .tile.d{background:linear-gradient(120deg,#00e5ff,#9dff3d) !important;box-shadow:0 0 28px rgba(0,229,255,.45) !important;color:#042018 !important}
   .tile .name{text-shadow:0 2px 10px rgba(0,0,0,.4)}
   .lvl .num{box-shadow:0 0 16px rgba(0,229,255,.55)}
   .progress{background:rgba(255,255,255,.12) !important}
@@ -325,6 +328,7 @@
       <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
       <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
       <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
+      <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
       <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
@@ -437,11 +441,11 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0},history:{},ballonBest:0};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0},history:{},ballonBest:0};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;
-    ["math","read","shape","clock","english"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
+    ["math","read","shape","clock","english","denken"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 
@@ -640,10 +644,52 @@
     4:{title:"Alles gemischt",desc:"Farben, Tiere & Zahlen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num]}
   };
 
+  /* ---------- DENKEN & KONZENTRATION (Kompetenzbereich „Muster und Strukturen" + Aufmerksamkeit) ---------- */
+  var SYMS=["🔴","🟡","🔵","🟢","🟣","🟠","⭐","❤️","🔺","⬛"];
+  function d_pattern(){
+    var pool=shuffle(SYMS).slice(0,4),per=2+rnd(2),base=pool.slice(0,per),len=per*2+rnd(2)+1,seq=[];
+    for(var i=0;i<len;i++)seq.push(base[i%per]);
+    var next=base[len%per],opts=uniq(next,function(){return pick(pool);},3);
+    return{label:"Wie geht das Muster weiter?",speak:"Wie geht das Muster weiter?",
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:2.1rem;letter-spacing:.15rem">'+seq.join(" ")+' <span style="opacity:.45">❓</span></div>';},
+      options:opts,correct:next,word:true,three:true};
+  }
+  function d_numseq(){
+    var step=pick([1,2,2,5,10,-1,-2]),start=step>0?1+rnd(10):25+rnd(30),seq=[];
+    for(var i=0;i<4;i++)seq.push(start+step*i);
+    var next=start+step*4;if(next<0)return d_numseq();
+    return{label:"Welche Zahl kommt als Nächstes?",speak:"Welche Zahl kommt als Nächstes?",
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.9rem">'+seq.join(" · ")+' · <span style="opacity:.45">?</span></div>';},
+      options:numOpts(next,Math.max(2,Math.abs(step))),correct:String(next),three:true};
+  }
+  var CAT={Obst:["🍎","🍌","🍇","🍓","🍊","🍐"],Tiere:["🐶","🐱","🐭","🐰","🐻","🦊"],Fahrzeuge:["🚗","🚌","🚲","✈️","🚂","🚢"],Formen:["🔴","🟦","🔺","⭐","⬛","🟣"]};
+  function d_odd(){
+    var keys=Object.keys(CAT),mainK=pick(keys),oddK=pick(keys.filter(function(k){return k!==mainK;}));
+    var pick3=shuffle(CAT[mainK]).slice(0,3),odd=pick(CAT[oddK]),opts=shuffle(pick3.concat([odd]));
+    return{label:"Was passt nicht dazu?",speak:"Welches passt nicht dazu?",
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.3rem;opacity:.7">Tippe das, was nicht dazugehört.</div>';},
+      options:opts,correct:odd,word:true};
+  }
+  function d_same(){
+    var a=pick(SYMS),b=pick(SYMS.filter(function(s){return s!==a;})),target=a+b;
+    var w1=a+pick(SYMS.filter(function(s){return s!==b&&s!==a;})),w2=pick(SYMS.filter(function(s){return s!==a;}))+b;
+    return{label:"Welches ist genau gleich?",speak:"Finde das gleiche Zeichen.",
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:2.6rem">'+target+'</div>';},
+      options:shuffle([target,w1,w2]),correct:target,word:true,three:true};
+  }
+  var DENK_LVL={
+    1:{title:"Muster fortsetzen",desc:"Was kommt als Nächstes?",set:[d_pattern]},
+    2:{title:"Zahlenreihen",desc:"Die nächste Zahl finden",set:[d_numseq]},
+    3:{title:"Was passt nicht?",desc:"Den Ausreißer finden",set:[d_odd]},
+    4:{title:"Finde das Gleiche",desc:"Genau hinschauen (Konzentration)",set:[d_same]},
+    5:{title:"Alles gemischt",desc:"Muster, Reihen & Logik",set:[d_pattern,d_numseq,d_odd,d_same]}
+  };
+
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
     shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
-    english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"}};
-  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"}];
+    english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"},
+    denken:{title:"Denken & Konzentration",lvl:DENK_LVL,color:"#00c2c2"}};
+  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"}];
 
   var PRAISE=["Super!","Toll!","Richtig!","Klasse!","Bravo!","Stark!","Perfekt!","Juhu!"];
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
