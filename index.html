@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="de" data-skin="neon">
+<html lang="de" data-skin="pro">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#070712">
+<meta name="theme-color" content="#f7f8fb">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lernsterne">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Lernsterne</title>
@@ -85,7 +85,12 @@
   .iconbtn:active{transform:scale(.94)}
 
   h2.title{font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.6rem;margin:.2rem 0 .1rem;text-wrap:balance}
+  .title{font-family:"Fredoka",sans-serif;font-weight:600}
   .muted{color:var(--ink-soft);font-size:.98rem;font-weight:700;margin:0 0 1rem}
+  .greeter{display:flex;align-items:center;gap:.9rem;margin:.1rem 0 1.1rem}
+  .greetMascot{width:4.4rem;height:4.4rem;flex:none}
+  .bubble{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:.7rem 1rem;box-shadow:var(--shadow-sm);flex:1;min-width:0}
+  .bubble::before{content:"";position:absolute;left:-.48rem;top:1.25rem;border:.4rem solid transparent;border-right-color:var(--panel)}
 
   /* Profile */
   .profiles{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:.5rem}
@@ -252,6 +257,27 @@
     linear-gradient(180deg,#070712,#0c0c22); background-attachment:fixed}
   :root[data-skin="soft"] body{background:linear-gradient(180deg,#f5f7fc,#eceff8)}
   :root[data-skin="sunny"] body{background:linear-gradient(180deg,#fff6ec,#ffe6cf)}
+  /* ---- PRO (Anton/Duolingo-Stil: weiße Karten, eine Hauptfarbe, Maskottchen) ---- */
+  :root[data-skin="pro"]{ --bg:#f7f8fb; --bg2:#eef1f6; --panel:#ffffff; --ink:#2b2f38; --ink-soft:#6b7280; --line:#e6e8ee;
+    --accent:#58cc02; --accent-2:#1cb0f6; --math:#ff6b6b; --read:#1cb0f6; --shape:#2bb673; --clock:#a56bff; --good:#58cc02; --bad:#ff5b6a; --star:#ffc800;
+    --shadow:0 .7rem 1.6rem -.7rem rgba(30,40,60,.18); --shadow-sm:0 .3rem .7rem -.3rem rgba(30,40,60,.14); color-scheme:light; }
+  :root[data-skin="pro"] body{background:var(--bg)}
+  :root[data-skin="pro"] .tile{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:0 .2rem 0 var(--line);border-radius:1.2rem}
+  :root[data-skin="pro"] .tile::after{display:none}
+  :root[data-skin="pro"] .tile .emoji{width:3rem;height:3rem;border-radius:.85rem;display:grid;place-items:center;font-size:1.65rem;background:#eef1f6;margin-bottom:.15rem}
+  :root[data-skin="pro"] .tile.m .emoji{background:#ffe3e3}
+  :root[data-skin="pro"] .tile.r .emoji{background:#e1f1ff}
+  :root[data-skin="pro"] .tile.s .emoji{background:#e0f6ec}
+  :root[data-skin="pro"] .tile.c .emoji{background:#f0e8ff}
+  :root[data-skin="pro"] .tile.e .emoji{background:#e6ecff}
+  :root[data-skin="pro"] .tile.d .emoji{background:#e0faf6}
+  :root[data-skin="pro"] .tile.g .emoji{background:#fff2d9}
+  :root[data-skin="pro"] .tile .name{color:var(--ink);text-shadow:none;font-size:1.15rem}
+  :root[data-skin="pro"] .tile .sub{color:var(--ink-soft);opacity:1}
+  :root[data-skin="pro"] .tile .mini{background:#eef7e2;color:#4b9b00}
+  :root[data-skin="pro"] .next,:root[data-skin="pro"] .primary{box-shadow:0 .25rem 0 #46a302}
+  :root[data-skin="pro"] .lvl{box-shadow:0 .2rem 0 var(--line)}
+  :root[data-skin="pro"] .opt{box-shadow:0 .2rem 0 var(--line)}
   /* Design-Wechsel-Knopf sichtbar lassen */
   #themeBtn{display:grid !important}
   /* ---- NEON-Extras (nur im dunklen Design) ---- */
@@ -325,8 +351,10 @@
 
   <!-- HOME -->
   <div id="home" hidden>
-    <h2 class="title" id="homeHi">Hallo!</h2>
-    <p class="muted">Was möchtest du üben?</p>
+    <div class="greeter">
+      <svg class="greetMascot" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,6 62,38 96,38 68,58 79,92 50,71 21,92 32,58 4,38 38,38" fill="#ffc53d" stroke="#f0a500" stroke-width="2"/><circle cx="50" cy="50" r="22" fill="#fff"/><circle cx="42" cy="48" r="3.4" fill="#2a2740"/><circle cx="58" cy="48" r="3.4" fill="#2a2740"/><path d="M40 58 q10 10 20 0" stroke="#2a2740" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="34" cy="55" r="3" fill="#ffb3b3"/><circle cx="66" cy="55" r="3" fill="#ffb3b3"/></svg>
+      <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
+    </div>
     <div class="grid">
       <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
       <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
@@ -1022,15 +1050,15 @@
   $("#parentBack").addEventListener("click",enterHome);
 
   /* Design-Umschalter (3 Designs) */
-  var SKINS=["neon","soft","sunny"],SKIN_NAME={neon:"Neon (dunkel)",soft:"Soft (hell)",sunny:"Sonnig (warm)"};
-  function applySkin(s){if(SKINS.indexOf(s)<0)s="neon";document.documentElement.setAttribute("data-skin",s);}
+  var SKINS=["pro","neon","soft","sunny"],SKIN_NAME={pro:"Pro (hell, App-Look)",neon:"Neon (dunkel)",soft:"Soft (hell)",sunny:"Sonnig (warm)"};
+  function applySkin(s){if(SKINS.indexOf(s)<0)s="pro";document.documentElement.setAttribute("data-skin",s);}
   var toastEl=null,toastT=0;
   function toast(msg){if(!toastEl){toastEl=document.createElement("div");toastEl.className="toast";document.body.appendChild(toastEl);}
     toastEl.textContent=msg;toastEl.classList.add("on");clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove("on");},1500);}
   var skinBtn=$("#themeBtn");skinBtn.textContent="🎨";skinBtn.title="Design wechseln";skinBtn.setAttribute("aria-label","Design wechseln");
-  applySkin(load("antona_skin","neon"));
+  applySkin(load("antona_skin","pro"));
   skinBtn.addEventListener("click",function(){
-    var cur=load("antona_skin","neon"),nx=SKINS[(SKINS.indexOf(cur)+1)%SKINS.length];
+    var cur=load("antona_skin","pro"),nx=SKINS[(SKINS.indexOf(cur)+1)%SKINS.length];
     save("antona_skin",nx);applySkin(nx);toast("Design: "+SKIN_NAME[nx]);
   });
 
