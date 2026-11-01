@@ -148,10 +148,16 @@
   .mcard.done{opacity:.35;cursor:default}
   /* UNO */
   .unotop{display:flex;align-items:center;justify-content:center;gap:1rem;margin:.4rem 0}
-  .unocard{border-radius:.7rem;min-width:3rem;height:4.2rem;display:grid;place-items:center;font-family:"Fredoka",sans-serif;
-    font-weight:700;font-size:1.5rem;color:#fff;box-shadow:var(--shadow-sm);border:2px solid rgba(255,255,255,.5);padding:0 .5rem}
-  .unocard.big{width:4.2rem;height:5.6rem;font-size:2rem}
-  .unocard.R{background:#ff5b5b}.unocard.Y{background:#ffc800;color:#4a3800}.unocard.G{background:#2bb673}.unocard.B{background:#2aa7ff}.unocard.W{background:linear-gradient(135deg,#ff5b5b,#ffc800,#2bb673,#2aa7ff)}
+  .unocard{position:relative;border-radius:.55rem;width:3rem;height:4.5rem;color:#fff;box-shadow:var(--shadow-sm);
+    border:3px solid #fff;overflow:hidden;font-family:"Fredoka",sans-serif;font-weight:700}
+  .unocard.big{width:4rem;height:6rem}
+  .unocard.R{background:#e23b3b}.unocard.Y{background:#edc200}.unocard.G{background:#2aa54a}.unocard.B{background:#2a6fd4}.unocard.W{background:#1f1f24}
+  .uc-oval{position:absolute;inset:14% 12%;background:#fff;border-radius:50%;transform:rotate(-24deg)}
+  .uc-big{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;z-index:1}
+  .unocard.big .uc-big{font-size:2.1rem}
+  .uc-corner{position:absolute;font-size:.68rem;z-index:1;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+  .uc-corner.tl{top:.1rem;left:.28rem}.uc-corner.br{bottom:.1rem;right:.28rem;transform:rotate(180deg)}
+  .unocard.R .uc-big{color:#e23b3b}.unocard.Y .uc-big{color:#c99e00}.unocard.G .uc-big{color:#2aa54a}.unocard.B .uc-big{color:#2a6fd4}.unocard.W .uc-big{color:#333}
   .unohand{display:flex;gap:.4rem;overflow-x:auto;padding:.5rem .2rem .2rem;min-height:5rem}
   .unohand .unocard{flex:none;cursor:pointer;transition:transform .1s}
   .unohand .unocard.playable{outline:3px solid var(--good);transform:translateY(-.3rem)}
@@ -165,6 +171,10 @@
   .sq.sel{box-shadow:inset 0 0 0 4px #ffd23f}
   .sq.move::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(39,179,115,.65)}
   .sq.cap{box-shadow:inset 0 0 0 4px rgba(255,91,91,.8)}
+  /* Kaufladen */
+  .shopwin{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;min-height:4.5rem}
+  .shopitem{display:flex;flex-direction:column;align-items:center;gap:.25rem;font-size:2.6rem}
+  .pricetag{font-family:"Fredoka",sans-serif;font-weight:700;font-size:1rem;background:var(--star);color:#4a3800;border-radius:.5rem;padding:.1rem .5rem}
   .diffpick{display:flex;align-items:center;gap:.4rem;justify-content:center;margin:.3rem 0 .1rem;flex-wrap:wrap}
   .diffpick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-weight:800;font-family:"Nunito",sans-serif;cursor:pointer;font-size:.9rem}
   .diffpick button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
@@ -498,6 +508,18 @@
       <button data-lv="1">Leicht</button><button data-lv="2">Mittel</button><button data-lv="3">Schwer</button></div>
     <div id="schBoard" class="chessboard"></div>
     <div id="schMsg" class="muted" style="text-align:center;margin-top:.6rem;min-height:1.2rem">Schlage den König 👑 des Computers!</div>
+  </div>
+
+  <!-- KAUFLADEN -->
+  <div id="shop" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="shopBack">← Stopp</button><div class="spacer"></div>
+      <div class="gbadge">🧾 <span id="shopScore">0</span>/8</div></div>
+    <div class="card" style="gap:1.1rem">
+      <div class="shopwin" id="shopItems"></div>
+      <div class="gq" id="shopQ" style="font-size:1.35rem">Was kostet alles zusammen?</div>
+      <div id="shopAns" class="answers three"></div>
+      <div id="shopFb" class="feedback" aria-live="polite"></div>
+    </div>
   </div>
 
   <!-- ELTERN -->
@@ -863,7 +885,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1090,7 +1112,8 @@
     {id:"blitz",name:"Blitz-Rechnen",emoji:"⚡",cost:4,desc:"So viele Aufgaben wie möglich in 30 Sekunden."},
     {id:"memory",name:"Sternen-Memory",emoji:"🧠",cost:5,desc:"Finde die passenden Paare."},
     {id:"uno",name:"UNO (Kinder)",emoji:"🎴",cost:6,desc:"Karten gegen den Computer: Farbe oder Zahl passend legen."},
-    {id:"schach",name:"Schach (Kinder)",emoji:"♟️",cost:6,desc:"Schlage den König des Computers."}
+    {id:"schach",name:"Schach (Kinder)",emoji:"♟️",cost:6,desc:"Schlage den König des Computers."},
+    {id:"shop",name:"Kaufladen",emoji:"🛒",cost:0,desc:"Einkaufen & kassieren bis 100 € – verdiene Münzen!"}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -1102,10 +1125,10 @@
       var rec=g.id==="ballons"?(p.stats.ballonBest||0):g.id==="blitz"?(p.stats.blitzBest||0):0;
       b.innerHTML='<span class="num" style="background:var(--accent-2)">'+g.emoji+'</span>'
         +'<span><span class="lt">'+g.name+'</span><br><span class="ld">'+g.desc+(rec?' · Rekord '+rec:'')+'</span></span>'
-        +'<span class="chev">🪙 '+g.cost+'</span>';
+        +'<span class="chev">'+(g.cost>0?'🪙 '+g.cost:'Gratis')+'</span>';
       b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;
         if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();
-        else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();});
+        else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -1214,10 +1237,11 @@
     do{first=deck.shift();if(first.c==="W")deck.push(first);}while(first.c==="W");
     UNO={deck:deck,discard:[first],player:player,cpu:cpu,turn:"p",color:first.c,over:false,pendingWild:null};
     $("#unoColorPick").hidden=true;$("#unoInfo").textContent="Du bist dran.";show("uno");renderUno();}
-  function renderUno(){var t=unoTop(),dc=$("#unoDiscard");dc.className="unocard big "+(UNO.color==="W"?"W":UNO.color);dc.textContent=unoLabel(t);
+  function unoInner(lab){return '<span class="uc-oval"></span><span class="uc-corner tl">'+lab+'</span><span class="uc-big">'+lab+'</span><span class="uc-corner br">'+lab+'</span>';}
+  function renderUno(){var t=unoTop(),dc=$("#unoDiscard");dc.className="unocard big "+(UNO.color==="W"?"W":UNO.color);dc.innerHTML=unoInner(unoLabel(t));
     $("#unoCpu").textContent=UNO.cpu.length;var hand=$("#unoHand");hand.innerHTML="";
     UNO.player.forEach(function(card){var el=document.createElement("div");el.className="unocard "+(card.c==="W"?"W":card.c)+(UNO.turn==="p"&&!UNO.over&&unoPlayable(card)?" playable":"");
-      el.textContent=unoLabel(card);el.addEventListener("click",function(){playerPlayUno(card);});hand.appendChild(el);});}
+      el.innerHTML=unoInner(unoLabel(card));el.addEventListener("click",function(){playerPlayUno(card);});hand.appendChild(el);});}
   function playerPlayUno(card){if(UNO.over||UNO.turn!=="p"||UNO.pendingWild||!unoPlayable(card))return;
     var i=UNO.player.indexOf(card);if(i<0)return;UNO.player.splice(i,1);UNO.discard.push(card);sCorrect();
     if(UNO.player.length===1)toast("UNO! 🎴");
@@ -1303,8 +1327,33 @@
     $("#schMsg").innerHTML=(whiteWon?"🎉 Du hast gewonnen!":"Der Computer gewinnt.")+' &nbsp;<button class="next" id="schAgain">Nochmal (🪙 6)</button>';
     var again=$("#schAgain");if(again)again.addEventListener("click",function(){if(!p||(p.stats.coins||0)<6){openGames();return;}p.stats.coins-=6;persist();$("#coinCount").textContent=p.stats.coins;startChess();});}
 
+  /* ---------- KAUFLADEN (Einkaufen & Kassieren, bis 100 €) ---------- */
+  var SHOPITEMS=[{e:"🍎",p:3},{e:"🍌",p:2},{e:"🍞",p:4},{e:"🥛",p:3},{e:"🧀",p:6},{e:"🍫",p:2},{e:"🎈",p:5},{e:"🧸",p:12},{e:"🚗",p:9},{e:"⚽",p:8},{e:"📗",p:7},{e:"🧃",p:2},{e:"🍉",p:6},{e:"👟",p:19},{e:"🎒",p:24}];
+  var SHOP={on:false,round:0,score:0,total:8};
+  function startShop(){SHOP={on:true,round:0,score:0,total:8};$("#shopScore").textContent="0";show("shop");shopNext();}
+  function shopNext(){if(SHOP.round>=SHOP.total)return endShop();SHOP.round++;$("#shopFb").textContent="";$("#shopFb").className="feedback";
+    var n=1+rnd(3),items=shuffle(SHOPITEMS).slice(0,n),sum=items.reduce(function(a,b){return a+b.p;},0);
+    while(sum>100){items=shuffle(SHOPITEMS).slice(0,1+rnd(2));sum=items.reduce(function(a,b){return a+b.p;},0);}
+    var correct,qtext,change=Math.random()<0.5;
+    if(change){var steps=[10,20,50,100],paid=steps.filter(function(x){return x>sum;})[0]||100;correct=paid-sum;qtext="Bezahlt mit "+paid+" € – wie viel zurück?";}
+    else{correct=sum;qtext="Was kostet alles zusammen?";}
+    $("#shopQ").textContent=qtext;
+    var win=$("#shopItems");win.innerHTML="";items.forEach(function(it){var d=document.createElement("div");d.className="shopitem";d.innerHTML='<span>'+it.e+'</span><span class="pricetag">'+it.p+' €</span>';win.appendChild(d);});
+    var opts=uniq(correct,function(){var d=correct+(rnd(2)?1:-1)*(1+rnd(8));return d<0?correct+1+rnd(4):d;},3);
+    var box=$("#shopAns");box.innerHTML="";opts.forEach(function(v){var b=document.createElement("button");b.className="opt";b.textContent=v+" €";b.addEventListener("click",function(){shopAnswer(v===correct,b);});box.appendChild(b);});}
+  function shopAnswer(ok,btn){if(!SHOP.on)return;var p=active();
+    if(ok){SHOP.score++;$("#shopScore").textContent=SHOP.score;sCorrect();btn.classList.add("good");
+      Array.prototype.forEach.call($("#shopAns").children,function(c){c.disabled=true;});
+      if(p){p.stats.coins=(p.stats.coins||0)+1;persist();$("#coinCount").textContent=p.stats.coins;}
+      $("#shopFb").className="feedback ok";$("#shopFb").innerHTML="⭐ Richtig! +1 🪙";setTimeout(shopNext,850);}
+    else{sWrong();btn.classList.add("bad");btn.disabled=true;$("#shopFb").className="feedback try";$("#shopFb").textContent="Zähl noch mal nach.";}}
+  function endShop(){SHOP.on=false;confetti();$("#shopItems").innerHTML="";$("#shopQ").textContent="Kasse gemacht! 🧾";$("#shopAns").innerHTML="";
+    $("#shopFb").className="feedback ok";$("#shopFb").innerHTML=SHOP.score+" von "+SHOP.total+" richtig! &nbsp;<button class=\"next\" id=\"shopAgain\">Nochmal</button>";
+    var again=$("#shopAgain");if(again)again.addEventListener("click",startShop);}
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
+  $("#shopBack").addEventListener("click",function(){SHOP.on=false;openGames();});
   $("#gamesBack").addEventListener("click",enterHome);
   $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
   $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
