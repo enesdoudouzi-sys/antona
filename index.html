@@ -138,6 +138,12 @@
   .balloon::after{content:"";position:absolute;bottom:-.45rem;left:50%;width:2px;height:.5rem;background:rgba(0,0,0,.25);transform:translateX(-50%)}
   .balloon.pop{animation:pop .25s forwards}
   .gresult{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;text-align:center}
+  #memGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-top:.4rem}
+  .mcard{aspect-ratio:3/4;border-radius:.9rem;border:1px solid var(--line);background:var(--accent);box-shadow:var(--shadow-sm);
+    display:grid;place-items:center;font-size:1.9rem;cursor:pointer;color:#fff;user-select:none;transition:transform .12s}
+  .mcard:active{transform:scale(.96)}
+  .mcard.open{background:var(--panel);color:var(--ink)}
+  .mcard.done{opacity:.35;cursor:default}
   .tile .mini{position:absolute;right:.7rem;bottom:.6rem;background:rgba(255,255,255,.22);border-radius:999px;
     padding:.12rem .55rem;font-size:.78rem;font-family:"Nunito",sans-serif;font-weight:800;z-index:1}
 
@@ -419,6 +425,24 @@
     <div id="ballonArea" aria-label="Spielfeld"></div>
   </div>
 
+  <!-- BLITZ-RECHNEN -->
+  <div id="blitz" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="blitzBack">← Stopp</button><div class="spacer"></div>
+      <div class="gbadge">⚡ <span id="blitzScore">0</span></div><div class="gbadge">⏱ <span id="blitzTime">30</span></div></div>
+    <div class="card" style="gap:1.3rem">
+      <div class="question" id="blitzQ">3 + 4 = ?</div>
+      <div id="blitzAns" class="answers three"></div>
+      <div id="blitzFb" class="feedback" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- STERNEN-MEMORY -->
+  <div id="memory" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="memBack">← Stopp</button><div class="spacer"></div>
+      <div class="gbadge">🔄 <span id="memMoves">0</span></div><div class="gbadge">✓ <span id="memPairs">0</span></div></div>
+    <div id="memGrid"></div>
+  </div>
+
   <!-- ELTERN -->
   <div id="parent" hidden>
     <div class="bar"><button class="back" id="parentBack">← Zurück</button></div>
@@ -493,7 +517,7 @@
   function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0},history:{},ballonBest:0};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
-    if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;
+    if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
     ["math","read","shape","clock","english","denken"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
@@ -600,8 +624,13 @@
   function m_times(tables){return function(){var a=pick(tables),b=1+rnd(10),res=a*b;
     var opts=uniq(res,function(){var d=b+(rnd(5)-2);if(d<1)d=b+1;return a*d;},3).map(String);
     return{label:"Male (Einmaleins)",speak:a+" mal "+b,render:function(z){z.className="question";z.textContent=a+" × "+b+" = ?";},options:opts,correct:String(res),three:true};};}
+  function m_tens(){var plus=Math.random()<0.5,x,y,res;
+    if(plus){x=1+rnd(8);y=1+rnd(9-x>0?9-x:1);res=(x+y)*10;}else{x=3+rnd(6);y=1+rnd(x-1);res=(x-y)*10;}
+    x*=10;y*=10;return{label:"Rechne mit Zehnern",speak:x+(plus?" plus ":" minus ")+y,
+      render:function(z){z.className="question";z.textContent=x+(plus?" + ":" − ")+y+" = ?";},options:numOpts(res,10),correct:String(res),three:true};}
   var MATH_LVL={
     1:{title:"Mengen & Zehnerfeld",desc:"Punkte sehen und zählen",set:[m_subitize,m_tenframe,m_bond]},
+    8:{title:"Zehnerzahlen",desc:"20 + 30, 70 − 40 …",set:[m_tens]},
     2:{title:"Plus & Minus bis 10",desc:"Mit Punktebildern",set:[m_add(10),m_add(10),m_sub(10)]},
     3:{title:"Plus & Minus bis 20",desc:"Etwas größere Zahlen",set:[m_add(18),m_sub(18),m_add(18)]},
     4:{title:"Plus & Minus bis 100",desc:"2. Klasse: große Zahlen",set:[m_add100,m_sub100,m_add100,m_sub100,m_double]},
@@ -614,7 +643,8 @@
   var WORDS=[{w:"Apfel",e:"🍎"},{w:"Ball",e:"⚽"},{w:"Baum",e:"🌳"},{w:"Blume",e:"🌸"},{w:"Hund",e:"🐶"},{w:"Katze",e:"🐱"},
     {w:"Maus",e:"🐭"},{w:"Fisch",e:"🐟"},{w:"Sonne",e:"☀️"},{w:"Stern",e:"⭐"},{w:"Haus",e:"🏠"},{w:"Auto",e:"🚗"},
     {w:"Banane",e:"🍌"},{w:"Ente",e:"🦆"},{w:"Igel",e:"🦔"},{w:"Uhr",e:"⏰"},{w:"Elefant",e:"🐘"},{w:"Nase",e:"👃"},
-    {w:"Tasse",e:"🍵"},{w:"Robbe",e:"🦭"},{w:"Maus",e:"🐭"},{w:"Krone",e:"👑"},{w:"Pilz",e:"🍄"},{w:"Schaf",e:"🐑"}];
+    {w:"Tasse",e:"🍵"},{w:"Robbe",e:"🦭"},{w:"Krone",e:"👑"},{w:"Pilz",e:"🍄"},{w:"Schaf",e:"🐑"},
+    {w:"Brot",e:"🍞"},{w:"Milch",e:"🥛"},{w:"Vogel",e:"🐦"},{w:"Wolke",e:"☁️"},{w:"Mond",e:"🌙"},{w:"Käfer",e:"🐞"},{w:"Blatt",e:"🍀"},{w:"Herz",e:"❤️"}];
   function r_anlaut(){var it=pick(WORDS),L=it.w.charAt(0).toUpperCase();
     return{label:"Mit welchem Buchstaben beginnt das Wort?",speak:"Mit welchem Buchstaben beginnt "+it.w+"?",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>'+it.w;},
@@ -678,6 +708,8 @@
   var EN_ANIMALS=[{de:"Hund",en:"Dog",e:"🐶"},{de:"Katze",en:"Cat",e:"🐱"},{de:"Fisch",en:"Fish",e:"🐟"},{de:"Vogel",en:"Bird",e:"🐦"},
     {de:"Kuh",en:"Cow",e:"🐮"},{de:"Pferd",en:"Horse",e:"🐴"},{de:"Bär",en:"Bear",e:"🐻"},{de:"Ente",en:"Duck",e:"🦆"},{de:"Schwein",en:"Pig",e:"🐷"},{de:"Löwe",en:"Lion",e:"🦁"}];
   var EN_NUM=[{n:1,en:"One"},{n:2,en:"Two"},{n:3,en:"Three"},{n:4,en:"Four"},{n:5,en:"Five"},{n:6,en:"Six"},{n:7,en:"Seven"},{n:8,en:"Eight"},{n:9,en:"Nine"},{n:10,en:"Ten"}];
+  var EN_FOOD=[{de:"Apfel",en:"Apple",e:"🍎"},{de:"Brot",en:"Bread",e:"🍞"},{de:"Milch",en:"Milk",e:"🥛"},{de:"Ei",en:"Egg",e:"🥚"},{de:"Käse",en:"Cheese",e:"🧀"},{de:"Banane",en:"Banana",e:"🍌"},{de:"Wasser",en:"Water",e:"💧"},{de:"Fisch",en:"Fish",e:"🐟"}];
+  var EN_BODY=[{de:"Hand",en:"Hand",e:"✋"},{de:"Auge",en:"Eye",e:"👁️"},{de:"Nase",en:"Nose",e:"👃"},{de:"Mund",en:"Mouth",e:"👄"},{de:"Ohr",en:"Ear",e:"👂"},{de:"Fuß",en:"Foot",e:"🦶"},{de:"Zahn",en:"Tooth",e:"🦷"},{de:"Haar",en:"Hair",e:"💇"}];
   function e_vocab(list){return function(){var it=pick(list),others=shuffle(list.filter(function(x){return x.en!==it.en})).slice(0,2),opts=shuffle([it].concat(others));
     return{label:"Wie heißt das auf Englisch?",speak:it.en,speakLang:"en",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span><span style="font-size:1.05rem;color:var(--ink-soft);font-weight:800">'+it.de+'</span>';},
@@ -690,7 +722,9 @@
     1:{title:"Farben (Colours)",desc:"Rot, Blau, Grün …",set:[e_vocab(EN_COLORS)]},
     2:{title:"Tiere (Animals)",desc:"Hund, Katze, Fisch …",set:[e_vocab(EN_ANIMALS)]},
     3:{title:"Zahlen (Numbers)",desc:"1 bis 10",set:[e_num]},
-    4:{title:"Alles gemischt",desc:"Farben, Tiere & Zahlen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num]}
+    4:{title:"Essen (Food)",desc:"Apfel, Brot, Milch …",set:[e_vocab(EN_FOOD)]},
+    5:{title:"Körper (Body)",desc:"Hand, Auge, Nase …",set:[e_vocab(EN_BODY)]},
+    6:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_vocab(EN_FOOD),e_vocab(EN_BODY)]}
   };
 
   /* ---------- DENKEN & KONZENTRATION (Kompetenzbereich „Muster und Strukturen" + Aufmerksamkeit) ---------- */
@@ -744,7 +778,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -939,7 +973,7 @@
   /* ---------- Daten sichern & übertragen (Sync ohne Konto) ---------- */
   function migrateProfiles(){
     profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
-      if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;
+      if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
       ["math","read","shape","clock","english","denken"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
   }
   $("#syncShow").addEventListener("click",function(){
@@ -966,7 +1000,11 @@
   });
 
   /* ---------- SPIELE (Anton-Prinzip: Münzen verdienen & verspielen) ---------- */
-  var GAME_LIST=[{id:"ballons",name:"Zahlen-Ballons",emoji:"🎈",cost:5,desc:"Platze den Ballon mit dem richtigen Ergebnis."}];
+  var GAME_LIST=[
+    {id:"ballons",name:"Zahlen-Ballons",emoji:"🎈",cost:5,desc:"Platze den Ballon mit dem richtigen Ergebnis."},
+    {id:"blitz",name:"Blitz-Rechnen",emoji:"⚡",cost:4,desc:"So viele Aufgaben wie möglich in 30 Sekunden."},
+    {id:"memory",name:"Sternen-Memory",emoji:"🧠",cost:5,desc:"Finde die passenden Paare."}
+  ];
   function openGames(){
     var p=active();if(!p)return;
     $("#gamesCoins").textContent=p.stats.coins||0;
@@ -974,10 +1012,12 @@
     GAME_LIST.forEach(function(g){
       var canPlay=(p.stats.coins||0)>=g.cost;
       var b=document.createElement("button");b.className="lvl";b.disabled=!canPlay;if(!canPlay)b.style.opacity=".55";
+      var rec=g.id==="ballons"?(p.stats.ballonBest||0):g.id==="blitz"?(p.stats.blitzBest||0):0;
       b.innerHTML='<span class="num" style="background:var(--accent-2)">'+g.emoji+'</span>'
-        +'<span><span class="lt">'+g.name+'</span><br><span class="ld">'+g.desc+(p.stats.ballonBest?' · Rekord '+p.stats.ballonBest:'')+'</span></span>'
+        +'<span><span class="lt">'+g.name+'</span><br><span class="ld">'+g.desc+(rec?' · Rekord '+rec:'')+'</span></span>'
         +'<span class="chev">🪙 '+g.cost+'</span>';
-      b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;if(g.id==="ballons")startBallon();});
+      b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;
+        if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -1036,10 +1076,47 @@
       if(!p||(p.stats.coins||0)<5){openGames();return;}p.stats.coins-=5;persist();$("#coinCount").textContent=p.stats.coins;startBallon();});
   }
 
+  /* Blitz-Rechnen */
+  var BLITZ={on:false,score:0,time:30,timer:0};
+  function startBlitz(){BLITZ={on:true,score:0,time:30,timer:0};$("#blitzScore").textContent="0";$("#blitzTime").textContent="30";
+    show("blitz");blitzNext();BLITZ.timer=setInterval(function(){BLITZ.time--;$("#blitzTime").textContent=BLITZ.time;if(BLITZ.time<=0)endBlitz();},1000);}
+  function blitzNext(){var plus=Math.random()<0.6,a,b,res;
+    if(plus){a=2+rnd(16);b=2+rnd(18-a>0?18-a:1);res=a+b;$("#blitzQ").textContent=a+" + "+b+" = ?";}
+    else{a=5+rnd(14);b=1+rnd(a-1);res=a-b;$("#blitzQ").textContent=a+" − "+b+" = ?";}
+    var opts=uniq(res,function(){var d=res+(rnd(7)-3);return d<0?res+1+rnd(3):d;},3),box=$("#blitzAns");box.innerHTML="";$("#blitzFb").textContent="";$("#blitzFb").className="feedback";
+    opts.forEach(function(v){var btn=document.createElement("button");btn.className="opt";btn.textContent=v;btn.addEventListener("click",function(){blitzAnswer(v===res,btn);});box.appendChild(btn);});}
+  function blitzAnswer(ok,btn){if(!BLITZ.on)return;if(ok){BLITZ.score++;$("#blitzScore").textContent=BLITZ.score;sCorrect();blitzNext();}else{sWrong();btn.classList.add("bad");btn.disabled=true;}}
+  function stopBlitz(){BLITZ.on=false;clearInterval(BLITZ.timer);}
+  function endBlitz(){stopBlitz();confetti();var p=active();if(p&&BLITZ.score>(p.stats.blitzBest||0)){p.stats.blitzBest=BLITZ.score;persist();}
+    $("#blitzQ").textContent="Fertig! ⚡";$("#blitzAns").innerHTML="";$("#blitzFb").className="feedback ok";
+    $("#blitzFb").innerHTML=BLITZ.score+" richtig! &nbsp;<button class=\"next\" id=\"blitzAgain\">Nochmal (🪙 4)</button>";
+    var again=$("#blitzAgain");if(again)again.addEventListener("click",function(){if(!p||(p.stats.coins||0)<4){openGames();return;}p.stats.coins-=4;persist();$("#coinCount").textContent=p.stats.coins;startBlitz();});}
+
+  /* Sternen-Memory */
+  var MEM={on:false,first:null,lock:false,moves:0,pairs:0,total:6},MEMSYM=["🍎","🐶","⭐","🚗","🌸","🐱","🦊","🎈","🍌","⚽","🐭","🌈"];
+  function startMemory(){MEM={on:true,first:null,lock:false,moves:0,pairs:0,total:6};$("#memMoves").textContent="0";$("#memPairs").textContent="0";
+    var syms=shuffle(MEMSYM).slice(0,MEM.total),deck=shuffle(syms.concat(syms)),g=$("#memGrid");g.innerHTML="";
+    deck.forEach(function(s){var c=document.createElement("div");c.className="mcard";c.setAttribute("data-sym",s);c.textContent="★";
+      c.addEventListener("click",function(){flipCard(c);});g.appendChild(c);});show("memory");}
+  function flipCard(c){if(!MEM.on||MEM.lock||c.classList.contains("open")||c.classList.contains("done"))return;
+    c.classList.add("open");c.textContent=c.getAttribute("data-sym");
+    if(!MEM.first){MEM.first=c;return;}
+    MEM.moves++;$("#memMoves").textContent=MEM.moves;
+    if(MEM.first.getAttribute("data-sym")===c.getAttribute("data-sym")){
+      MEM.first.classList.add("done");c.classList.add("done");MEM.first=null;MEM.pairs++;$("#memPairs").textContent=MEM.pairs;sStar();
+      if(MEM.pairs>=MEM.total)endMemory();
+    } else {MEM.lock=true;var a=MEM.first,bc=c;MEM.first=null;sWrong();
+      setTimeout(function(){a.classList.remove("open");a.textContent="★";bc.classList.remove("open");bc.textContent="★";MEM.lock=false;},750);}}
+  function endMemory(){MEM.on=false;confetti();var p=active();
+    $("#memGrid").innerHTML='<div class="gresult" style="grid-column:1/-1"><div style="font-size:3rem">🧠</div><h2 class="display" style="margin:0;font-size:1.5rem">Alle Paare gefunden!</h2><p class="muted" style="margin:0">'+MEM.moves+' Versuche</p><button class="next" id="memAgain">Nochmal (🪙 5)</button></div>';
+    var again=$("#memAgain");if(again)again.addEventListener("click",function(){if(!p||(p.stats.coins||0)<5){openGames();return;}p.stats.coins-=5;persist();$("#coinCount").textContent=p.stats.coins;startMemory();});}
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
   $("#gamesBack").addEventListener("click",enterHome);
   $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
+  $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
+  $("#memBack").addEventListener("click",function(){MEM.on=false;openGames();});
   $("#lvlBack").addEventListener("click",enterHome);
   $("#backBtn").addEventListener("click",function(){openLevels(state?state.key:curGame);});
   $("#homeBtn").addEventListener("click",enterHome);
