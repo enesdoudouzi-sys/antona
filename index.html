@@ -117,6 +117,20 @@
   .tile.c{background:linear-gradient(145deg,#c9a4ff,var(--clock))}
   .tile.e{background:linear-gradient(120deg,#6d7bff,#9b6bff);flex-direction:row;align-items:center;gap:.9rem}
   .tile.e .emoji{font-size:2.2rem}
+  .tile.g{background:linear-gradient(120deg,#ff9e45,#ff6b9d);flex-direction:row;align-items:center;gap:.9rem}
+  .tile.g .emoji{font-size:2.1rem}
+  /* Spiel */
+  .gbadge{display:flex;align-items:center;gap:.3rem;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:.3rem .7rem;font-family:"Fredoka",sans-serif;font-size:1rem;box-shadow:var(--shadow-sm)}
+  .gq{text-align:center;font-family:"Fredoka",sans-serif;font-size:2rem;margin:.3rem 0 .6rem}
+  #ballonArea{position:relative;flex:1;min-height:21rem;overflow:hidden;border-radius:1.3rem;
+    background:linear-gradient(180deg,#bfe3ff,#eaf5ff);box-shadow:var(--shadow) inset;touch-action:manipulation}
+  .balloon{position:absolute;width:3.5rem;height:4.3rem;border-radius:50% 50% 47% 47%;display:grid;place-items:center;
+    font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.3rem;color:#fff;cursor:pointer;user-select:none;
+    box-shadow:inset -.4rem -.5rem 0 rgba(0,0,0,.12);will-change:transform}
+  .balloon::after{content:"";position:absolute;bottom:-.45rem;left:50%;width:2px;height:.5rem;background:rgba(0,0,0,.25);transform:translateX(-50%)}
+  .balloon.pop{animation:pop .25s forwards}
+  .gresult{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;text-align:center}
   .tile .mini{position:absolute;right:.7rem;bottom:.6rem;background:rgba(255,255,255,.22);border-radius:999px;
     padding:.12rem .55rem;font-size:.78rem;font-family:"Nunito",sans-serif;font-weight:800;z-index:1}
 
@@ -225,6 +239,7 @@
     <div class="spacer"></div>
     <button class="who" id="whoBtn" hidden><span class="av" id="whoAv">🙂</span><span id="whoName">Kind</span></button>
     <div class="pill" id="starPill" hidden><span class="s">★</span><span id="starCount">0</span></div>
+    <div class="pill" id="coinPill" hidden><span style="color:#f0a500">🪙</span><span id="coinCount">0</span></div>
     <button class="iconbtn" id="parentBtn" title="Eltern-Bereich" aria-label="Eltern-Bereich" hidden>👪</button>
     <button class="iconbtn" id="themeBtn" title="Hell/Dunkel" aria-label="Hell oder Dunkel">🌙</button>
   </div>
@@ -260,6 +275,7 @@
       <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
       <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
       <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
+      <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
   </div>
@@ -297,6 +313,23 @@
     <p id="doneText">Du hast 8 von 10 richtig.</p>
     <button class="next" id="againBtn">Nochmal</button>
     <button class="back" id="homeBtn" style="margin-top:.2rem">Zur Startseite</button>
+  </div>
+
+  <!-- SPIELE -->
+  <div id="games" hidden>
+    <div class="bar"><button class="back" id="gamesBack">← Zurück</button><div class="spacer"></div>
+      <div class="pill"><span style="color:#f0a500">🪙</span> <span id="gamesCoins">0</span></div></div>
+    <h2 class="title">Spiele</h2>
+    <p class="muted">Sammle Münzen beim Üben – und spiele damit!</p>
+    <div class="levels" id="gamesList"></div>
+  </div>
+
+  <!-- ZAHLEN-BALLONS -->
+  <div id="ballons" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="ballonBack">← Stopp</button><div class="spacer"></div>
+      <div class="gbadge">🎈 <span id="ballonScore">0</span></div><div class="gbadge">⏱ <span id="ballonTime">60</span></div></div>
+    <div class="gq" id="ballonQ">7 + 5 = ?</div>
+    <div id="ballonArea" aria-label="Spielfeld"></div>
   </div>
 
   <!-- ELTERN -->
@@ -354,9 +387,10 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0},history:{}};}
-  profiles.forEach(function(p){ // alte Profile um neue Fächer/Verlauf ergänzen
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0},history:{},ballonBest:0};}
+  profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
+    if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;
     ["math","read","shape","clock","english"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
@@ -565,12 +599,13 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
-    var hasActive=!!active();
-    $("#whoBtn").hidden=!hasActive||id==="profiles"||id==="newProfile";
-    $("#starPill").hidden=!hasActive||id==="profiles"||id==="newProfile";
-    $("#parentBtn").hidden=!hasActive||id==="parent"||id==="profiles"||id==="newProfile";
+    var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
+    $("#whoBtn").hidden=!hasActive||pre;
+    $("#starPill").hidden=!hasActive||pre;
+    $("#coinPill").hidden=!hasActive||pre;
+    $("#parentBtn").hidden=!hasActive||pre||id==="parent";
     try{window.speechSynthesis.cancel();}catch(e){}
   }
 
@@ -606,7 +641,7 @@
     var p=active();if(!p)return show("profiles");
     $("#homeHi").textContent="Hallo, "+p.name+"!";
     $("#whoAv").textContent=p.av;$("#whoName").textContent=p.name;
-    $("#starCount").textContent=p.stats.stars;
+    $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins||0;
     SUBJ.forEach(function(s){$("#best-"+s.k).textContent="★ "+p.stats.best[s.k];});
     show("home");
   }
@@ -614,6 +649,7 @@
   /* ---------- Stufen-UI ---------- */
   var curGame=null,curLevel=1;
   function openLevels(key){
+    if(key==="spiele")return openGames();
     curGame=key;var g=GAMES[key];
     $("#lvlTitle").textContent=g.title;
     var list=$("#lvlList");list.innerHTML="";
@@ -688,15 +724,16 @@
   function finish(){
     var p=active();p.stats.rounds++;
     if(state.earned>p.stats.best[state.key])p.stats.best[state.key]=state.earned;
+    p.stats.coins=(p.stats.coins||0)+state.correct; // 1 Münze je richtige Antwort
     var dk=dayKey();if(!p.stats.history)p.stats.history={};var h=p.stats.history[dk]||{rounds:0,correct:0,stars:0};
     h.rounds++;h.correct+=state.correct;h.stars+=state.earned;p.stats.history[dk]=h;
     persist();
-    $("#starCount").textContent=p.stats.stars;
+    $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins;
     var got=state.correct;
     $("#doneStars").textContent=got>=9?"★★★":got>=6?"★★":got>=1?"★":"☆";
     $("#doneEmoji").textContent=got>=9?"🏆":got>=6?"🎉":"🌟";
     $("#doneTitle").textContent=got>=9?"Fantastisch!":got>=6?"Super gemacht!":"Gut geübt!";
-    $("#doneText").textContent="Du hast "+got+" von "+ROUNDS+" richtig und "+state.earned+" Sterne verdient.";
+    $("#doneText").textContent="Du hast "+got+" von "+ROUNDS+" richtig – "+state.earned+" Sterne und "+state.correct+" Münzen 🪙 verdient.";
     show("done");if(got>=6)confetti();speak($("#doneTitle").textContent);
   }
 
@@ -754,8 +791,81 @@
   function enterHomeStarPill(){var p=active();if(p)$("#starCount").textContent=p.stats.stars;}
   $("#pSwitch").addEventListener("click",function(){activeId=null;persist();renderProfiles();show("profiles");});
 
+  /* ---------- SPIELE (Anton-Prinzip: Münzen verdienen & verspielen) ---------- */
+  var GAME_LIST=[{id:"ballons",name:"Zahlen-Ballons",emoji:"🎈",cost:5,desc:"Platze den Ballon mit dem richtigen Ergebnis."}];
+  function openGames(){
+    var p=active();if(!p)return;
+    $("#gamesCoins").textContent=p.stats.coins||0;
+    var list=$("#gamesList");list.innerHTML="";
+    GAME_LIST.forEach(function(g){
+      var canPlay=(p.stats.coins||0)>=g.cost;
+      var b=document.createElement("button");b.className="lvl";b.disabled=!canPlay;if(!canPlay)b.style.opacity=".55";
+      b.innerHTML='<span class="num" style="background:var(--accent-2)">'+g.emoji+'</span>'
+        +'<span><span class="lt">'+g.name+'</span><br><span class="ld">'+g.desc+(p.stats.ballonBest?' · Rekord '+p.stats.ballonBest:'')+'</span></span>'
+        +'<span class="chev">🪙 '+g.cost+'</span>';
+      b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;if(g.id==="ballons")startBallon();});
+      list.appendChild(b);
+    });
+    var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
+    note.textContent=(p.stats.coins||0)<GAME_LIST[0].cost?"Übe ein paar Aufgaben, um Münzen zu verdienen – jede richtige Antwort gibt eine Münze 🪙.":"Viel Spaß! Neue Münzen verdienst du beim Üben.";
+    list.appendChild(note);
+    show("games");
+  }
+  /* Zahlen-Ballons */
+  var BG={on:false,score:0,time:60,balloons:[],raf:0,timer:0,area:null,answer:0},BCOL=["#ff6b6b","#2aa7ff","#19b36b","#b07bff","#ff8a3d","#ff5d9e"],spawnScheduled=false;
+  function ballonQuestion(){var plus=Math.random()<0.6,a,b,res;
+    if(plus){a=2+rnd(16);b=2+rnd(18-a>0?18-a:1);res=a+b;$("#ballonQ").textContent=a+" + "+b+" = ?";}
+    else{a=5+rnd(15);b=1+rnd(a-1);res=a-b;$("#ballonQ").textContent=a+" − "+b+" = ?";}
+    BG.answer=res;}
+  function clearBalloons(){BG.balloons.forEach(function(bo){if(bo.el&&bo.el.parentNode)bo.el.parentNode.removeChild(bo.el);});BG.balloons=[];}
+  function spawnWave(){
+    if(!BG.on)return;clearBalloons();ballonQuestion();
+    var area=BG.area,W=area.clientWidth||300,H=area.clientHeight||320;
+    var opts=uniq(BG.answer,function(){var d=BG.answer+(rnd(9)-4);return d<0?BG.answer+1+rnd(4):d;},3),slot=W/opts.length;
+    opts.forEach(function(val,i){
+      var el=document.createElement("div");el.className="balloon";el.textContent=val;el.style.background=BCOL[(i+rnd(6))%BCOL.length];
+      var x=slot*i+slot/2-28+(-8+rnd(16));if(x<4)x=4;if(x>W-60)x=W-60;
+      var bo={el:el,x:x,y:H+rnd(50),speed:1.4+Math.random()*1.1+BG.score*0.05,val:val,correct:val===BG.answer,done:false};
+      el.style.transform="translate("+bo.x+"px,"+bo.y+"px)";
+      el.addEventListener("click",function(){tapBalloon(bo);});
+      area.appendChild(el);BG.balloons.push(bo);
+    });
+  }
+  function spawnSoon(){if(spawnScheduled)return;spawnScheduled=true;setTimeout(function(){spawnScheduled=false;if(BG.on)spawnWave();},280);}
+  function tapBalloon(bo){
+    if(!BG.on||bo.done)return;bo.done=true;bo.el.classList.add("pop");
+    if(bo.correct){BG.score++;$("#ballonScore").textContent=BG.score;sStar();spawnSoon();}
+    else{sWrong();setTimeout(function(){if(bo.el.parentNode)bo.el.parentNode.removeChild(bo.el);},250);}
+  }
+  function ballonLoop(){
+    if(!BG.on)return;
+    BG.balloons.forEach(function(bo){if(bo.done)return;bo.y-=bo.speed;bo.el.style.transform="translate("+bo.x+"px,"+bo.y+"px)";});
+    var aliveCorrect=BG.balloons.some(function(bo){return bo.correct&&!bo.done&&bo.y>-70;});
+    if(!aliveCorrect)spawnSoon();
+    BG.raf=requestAnimationFrame(ballonLoop);
+  }
+  function startBallon(){
+    BG.on=true;BG.score=0;BG.time=60;$("#ballonScore").textContent="0";$("#ballonTime").textContent="60";
+    show("ballons");BG.area=$("#ballonArea");BG.area.innerHTML="";
+    spawnWave();BG.raf=requestAnimationFrame(ballonLoop);
+    BG.timer=setInterval(function(){BG.time--;$("#ballonTime").textContent=BG.time;if(BG.time<=0)endBallon();},1000);
+  }
+  function stopBallon(){BG.on=false;cancelAnimationFrame(BG.raf);clearInterval(BG.timer);clearBalloons();}
+  function endBallon(){
+    stopBallon();var p=active();if(p){if(BG.score>(p.stats.ballonBest||0))p.stats.ballonBest=BG.score;persist();}
+    confetti();
+    $("#ballonArea").innerHTML='<div class="gresult"><div style="font-size:3rem">🎈</div>'
+      +'<h2 class="display" style="margin:0;font-size:1.6rem">'+BG.score+' Ballons geschafft!</h2>'
+      +'<p class="muted" style="margin:0">Rekord: '+((p&&p.stats.ballonBest)||BG.score)+'</p>'
+      +'<button class="next" id="ballonAgain">Nochmal (🪙 5)</button></div>';
+    var again=$("#ballonAgain");if(again)again.addEventListener("click",function(){
+      if(!p||(p.stats.coins||0)<5){openGames();return;}p.stats.coins-=5;persist();$("#coinCount").textContent=p.stats.coins;startBallon();});
+  }
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
+  $("#gamesBack").addEventListener("click",enterHome);
+  $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
   $("#lvlBack").addEventListener("click",enterHome);
   $("#backBtn").addEventListener("click",function(){openLevels(state?state.key:curGame);});
   $("#homeBtn").addEventListener("click",enterHome);
