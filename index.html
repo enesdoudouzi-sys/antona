@@ -216,6 +216,8 @@
   .avpick button[aria-pressed="true"]{border-color:var(--accent);background:var(--bg2)}
   .primary{border:none;background:var(--accent);color:#fff;border-radius:.8rem;padding:.75rem 1.2rem;font-weight:800;font-family:"Fredoka",sans-serif;cursor:pointer;box-shadow:var(--shadow-sm)}
   .primary:active{transform:translateY(2px)}
+  textarea{font-family:"Nunito",sans-serif;font-weight:700;font-size:.85rem;padding:.6rem;border-radius:.7rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);resize:vertical;width:100%;line-height:1.3}
+  .hr{border:none;border-top:1px solid var(--line);margin:.9rem 0}
 
   .foot{text-align:center;color:var(--ink-soft);font-size:.82rem;font-weight:700;margin-top:1rem;font-family:"Nunito",sans-serif}
 
@@ -417,6 +419,22 @@
       <div class="sheet">
         <h3>Empfehlung</h3>
         <p class="muted" id="pTip" style="margin:0"></p>
+      </div>
+      <div class="sheet">
+        <h3>Daten sichern & auf anderes Gerät übertragen</h3>
+        <p class="muted" style="margin:.2rem 0 .6rem">Ganz ohne Konto: Erstelle hier einen Code und lies ihn auf dem anderen Gerät wieder ein.</p>
+        <button class="primary" id="syncShow">Sicherungs-Code erstellen</button>
+        <div id="syncOutWrap" hidden style="margin-top:.6rem">
+          <textarea id="syncOut" readonly rows="3" aria-label="Sicherungs-Code"></textarea>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
+            <button class="back" id="syncCopy">📋 Code kopieren</button><span id="syncCopyMsg" class="muted"></span>
+          </div>
+        </div>
+        <hr class="hr">
+        <p class="muted" style="margin:.2rem 0 .4rem">Auf dem anderen Gerät: Code hier einfügen und einlesen.</p>
+        <textarea id="syncIn" rows="3" placeholder="Code hier einfügen…" aria-label="Code einfügen"></textarea>
+        <button class="primary" id="syncImport" style="margin-top:.4rem">Code einlesen</button>
+        <div id="syncMsg" class="feedback" style="min-height:1.2rem;justify-content:flex-start"></div>
       </div>
       <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
         <button class="dangerbtn" id="pReset">Fortschritt dieses Kindes zurücksetzen</button>
@@ -886,6 +904,35 @@
   });
   function enterHomeStarPill(){var p=active();if(p)$("#starCount").textContent=p.stats.stars;}
   $("#pSwitch").addEventListener("click",function(){activeId=null;persist();renderProfiles();show("profiles");});
+
+  /* ---------- Daten sichern & übertragen (Sync ohne Konto) ---------- */
+  function migrateProfiles(){
+    profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
+      if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;
+      ["math","read","shape","clock","english","denken"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
+  }
+  $("#syncShow").addEventListener("click",function(){
+    try{var code=btoa(unescape(encodeURIComponent(JSON.stringify(profiles))));
+      $("#syncOut").value=code;$("#syncOutWrap").hidden=false;$("#syncCopyMsg").textContent="";}
+    catch(e){$("#syncCopyMsg").textContent="Konnte keinen Code erstellen.";}
+  });
+  $("#syncCopy").addEventListener("click",function(){
+    var t=$("#syncOut");try{t.focus();t.select();}catch(e){}
+    function ok(){$("#syncCopyMsg").textContent=" Kopiert!";}
+    function manual(){$("#syncCopyMsg").textContent=" Bitte markieren und kopieren.";}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.value).then(ok,function(){try{document.execCommand("copy")?ok():manual();}catch(e){manual();}});}
+    else{try{document.execCommand("copy")?ok():manual();}catch(e){manual();}}
+  });
+  $("#syncImport").addEventListener("click",function(){
+    var v=($("#syncIn").value||"").trim(),msg=$("#syncMsg");
+    if(!v){msg.className="feedback try";msg.textContent="Bitte zuerst einen Code einfügen.";return;}
+    try{var arr=JSON.parse(decodeURIComponent(escape(atob(v))));
+      if(!Array.isArray(arr)||!arr.length||!arr[0].stats)throw 0;
+      profiles=arr;migrateProfiles();activeId=profiles[0].id;persist();
+      msg.className="feedback ok";msg.textContent="✓ Übernommen! "+profiles.length+" Profil(e) geladen.";
+      renderProfiles();
+    }catch(e){msg.className="feedback try";msg.textContent="Dieser Code ist ungültig. Bitte noch einmal kopieren.";}
+  });
 
   /* ---------- SPIELE (Anton-Prinzip: Münzen verdienen & verspielen) ---------- */
   var GAME_LIST=[{id:"ballons",name:"Zahlen-Ballons",emoji:"🎈",cost:5,desc:"Platze den Ballon mit dem richtigen Ergebnis."}];
