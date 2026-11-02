@@ -91,6 +91,8 @@
   .greetMascot{width:4.4rem;height:4.4rem;flex:none}
   .bubble{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:.7rem 1rem;box-shadow:var(--shadow-sm);flex:1;min-width:0}
   .bubble::before{content:"";position:absolute;left:-.48rem;top:1.25rem;border:.4rem solid transparent;border-right-color:var(--panel)}
+  .homegoal{margin:.1rem 0 .4rem}
+  .goalrow{font-size:.92rem;color:var(--ink-soft);font-weight:800;margin-bottom:.25rem}
 
   /* Profile */
   .profiles{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:.5rem}
@@ -202,6 +204,12 @@
   .badge.locked{opacity:.45;filter:grayscale(1)}
   .badge .bn{font-family:"Fredoka",sans-serif;font-weight:600;margin-top:.2rem}
   .badge .bd{font-size:.82rem;color:var(--ink-soft)}
+  /* Avatar-Shop */
+  #avatarGrid{flex-wrap:wrap;row-gap:1.3rem}
+  #avatarGrid button{position:relative;width:3.6rem;height:3.6rem;font-size:2rem}
+  #avatarGrid button[aria-pressed="true"]{border-color:var(--accent);background:var(--bg2)}
+  #avatarGrid button.locked{opacity:.65}
+  #avatarGrid button .cost{position:absolute;bottom:-.75rem;left:50%;transform:translateX(-50%);font-size:.6rem;background:var(--star);color:#4a3800;border-radius:.4rem;padding:0 .3rem;font-family:"Fredoka",sans-serif;white-space:nowrap}
   .diffpick{display:flex;align-items:center;gap:.4rem;justify-content:center;margin:.3rem 0 .1rem;flex-wrap:wrap}
   .diffpick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-weight:800;font-family:"Nunito",sans-serif;cursor:pointer;font-size:.9rem}
   .diffpick button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
@@ -426,6 +434,7 @@
       <svg class="greetMascot" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,6 62,38 96,38 68,58 79,92 50,71 21,92 32,58 4,38 38,38" fill="#ffc53d" stroke="#f0a500" stroke-width="2"/><circle cx="50" cy="50" r="22" fill="#fff"/><circle cx="42" cy="48" r="3.4" fill="#2a2740"/><circle cx="58" cy="48" r="3.4" fill="#2a2740"/><path d="M40 58 q10 10 20 0" stroke="#2a2740" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="34" cy="55" r="3" fill="#ffb3b3"/><circle cx="66" cy="55" r="3" fill="#ffb3b3"/></svg>
       <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" id="homeSub" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
     </div>
+    <div id="homeGoal" class="homegoal"></div>
     <div class="grid">
       <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
       <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
@@ -438,7 +447,10 @@
       <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen & Welt</span><span class="mini" id="best-geo">★ 0</span></button>
       <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
     </div>
-    <button class="back" id="pokaleBtn" style="margin:1rem auto 0;display:block">🏆 Meine Pokale</button>
+    <div style="display:flex;gap:.6rem;justify-content:center;margin-top:1rem;flex-wrap:wrap">
+      <button class="back" id="pokaleBtn">🏆 Meine Pokale</button>
+      <button class="back" id="avatarBtn">🙂 Avatar</button>
+    </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
   </div>
 
@@ -580,6 +592,28 @@
     <canvas id="malenCanvas" class="malencanvas"></canvas>
   </div>
 
+  <!-- QUIZ-DUELL -->
+  <div id="quiz" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="quizBack">← Stopp</button><div class="spacer"></div>
+      <div class="gbadge">🦉 <span id="quizScore">0</span></div><div class="gbadge">⏱ <span id="quizTime">30</span></div></div>
+    <div class="card" style="gap:1.1rem">
+      <div class="qlabel" id="quizLabel">Wissensfrage</div>
+      <div class="question" id="quizQ"></div>
+      <div id="quizAns" class="answers three"></div>
+      <div id="quizFb" class="feedback" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- AVATAR -->
+  <div id="avatar" hidden>
+    <div class="bar"><button class="back" id="avatarBack">← Zurück</button><div class="spacer"></div>
+      <div class="pill"><span style="color:#f0a500">🪙</span> <span id="avatarCoins">0</span></div></div>
+    <h2 class="title">Mein Avatar</h2>
+    <p class="muted">Tippe ein Bild zum Auswählen. Besondere kosten Münzen.</p>
+    <div id="avatarGrid" class="avpick" style="justify-content:center;gap:.6rem"></div>
+    <div id="avatarMsg" class="feedback" style="justify-content:center"></div>
+  </div>
+
   <!-- POKALE -->
   <div id="badges" hidden>
     <div class="bar"><button class="back" id="badgesBack">← Zurück</button></div>
@@ -621,6 +655,12 @@
         <p class="muted" id="pTip" style="margin:0"></p>
       </div>
       <div class="sheet">
+        <h3>Tagesziel</h3>
+        <p class="muted" id="goalText" style="margin:.2rem 0 .5rem"></p>
+        <div id="goalPick" class="diffpick" style="justify-content:flex-start"><span class="muted">Sterne pro Tag:</span>
+          <button data-g="5">5</button><button data-g="10">10</button><button data-g="15">15</button><button data-g="20">20</button></div>
+      </div>
+      <div class="sheet">
         <h3>Daten sichern & auf anderes Gerät übertragen</h3>
         <p class="muted" style="margin:.2rem 0 .6rem">Ganz ohne Konto: Erstelle hier einen Code und lies ihn auf dem anderen Gerät wieder ein.</p>
         <button class="primary" id="syncShow">Sicherungs-Code erstellen</button>
@@ -659,11 +699,12 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:""};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[]};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
     if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
+    if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
     ["math","read","shape","clock","english","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
@@ -786,6 +827,7 @@
     1:{title:"Mengen & Zehnerfeld",desc:"Punkte sehen und zählen",set:[m_subitize,m_tenframe,m_bond]},
     8:{title:"Zehnerzahlen",desc:"20 + 30, 70 − 40 …",set:[m_tens]},
     9:{title:"Mit Geld rechnen (€)",desc:"3,50 € + 2 € …",set:[m_money]},
+    10:{title:"Profi: gemischt & schwer",desc:"12 + 42, 76 − 38, Einmaleins, Geld",set:[m_add100,m_sub100,m_tens,m_times([2,3,4,5,6,7,8,9,10]),m_money]},
     2:{title:"Plus & Minus bis 10",desc:"Mit Punktebildern",set:[m_add(10),m_add(10),m_sub(10)]},
     3:{title:"Plus & Minus bis 20",desc:"Etwas größere Zahlen",set:[m_add(18),m_sub(18),m_add(18)]},
     4:{title:"Plus & Minus bis 100",desc:"2. Klasse: große Zahlen",set:[m_add100,m_sub100,m_add100,m_sub100,m_double]},
@@ -841,7 +883,8 @@
     4:{title:"Umlaute & ß",desc:"ä, ö, ü und ß",set:[r_umlaut]},
     5:{title:"Groß & klein",desc:"Nomen schreibt man groß",set:[r_case]},
     6:{title:"Reimwörter",desc:"Was reimt sich?",set:[r_rhyme]},
-    7:{title:"Erste Sätze",desc:"Satz sinnvoll ergänzen",set:[r_sentence]}
+    7:{title:"Erste Sätze",desc:"Satz sinnvoll ergänzen",set:[r_sentence]},
+    8:{title:"Profi: alles gemischt",desc:"Sätze, Reime, ä/ö/ü, groß/klein",set:[r_sentence,r_rhyme,r_umlaut,r_case]}
   };
 
   /* ---------- FORMEN & FARBEN ---------- */
@@ -895,13 +938,19 @@
     return{label:"Welche Zahl auf Englisch?",speak:it.en,speakLang:"en",
       render:function(z){z.className="question";z.innerHTML='<span style="font-size:3.4rem;font-family:\'Fredoka\',sans-serif">'+it.n+'</span>';},
       options:opts.map(function(o){return o.en}),correct:it.en,word:true,three:true};}
+  var EN_NUM2=[{n:11,en:"Eleven"},{n:12,en:"Twelve"},{n:13,en:"Thirteen"},{n:14,en:"Fourteen"},{n:15,en:"Fifteen"},{n:16,en:"Sixteen"},{n:17,en:"Seventeen"},{n:18,en:"Eighteen"},{n:19,en:"Nineteen"},{n:20,en:"Twenty"}];
+  function e_num2(){var it=pick(EN_NUM2),others=shuffle(EN_NUM2.filter(function(x){return x.n!==it.n;})).slice(0,2),opts=shuffle([it].concat(others));
+    return{label:"Welche Zahl auf Englisch?",speak:it.en,speakLang:"en",render:function(z){z.className="question";z.innerHTML='<span style="font-size:3.4rem;font-family:\'Fredoka\',sans-serif">'+it.n+'</span>';},
+      options:opts.map(function(o){return o.en}),correct:it.en,word:true,three:true};}
   var ENGLISH_LVL={
     1:{title:"Farben (Colours)",desc:"Rot, Blau, Grün …",set:[e_vocab(EN_COLORS)]},
     2:{title:"Tiere (Animals)",desc:"Hund, Katze, Fisch …",set:[e_vocab(EN_ANIMALS)]},
     3:{title:"Zahlen (Numbers)",desc:"1 bis 10",set:[e_num]},
     4:{title:"Essen (Food)",desc:"Apfel, Brot, Milch …",set:[e_vocab(EN_FOOD)]},
     5:{title:"Körper (Body)",desc:"Hand, Auge, Nase …",set:[e_vocab(EN_BODY)]},
-    6:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_vocab(EN_FOOD),e_vocab(EN_BODY)]}
+    6:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_vocab(EN_FOOD),e_vocab(EN_BODY)]},
+    7:{title:"Zahlen 11–20",desc:"Eleven … Twenty",set:[e_num2]},
+    8:{title:"Profi: alles & 1–20",desc:"Alle Themen + Zahlen bis 20",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_num2,e_vocab(EN_FOOD),e_vocab(EN_BODY)]}
   };
 
   /* ---------- DENKEN & KONZENTRATION (Kompetenzbereich „Muster und Strukturen" + Aufmerksamkeit) ---------- */
@@ -964,12 +1013,17 @@
   var SACH_VERKEHR=[{q:"Bei welcher Ampelfarbe darfst du gehen?",e:"🚦",a:["Grün","Rot","Gelb"]},{q:"Was tust du bei Rot?",e:"🚦",a:["Stehen bleiben","Schnell laufen","Winken"]},
     {q:"Wo überquerst du sicher die Straße?",e:"🦓",a:["Am Zebrastreifen","Zwischen Autos","Überall"]},{q:"Was trägst du beim Radfahren?",e:"🚲",a:["Helm","Hut","Krone"]},
     {q:"Vor dem Überqueren schaust du …",e:"👀",a:["Links und rechts","Nur nach oben","Gar nicht"]},{q:"Welche Farbe heißt Stopp?",e:"🔴",a:["Rot","Grün","Blau"]}];
+  var SACH_PROFI=[{q:"Wie viele Beine hat ein Insekt?",e:"🐞",a:["6","8","4"]},{q:"Was brauchen Pflanzen zum Wachsen?",e:"🌱",a:["Wasser und Sonne","Nur Dunkelheit","Schokolade"]},
+    {q:"Wohin gehört Altpapier?",e:"♻️",a:["In die Papiertonne","In die Natur","Ins Wasser"]},{q:"Was passiert mit Wasser in der Sonne?",e:"💧",a:["Es verdunstet","Es wird hart","Es wird blau"]},
+    {q:"Was ist ein Säugetier?",e:"🐄",a:["Die Kuh","Der Fisch","Der Vogel"]},{q:"Welches Tier legt Eier?",e:"🐔",a:["Huhn","Kuh","Hund"]},
+    {q:"Wann ist Mittag?",e:"🕛",a:["12 Uhr","6 Uhr","Mitternacht"]}];
   var SACH_LVL={
     1:{title:"Tiere & Natur",desc:"Tiere, Beine, Zuhause …",set:[qa(SACH_TIERE)]},
     2:{title:"Mein Körper & Sinne",desc:"Sehen, hören, gesund sein",set:[qa(SACH_KOERPER)]},
     3:{title:"Jahreszeiten & Wetter",desc:"Winter, Sommer, Regen …",set:[qa(SACH_JAHR)]},
     4:{title:"Verkehr & Sicherheit",desc:"Ampel, Zebrastreifen, Helm",set:[qa(SACH_VERKEHR)]},
-    5:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[qa(SACH_TIERE.concat(SACH_KOERPER,SACH_JAHR,SACH_VERKEHR))]}
+    5:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[qa(SACH_TIERE.concat(SACH_KOERPER,SACH_JAHR,SACH_VERKEHR))]},
+    6:{title:"Profi: schwere Fragen",desc:"Insekten, Pflanzen, Recycling …",set:[qa(SACH_PROFI.concat(SACH_TIERE,SACH_JAHR))]}
   };
 
   /* ---------- MUSIK ---------- */
@@ -980,8 +1034,12 @@
     render:function(z){z.className="question";z.innerHTML='<span class="em">'+(high?"🔼":"🔽")+'</span><button class="read-btn" id="toneBtn" aria-label="Ton abspielen">🔊</button>';
       setTimeout(function(){tone(high?880:220,.5);var tb=document.getElementById("toneBtn");if(tb)tb.addEventListener("click",function(){tone(high?880:220,.5);});},200);},
     options:shuffle(["Hoch","Tief"]),correct:high?"Hoch":"Tief"};}
+  var MUS_PROFI=[{q:"Welches Instrument wird gestrichen?",e:"🎻",a:["Geige","Trommel","Trompete"]},{q:"Welches Instrument hat Tasten?",e:"🎹",a:["Klavier","Gitarre","Flöte"]},
+    {q:"Welches Instrument wird geblasen?",e:"🎺",a:["Trompete","Trommel","Geige"]},{q:"Was ist laut?",e:"🔊",a:["Ein Donner","Ein Flüstern","Eine Feder"]},
+    {q:"Womit gibt man den Takt an?",e:"🥁",a:["Trommel","Flöte","Geige"]}];
   var MUSIK_LVL={1:{title:"Instrumente",desc:"Gitarre, Trommel …",set:[qa(MUS_INSTR)]},2:{title:"Hoch oder tief?",desc:"Töne hören",set:[m_pitch]},
-    3:{title:"Gemischt",desc:"Instrumente & Töne",set:[qa(MUS_INSTR),m_pitch]}};
+    3:{title:"Gemischt",desc:"Instrumente & Töne",set:[qa(MUS_INSTR),m_pitch]},
+    4:{title:"Profi: Instrumenten-Arten",desc:"Streichen, blasen, Tasten …",set:[qa(MUS_PROFI),m_pitch,qa(MUS_INSTR)]}};
   /* ---------- GEOGRAFIE ---------- */
   var GEO_FLAG=[{q:"Zu welchem Land gehört die Flagge?",e:"🇩🇪",a:["Deutschland","Frankreich","Italien"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇫🇷",a:["Frankreich","Spanien","Türkei"]},
     {q:"Zu welchem Land gehört die Flagge?",e:"🇮🇹",a:["Italien","Deutschland","England"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇹🇷",a:["Türkei","Spanien","Frankreich"]},
@@ -989,8 +1047,13 @@
   var GEO_WELT=[{q:"Auf welchem Planeten leben wir?",e:"🌍",a:["Erde","Mars","Mond"]},{q:"Was ist das größte Tier im Meer?",e:"🐋",a:["Wal","Hai","Fisch"]},
     {q:"Wo ist es sehr kalt und eisig?",e:"🧊",a:["Am Nordpol","In der Wüste","Am Strand"]},{q:"Wo leben Kamele?",e:"🐪",a:["In der Wüste","Im Eis","Im Meer"]},
     {q:"Was ist ganz oben am Himmel am Tag?",e:"☀️",a:["Die Sonne","Der Mond","Die Sterne"]},{q:"Wie heißt viel Wasser mit Salz?",e:"🌊",a:["Das Meer","Der Fluss","Der See"]}];
+  var GEO_FLAG2=[{q:"Zu welchem Land gehört die Flagge?",e:"🇳🇱",a:["Niederlande","Frankreich","Italien"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇬🇷",a:["Griechenland","Türkei","Spanien"]},
+    {q:"Zu welchem Land gehört die Flagge?",e:"🇵🇱",a:["Polen","Deutschland","England"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇺🇸",a:["USA","England","Frankreich"]}];
+  var GEO_CONT=[{q:"Auf welchem Kontinent liegt Deutschland?",e:"🌍",a:["Europa","Afrika","Asien"]},{q:"Wo leben Pinguine?",e:"🐧",a:["Am Südpol","In der Wüste","Im Dschungel"]},
+    {q:"Welcher ist der größte Ozean?",e:"🌊",a:["Pazifik","Nordsee","Bodensee"]},{q:"Wo leben Löwen in freier Natur?",e:"🦁",a:["In Afrika","Am Nordpol","In Europa"]}];
   var GEO_LVL={1:{title:"Flaggen",desc:"Länder erkennen",set:[qa(GEO_FLAG)]},2:{title:"Unsere Welt",desc:"Erde, Meer, Wüste …",set:[qa(GEO_WELT)]},
-    3:{title:"Gemischt",desc:"Flaggen & Welt",set:[qa(GEO_FLAG),qa(GEO_WELT)]}};
+    3:{title:"Gemischt",desc:"Flaggen & Welt",set:[qa(GEO_FLAG),qa(GEO_WELT)]},
+    4:{title:"Profi: mehr Länder & Kontinente",desc:"Flaggen, Ozeane, Kontinente",set:[qa(GEO_FLAG2),qa(GEO_CONT),qa(GEO_FLAG)]}};
 
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
     shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
@@ -1005,7 +1068,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1050,7 +1113,7 @@
     $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins||0;
     $("#homeSub").textContent=(p.stats.streak>=2?("🔥 "+p.stats.streak+" Tage in Folge – weiter so!"):"Was üben wir heute?");
     SUBJ.forEach(function(s){$("#best-"+s.k).textContent="★ "+(p.stats.best[s.k]||0);});
-    show("home");
+    renderGoal();show("home");
   }
 
   /* ---------- Stufen-UI ---------- */
@@ -1190,6 +1253,8 @@
     else if(p.stats.best[weakest.k]<5) tip="Das Fach "+weakest.n+" fällt noch schwer. Übt es in der leichtesten Stufe, täglich kurz und mit viel Lob.";
     else tip="Schöner Fortschritt! Steigert euch beim stärksten Fach eine Stufe und bleibt beim schwächsten geduldig.";
     $("#pTip").textContent=tip;
+    var goal=p.stats.goal||10;$("#goalText").textContent="Aktuell: "+goal+" Sterne pro Tag. Heute schon "+((p.stats.history&&p.stats.history[dayKey()]||{}).stars||0)+" geschafft.";
+    Array.prototype.forEach.call(document.querySelectorAll("#goalPick button"),function(x){x.setAttribute("aria-pressed",(+x.getAttribute("data-g"))===goal);});
   }
   $("#pReset").addEventListener("click",function(){
     var p=active();if(!p)return;
@@ -1198,12 +1263,14 @@
   });
   function enterHomeStarPill(){var p=active();if(p)$("#starCount").textContent=p.stats.stars;}
   $("#pSwitch").addEventListener("click",function(){activeId=null;persist();renderProfiles();show("profiles");});
+  Array.prototype.forEach.call(document.querySelectorAll("#goalPick button"),function(btn){btn.addEventListener("click",function(){var p=active();if(!p)return;p.stats.goal=+btn.getAttribute("data-g");persist();renderParent();});});
 
   /* ---------- Daten sichern & übertragen (Sync ohne Konto) ---------- */
   function migrateProfiles(){
     profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
       if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
       if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
+    if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
     ["math","read","shape","clock","english","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
   }
   $("#syncShow").addEventListener("click",function(){
@@ -1239,7 +1306,8 @@
     {id:"shop",name:"Kaufladen & Kasse",emoji:"🛒",cost:0,desc:"Live gegen den Computer kassieren: Preis, Rückgeld, bar oder Karte."},
     {id:"vier",name:"Vier gewinnt",emoji:"🔴",cost:5,desc:"Bringe vier Steine in eine Reihe – gegen den Computer."},
     {id:"galgen",name:"Galgenmännchen",emoji:"🔤",cost:4,desc:"Errate das Wort Buchstabe für Buchstabe."},
-    {id:"malen",name:"Malen & Kritzeln",emoji:"🎨",cost:0,desc:"Frei malen mit vielen Farben."}
+    {id:"malen",name:"Malen & Kritzeln",emoji:"🎨",cost:0,desc:"Frei malen mit vielen Farben."},
+    {id:"quiz",name:"Quiz-Duell auf Zeit",emoji:"🦉",cost:4,desc:"So viele Wissensfragen wie möglich in 30 Sekunden."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -1255,7 +1323,8 @@
       b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;
         if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();
         else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();
-        else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();});
+        else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();
+        else if(g.id==="quiz")startQuiz();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -1569,6 +1638,40 @@
       d.innerHTML='<div class="be">'+(earned?bd.e:"🔒")+'</div><div class="bn">'+bd.n+'</div><div class="bd">'+bd.d+'</div>';g.appendChild(d);});
     $("#badgesSub").textContent=got+" von "+BADGES.length+" Abzeichen gesammelt.";show("badges");}
 
+  /* ---------- QUIZ-DUELL AUF ZEIT ---------- */
+  var QUIZPOOL=[].concat(SACH_TIERE,SACH_KOERPER,SACH_JAHR,SACH_VERKEHR,GEO_WELT,GEO_FLAG,MUS_INSTR),QUIZ={on:false,score:0,time:30,timer:0};
+  function startQuiz(){QUIZ={on:true,score:0,time:30,timer:0};$("#quizScore").textContent="0";$("#quizTime").textContent="30";show("quiz");quizNext();
+    QUIZ.timer=setInterval(function(){QUIZ.time--;$("#quizTime").textContent=QUIZ.time;if(QUIZ.time<=0)endQuiz();},1000);}
+  function quizNext(){var it=pick(QUIZPOOL);$("#quizLabel").textContent=it.q;$("#quizQ").innerHTML='<span class="em">'+(it.e||"🦉")+'</span>';
+    var opts=shuffle(it.a.slice()),box=$("#quizAns");box.innerHTML="";$("#quizFb").textContent="";$("#quizFb").className="feedback";
+    opts.forEach(function(v){var b=document.createElement("button");b.className="opt";b.innerHTML='<span class="word">'+v+'</span>';b.addEventListener("click",function(){quizAns(v===it.a[0],b);});box.appendChild(b);});}
+  function quizAns(ok,btn){if(!QUIZ.on)return;if(ok){QUIZ.score++;$("#quizScore").textContent=QUIZ.score;sCorrect();quizNext();}else{sWrong();btn.classList.add("bad");btn.disabled=true;}}
+  function stopQuiz(){QUIZ.on=false;clearInterval(QUIZ.timer);}
+  function endQuiz(){stopQuiz();confetti();var p=active();if(p&&QUIZ.score>(p.stats.quizBest||0)){p.stats.quizBest=QUIZ.score;persist();}
+    $("#quizLabel").textContent="Fertig! 🦉";$("#quizQ").innerHTML="";$("#quizAns").innerHTML="";$("#quizFb").className="feedback ok";
+    $("#quizFb").innerHTML=QUIZ.score+" richtig! &nbsp;<button class=\"next\" id=\"quizAgain\">Nochmal (🪙 4)</button>";
+    var ag=$("#quizAgain");if(ag)ag.addEventListener("click",function(){if(!p||(p.stats.coins||0)<4){openGames();return;}p.stats.coins-=4;persist();$("#coinCount").textContent=p.stats.coins;startQuiz();});}
+
+  /* ---------- AVATAR-SHOP ---------- */
+  var AV_PREMIUM=[{e:"🐉",c:20},{e:"🦅",c:20},{e:"🦁",c:15},{e:"🐼",c:15},{e:"🦖",c:25},{e:"🤖",c:15},{e:"👑",c:30},{e:"🦸",c:25},{e:"🧙",c:20},{e:"🦄",c:30}];
+  function openAvatar(flash){var p=active();if(!p)return;if(!p.stats.unlocked)p.stats.unlocked=[];
+    $("#avatarCoins").textContent=p.stats.coins||0;var g=$("#avatarGrid");g.innerHTML="";
+    AVATARS.forEach(function(a){g.appendChild(avBtn(p,a,0));});AV_PREMIUM.forEach(function(it){g.appendChild(avBtn(p,it.e,it.c));});
+    var m=$("#avatarMsg");if(flash){m.className="feedback ok";m.textContent=flash;}else{m.className="feedback";m.textContent="";}show("avatar");}
+  function avBtn(p,emoji,cost){var unlocked=cost===0||p.stats.unlocked.indexOf(emoji)>=0;
+    var b=document.createElement("button");b.setAttribute("aria-pressed",p.av===emoji);
+    if(unlocked){b.textContent=emoji;}else{b.className="locked";b.innerHTML=emoji+'<span class="cost">🪙 '+cost+'</span>';}
+    b.addEventListener("click",function(){
+      if(unlocked){p.av=emoji;persist();$("#whoAv").textContent=emoji;openAvatar();}
+      else if((p.stats.coins||0)<cost){$("#avatarMsg").className="feedback try";$("#avatarMsg").textContent="Dafür brauchst du "+cost+" Münzen. Übe weiter!";}
+      else{p.stats.coins-=cost;p.stats.unlocked.push(emoji);p.av=emoji;persist();$("#coinCount").textContent=p.stats.coins;$("#whoAv").textContent=emoji;openAvatar("Freigeschaltet! ✨");}
+    });return b;}
+
+  /* ---------- LERNZIEL (Sterne heute) ---------- */
+  function renderGoal(){var p=active();if(!p)return;var goal=p.stats.goal||10,today=(p.stats.history&&p.stats.history[dayKey()]||{}).stars||0;
+    var pct=Math.min(100,Math.round(today/goal*100));
+    $("#homeGoal").innerHTML='<div class="goalrow">🎯 Tagesziel: <b>'+today+' / '+goal+' ⭐</b>'+(today>=goal?' <span style="color:var(--good)">geschafft! 🎉</span>':'')+'</div><div class="barmini"><i style="width:'+pct+'%"></i></div>';}
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
   $("#shopBack").addEventListener("click",function(){KASSE.on=false;openGames();});
@@ -1578,6 +1681,9 @@
   $("#malenClear").addEventListener("click",clearMalen);
   $("#badgesBack").addEventListener("click",enterHome);
   $("#pokaleBtn").addEventListener("click",openBadges);
+  $("#quizBack").addEventListener("click",function(){stopQuiz();openGames();});
+  $("#avatarBack").addEventListener("click",enterHome);
+  $("#avatarBtn").addEventListener("click",function(){openAvatar();});
   $("#gamesBack").addEventListener("click",enterHome);
   $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
   $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
