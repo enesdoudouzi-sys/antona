@@ -204,6 +204,16 @@
   .badge.locked{opacity:.45;filter:grayscale(1)}
   .badge .bn{font-family:"Fredoka",sans-serif;font-weight:600;margin-top:.2rem}
   .badge .bd{font-size:.82rem;color:var(--ink-soft)}
+  /* Rechen-Memory */
+  #rmemGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.3rem}
+  .rcard{aspect-ratio:3/4;border-radius:.8rem;border:1px solid var(--line);background:var(--accent);display:grid;place-items:center;font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.05rem;color:#fff;cursor:pointer}
+  .rcard.open{background:var(--panel);color:var(--ink)}
+  .rcard.done{opacity:.35;cursor:default}
+  /* Zahlen-Pyramide */
+  .pyra{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+  .pyrow{display:flex;gap:.4rem}
+  .brick{width:3.3rem;height:2.6rem;border-radius:.5rem;background:var(--bg2);display:grid;place-items:center;font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.3rem;border:1px solid var(--line)}
+  .brick.q{background:var(--accent);color:#fff}
   /* Avatar-Shop */
   #avatarGrid{flex-wrap:wrap;row-gap:1.3rem}
   #avatarGrid button{position:relative;width:3.6rem;height:3.6rem;font-size:2rem}
@@ -614,6 +624,24 @@
     <div id="avatarMsg" class="feedback" style="justify-content:center"></div>
   </div>
 
+  <!-- RECHEN-MEMORY -->
+  <div id="rmem" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="rmemBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🔄 <span id="rmemMoves">0</span></div><div class="gbadge">✓ <span id="rmemPairs">0</span></div></div>
+    <div class="muted" style="text-align:center;margin:.2rem 0">Finde die Aufgabe und ihr Ergebnis (z. B. 3+4 und 7).</div>
+    <div id="rmemGrid"></div>
+  </div>
+
+  <!-- ZAHLEN-PYRAMIDE -->
+  <div id="pyra" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="pyraBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🔺 <span id="pyraScore">0</span>/8</div></div>
+    <div class="card" style="gap:1.1rem">
+      <div class="muted">Jeder Stein = die zwei darunter zusammen. Finde den fehlenden Stein!</div>
+      <div id="pyraView" class="pyra"></div>
+      <div id="pyraAns" class="answers three"></div>
+      <div id="pyraFb" class="feedback" aria-live="polite"></div>
+    </div>
+  </div>
+
   <!-- POKALE -->
   <div id="badges" hidden>
     <div class="bar"><button class="back" id="badgesBack">← Zurück</button></div>
@@ -653,6 +681,12 @@
       <div class="sheet">
         <h3>Empfehlung</h3>
         <p class="muted" id="pTip" style="margin:0"></p>
+      </div>
+      <div class="sheet">
+        <h3>Vorlese-Stimme</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Je nach Gerät gibt es verschiedene Stimmen. Wähle die schönste – „online" klingt meist natürlicher.</p>
+        <select id="voicePick" style="width:100%;padding:.55rem;border-radius:.6rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif"></select>
+        <button class="back" id="voiceTest" style="margin-top:.5rem">🔊 Stimme testen</button>
       </div>
       <div class="sheet">
         <h3>Tagesziel</h3>
@@ -738,11 +772,16 @@
     try{var vs=window.speechSynthesis.getVoices();if(!vs||!vs.length)return;
       var de=vs.filter(function(v){return /^de(-|_|$)/i.test(v.lang||"");});
       var en=vs.filter(function(v){return /^en(-|_|$)/i.test(v.lang||"");});
-      if(de.length)deVoice=bestVoice(de,["Google Deutsch","Microsoft Katja","Microsoft Hedda","Microsoft Anna","Anna","Petra","Katja","Vicki","Markus"]);
-      if(en.length)enVoice=bestVoice(en,["Google US English","Google UK English Female","Microsoft Aria","Microsoft Jenny","Microsoft Zira","Samantha","Aria"]);
+      var saved=load("antona_voice","");
+      if(de.length){var sv=saved?de.filter(function(v){return v.name===saved;})[0]:null;
+        deVoice=sv||bestVoice(de,["Google Deutsch","Microsoft Katja Online","Microsoft Katja","Microsoft Hedda","Natural","Anna","Petra","Katja","Vicki","Markus"]);}
+      if(en.length)enVoice=bestVoice(en,["Google US English","Microsoft Aria Online","Google UK English Female","Microsoft Jenny","Samantha","Aria"]);
     }catch(e){}
   }
-  try{if("speechSynthesis"in window){chooseVoice();window.speechSynthesis.onvoiceschanged=chooseVoice;}}catch(e){}
+  function populateVoices(){try{var sel=$("#voicePick");if(!sel)return;var vs=window.speechSynthesis.getVoices()||[],de=vs.filter(function(v){return /^de/i.test(v.lang||"");}),saved=load("antona_voice","");sel.innerHTML="";
+    if(!de.length){var o=document.createElement("option");o.value="";o.textContent="Standard-Stimme des Geräts";sel.appendChild(o);return;}
+    de.forEach(function(v){var o=document.createElement("option");o.value=v.name;o.textContent=v.name+(v.localService===false?" (online, natürlicher)":"");if(v.name===saved)o.selected=true;sel.appendChild(o);});}catch(e){}}
+  try{if("speechSynthesis"in window){chooseVoice();window.speechSynthesis.onvoiceschanged=function(){chooseVoice();populateVoices();};}}catch(e){}
   function speak(t,lang){try{if(!("speechSynthesis"in window))return;window.speechSynthesis.cancel();
     if(!deVoice&&!enVoice)chooseVoice();
     var en=(lang&&lang.indexOf("en")===0);
@@ -1068,7 +1107,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1255,6 +1294,7 @@
     $("#pTip").textContent=tip;
     var goal=p.stats.goal||10;$("#goalText").textContent="Aktuell: "+goal+" Sterne pro Tag. Heute schon "+((p.stats.history&&p.stats.history[dayKey()]||{}).stars||0)+" geschafft.";
     Array.prototype.forEach.call(document.querySelectorAll("#goalPick button"),function(x){x.setAttribute("aria-pressed",(+x.getAttribute("data-g"))===goal);});
+    populateVoices();
   }
   $("#pReset").addEventListener("click",function(){
     var p=active();if(!p)return;
@@ -1264,6 +1304,8 @@
   function enterHomeStarPill(){var p=active();if(p)$("#starCount").textContent=p.stats.stars;}
   $("#pSwitch").addEventListener("click",function(){activeId=null;persist();renderProfiles();show("profiles");});
   Array.prototype.forEach.call(document.querySelectorAll("#goalPick button"),function(btn){btn.addEventListener("click",function(){var p=active();if(!p)return;p.stats.goal=+btn.getAttribute("data-g");persist();renderParent();});});
+  (function(){var vsel=$("#voicePick");if(vsel)vsel.addEventListener("change",function(){save("antona_voice",vsel.value);chooseVoice();});
+    var vt=$("#voiceTest");if(vt)vt.addEventListener("click",function(){speak("Hallo! Ich lese dir die Aufgaben vor.");});})();
 
   /* ---------- Daten sichern & übertragen (Sync ohne Konto) ---------- */
   function migrateProfiles(){
@@ -1307,7 +1349,9 @@
     {id:"vier",name:"Vier gewinnt",emoji:"🔴",cost:5,desc:"Bringe vier Steine in eine Reihe – gegen den Computer."},
     {id:"galgen",name:"Galgenmännchen",emoji:"🔤",cost:4,desc:"Errate das Wort Buchstabe für Buchstabe."},
     {id:"malen",name:"Malen & Kritzeln",emoji:"🎨",cost:0,desc:"Frei malen mit vielen Farben."},
-    {id:"quiz",name:"Quiz-Duell auf Zeit",emoji:"🦉",cost:4,desc:"So viele Wissensfragen wie möglich in 30 Sekunden."}
+    {id:"quiz",name:"Quiz-Duell auf Zeit",emoji:"🦉",cost:4,desc:"So viele Wissensfragen wie möglich in 30 Sekunden."},
+    {id:"rmem",name:"Rechen-Memory",emoji:"🧮",cost:5,desc:"Aufgabe und Ergebnis als Paar finden (3+4 und 7)."},
+    {id:"pyra",name:"Zahlen-Pyramide",emoji:"🔺",cost:0,desc:"Finde den fehlenden Stein – jeder Stein = die zwei darunter."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -1324,7 +1368,7 @@
         if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();
         else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();
         else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();
-        else if(g.id==="quiz")startQuiz();});
+        else if(g.id==="quiz")startQuiz();else if(g.id==="rmem")startRmem();else if(g.id==="pyra")startPyra();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -1597,7 +1641,8 @@
     vierDrop(move,"Y",false);}
 
   /* ---------- GALGENMÄNNCHEN ---------- */
-  var GAL=null,GALWORDS=[{w:"HUND",h:"🐶 Tier"},{w:"KATZE",h:"🐱 Tier"},{w:"APFEL",h:"🍎 Obst"},{w:"SONNE",h:"☀️ am Himmel"},{w:"BAUM",h:"🌳 Pflanze"},{w:"AUTO",h:"🚗 Fahrzeug"},{w:"HAUS",h:"🏠 Gebäude"},{w:"BLUME",h:"🌸 Pflanze"},{w:"MAUS",h:"🐭 Tier"},{w:"STERN",h:"⭐ am Himmel"},{w:"BALL",h:"⚽ Spielzeug"},{w:"FISCH",h:"🐟 Tier"}];
+  var GAL=null,GALWORDS=[{w:"HUND",h:"🐶 Tier"},{w:"KATZE",h:"🐱 Tier"},{w:"APFEL",h:"🍎 Obst"},{w:"SONNE",h:"☀️ am Himmel"},{w:"BAUM",h:"🌳 Pflanze"},{w:"AUTO",h:"🚗 Fahrzeug"},{w:"HAUS",h:"🏠 Gebäude"},{w:"BLUME",h:"🌸 Pflanze"},{w:"MAUS",h:"🐭 Tier"},{w:"STERN",h:"⭐ am Himmel"},{w:"BALL",h:"⚽ Spielzeug"},{w:"FISCH",h:"🐟 Tier"},
+    {w:"BANANE",h:"🍌 Obst"},{w:"ELEFANT",h:"🐘 Tier"},{w:"FAHRRAD",h:"🚲 Fahrzeug"},{w:"GITARRE",h:"🎸 Musik"},{w:"BLEISTIFT",h:"✏️ Schule"},{w:"KROKODIL",h:"🐊 Tier"},{w:"REGENBOGEN",h:"🌈 am Himmel"},{w:"SONNENBLUME",h:"🌻 Pflanze"},{w:"SCHMETTERLING",h:"🦋 Tier"},{w:"COMPUTER",h:"💻 Technik"},{w:"PINGUIN",h:"🐧 Tier"},{w:"ERDBEERE",h:"🍓 Obst"}];
   function startGalgen(){var it=pick(GALWORDS);GAL={word:it.w,guessed:[],lives:6,over:false};$("#galgenHint").textContent="Tipp: "+it.h;$("#galgenMsg").textContent="";$("#galgenMsg").className="feedback";show("galgen");renderGalgen();}
   function renderGalgen(){$("#galgenLife").textContent=GAL.lives>0?Array(GAL.lives+1).join("❤️"):"💀";
     $("#galgenWord").textContent=GAL.word.split("").map(function(ch){return GAL.guessed.indexOf(ch)>=0?ch:"_";}).join(" ");
@@ -1637,6 +1682,35 @@
     BADGES.forEach(function(bd){var earned=bd.ok(p.stats);if(earned)got++;var d=document.createElement("div");d.className="badge"+(earned?"":" locked");
       d.innerHTML='<div class="be">'+(earned?bd.e:"🔒")+'</div><div class="bn">'+bd.n+'</div><div class="bd">'+bd.d+'</div>';g.appendChild(d);});
     $("#badgesSub").textContent=got+" von "+BADGES.length+" Abzeichen gesammelt.";show("badges");}
+
+  /* ---------- RECHEN-MEMORY (Aufgabe ↔ Ergebnis) ---------- */
+  var RMEM={on:false,first:null,lock:false,moves:0,pairs:0,total:6};
+  function startRmem(){RMEM={on:true,first:null,lock:false,moves:0,pairs:0,total:6};$("#rmemMoves").textContent="0";$("#rmemPairs").textContent="0";
+    var used={},cards=[],n=0;while(n<RMEM.total){var a=1+rnd(9),b=1+rnd(9),res=a+b;if(used[res]){continue;}used[res]=1;n++;cards.push({val:res,kind:"eq",label:a+"+"+b});cards.push({val:res,kind:"num",label:""+res});}
+    cards=shuffle(cards);var g=$("#rmemGrid");g.innerHTML="";cards.forEach(function(c){var el=document.createElement("div");el.className="rcard";el._c=c;el.textContent="?";el.addEventListener("click",function(){rmemFlip(el);});g.appendChild(el);});show("rmem");}
+  function rmemFlip(el){if(!RMEM.on||RMEM.lock||el.classList.contains("open")||el.classList.contains("done"))return;el.classList.add("open");el.textContent=el._c.label;
+    if(!RMEM.first){RMEM.first=el;return;}RMEM.moves++;$("#rmemMoves").textContent=RMEM.moves;var a=RMEM.first,b=el;
+    if(a._c.val===b._c.val&&a._c.kind!==b._c.kind){a.classList.add("done");b.classList.add("done");RMEM.first=null;RMEM.pairs++;$("#rmemPairs").textContent=RMEM.pairs;sStar();if(RMEM.pairs>=RMEM.total)rmemEnd();}
+    else{RMEM.lock=true;RMEM.first=null;sWrong();setTimeout(function(){a.classList.remove("open");a.textContent="?";b.classList.remove("open");b.textContent="?";RMEM.lock=false;},800);}}
+  function rmemEnd(){RMEM.on=false;confetti();var p=active();
+    $("#rmemGrid").innerHTML='<div class="gresult" style="grid-column:1/-1"><div style="font-size:3rem">🧮</div><h2 class="display" style="margin:0;font-size:1.4rem">Alle Paare gefunden!</h2><p class="muted" style="margin:0">'+RMEM.moves+' Versuche</p><button class="next" id="rmemAgain">Nochmal (🪙 5)</button></div>';
+    var ag=$("#rmemAgain");if(ag)ag.addEventListener("click",function(){if(!p||(p.stats.coins||0)<5){openGames();return;}p.stats.coins-=5;persist();$("#coinCount").textContent=p.stats.coins;startRmem();});}
+
+  /* ---------- ZAHLEN-PYRAMIDE ---------- */
+  var PYRA={on:false,round:0,score:0,total:8};
+  function startPyra(){PYRA={on:true,round:0,score:0,total:8};$("#pyraScore").textContent="0";show("pyra");pyraNext();}
+  function pyraNext(){if(PYRA.round>=PYRA.total)return pyraEnd();PYRA.round++;$("#pyraFb").textContent="";$("#pyraFb").className="feedback";
+    var b1=1+rnd(9),b2=1+rnd(9),b3=1+rnd(9),m1=b1+b2,m2=b2+b3,top=m1+m2,bricks={top:top,m1:m1,m2:m2},hideKey=pick(["top","m1","m2"]),correct=bricks[hideKey];
+    $("#pyraView").innerHTML='<div class="pyrow"><div class="brick '+(hideKey==="top"?"q":"")+'">'+(hideKey==="top"?"?":top)+'</div></div>'
+      +'<div class="pyrow"><div class="brick '+(hideKey==="m1"?"q":"")+'">'+(hideKey==="m1"?"?":m1)+'</div><div class="brick '+(hideKey==="m2"?"q":"")+'">'+(hideKey==="m2"?"?":m2)+'</div></div>'
+      +'<div class="pyrow"><div class="brick">'+b1+'</div><div class="brick">'+b2+'</div><div class="brick">'+b3+'</div></div>';
+    var opts=uniq(correct,function(){var d=correct+(rnd(2)?1:-1)*(1+rnd(4));return d<0?correct+1:d;},3),box=$("#pyraAns");box.innerHTML="";
+    opts.forEach(function(x){var btn=document.createElement("button");btn.className="opt";btn.textContent=x;btn.addEventListener("click",function(){pyraAns(x===correct,btn);});box.appendChild(btn);});}
+  function pyraAns(ok,btn){if(!PYRA.on)return;var p=active();
+    if(ok){PYRA.score++;$("#pyraScore").textContent=PYRA.score;sCorrect();btn.classList.add("good");Array.prototype.forEach.call($("#pyraAns").children,function(c){c.disabled=true;});
+      if(p){p.stats.coins=(p.stats.coins||0)+1;persist();$("#coinCount").textContent=p.stats.coins;}$("#pyraFb").className="feedback ok";$("#pyraFb").innerHTML="⭐ Richtig! +1 🪙";setTimeout(pyraNext,850);}
+    else{sWrong();btn.classList.add("bad");btn.disabled=true;$("#pyraFb").className="feedback try";$("#pyraFb").textContent="Zähl die zwei Steine darunter zusammen.";}}
+  function pyraEnd(){PYRA.on=false;confetti();$("#pyraView").innerHTML="";$("#pyraAns").innerHTML="";$("#pyraFb").className="feedback ok";$("#pyraFb").innerHTML=PYRA.score+" von "+PYRA.total+" richtig! &nbsp;<button class=\"next\" id=\"pyraAgain\">Nochmal</button>";var ag=$("#pyraAgain");if(ag)ag.addEventListener("click",startPyra);}
 
   /* ---------- QUIZ-DUELL AUF ZEIT ---------- */
   var QUIZPOOL=[].concat(SACH_TIERE,SACH_KOERPER,SACH_JAHR,SACH_VERKEHR,GEO_WELT,GEO_FLAG,MUS_INSTR),QUIZ={on:false,score:0,time:30,timer:0};
@@ -1684,6 +1758,8 @@
   $("#quizBack").addEventListener("click",function(){stopQuiz();openGames();});
   $("#avatarBack").addEventListener("click",enterHome);
   $("#avatarBtn").addEventListener("click",function(){openAvatar();});
+  $("#rmemBack").addEventListener("click",function(){RMEM.on=false;openGames();});
+  $("#pyraBack").addEventListener("click",function(){PYRA.on=false;openGames();});
   $("#gamesBack").addEventListener("click",enterHome);
   $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
   $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
