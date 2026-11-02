@@ -128,6 +128,8 @@
   .tile.d .emoji{font-size:2.1rem}
   .tile.k{background:linear-gradient(120deg,#5ec26a,#2aa7ff);flex-direction:row;align-items:center;gap:.9rem}
   .tile.k .emoji{font-size:2.1rem}
+  .tile.mu{background:linear-gradient(145deg,#ffa05e,#ff6b6b)}
+  .tile.geo{background:linear-gradient(145deg,#5fb0ff,#2a73d6)}
   /* Spiel */
   .gbadge{display:flex;align-items:center;gap:.3rem;background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:.3rem .7rem;font-family:"Fredoka",sans-serif;font-size:1rem;box-shadow:var(--shadow-sm)}
@@ -180,6 +182,26 @@
   .kassenDisplay{font-family:"Fredoka",sans-serif;font-size:1.7rem;background:#15181c;color:#4dff88;border-radius:.6rem;padding:.3rem 1.2rem;letter-spacing:.06em;font-variant-numeric:tabular-nums}
   .terminal{background:var(--panel);border:2px solid var(--line);border-radius:.8rem;padding:.6rem 1.1rem;text-align:center;font-size:1.8rem;margin:.3rem auto;width:fit-content}
   #kasseStep{width:100%;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+  /* Vier gewinnt */
+  .vierboard{width:min(21rem,92vw);margin:.4rem auto;display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;background:#2a6fd4;padding:.5rem;border-radius:1rem}
+  .vslot{aspect-ratio:1;background:var(--panel);border-radius:50%;display:grid;place-items:center;cursor:pointer}
+  .vslot.R{background:#ff5b5b}.vslot.Y{background:#ffd23f}
+  /* Galgenmännchen */
+  .galgenkeys{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;width:100%;max-width:26rem}
+  .galgenkeys button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:.5rem;padding:.5rem 0;font-weight:800;font-family:"Fredoka",sans-serif;cursor:pointer}
+  .galgenkeys button:disabled{opacity:.3}
+  /* Malen */
+  .malencolors{display:flex;gap:.3rem;flex-wrap:wrap}
+  .malencolors button{width:1.8rem;height:1.8rem;border-radius:50%;border:2px solid #fff;box-shadow:var(--shadow-sm);cursor:pointer}
+  .malencolors button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+  .malencanvas{flex:1;width:100%;background:#fff;border-radius:1rem;box-shadow:var(--shadow);touch-action:none;min-height:18rem}
+  /* Pokale */
+  .badgesgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .badge{background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:.9rem;text-align:center;box-shadow:var(--shadow-sm)}
+  .badge .be{font-size:2.2rem}
+  .badge.locked{opacity:.45;filter:grayscale(1)}
+  .badge .bn{font-family:"Fredoka",sans-serif;font-weight:600;margin-top:.2rem}
+  .badge .bd{font-size:.82rem;color:var(--ink-soft)}
   .diffpick{display:flex;align-items:center;gap:.4rem;justify-content:center;margin:.3rem 0 .1rem;flex-wrap:wrap}
   .diffpick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-weight:800;font-family:"Nunito",sans-serif;cursor:pointer;font-size:.9rem}
   .diffpick button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
@@ -317,6 +339,8 @@
   :root[data-skin="pro"] .tile.e .emoji{background:#e6ecff}
   :root[data-skin="pro"] .tile.d .emoji{background:#e0faf6}
   :root[data-skin="pro"] .tile.k .emoji{background:#e3f6e8}
+  :root[data-skin="pro"] .tile.mu .emoji{background:#ffe6dc}
+  :root[data-skin="pro"] .tile.geo .emoji{background:#e1f0ff}
   :root[data-skin="pro"] .tile.g .emoji{background:#fff2d9}
   :root[data-skin="pro"] .tile .name{color:var(--ink);text-shadow:none;font-size:1.15rem}
   :root[data-skin="pro"] .tile .sub{color:var(--ink-soft);opacity:1}
@@ -400,7 +424,7 @@
   <div id="home" hidden>
     <div class="greeter">
       <svg class="greetMascot" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,6 62,38 96,38 68,58 79,92 50,71 21,92 32,58 4,38 38,38" fill="#ffc53d" stroke="#f0a500" stroke-width="2"/><circle cx="50" cy="50" r="22" fill="#fff"/><circle cx="42" cy="48" r="3.4" fill="#2a2740"/><circle cx="58" cy="48" r="3.4" fill="#2a2740"/><path d="M40 58 q10 10 20 0" stroke="#2a2740" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="34" cy="55" r="3" fill="#ffb3b3"/><circle cx="66" cy="55" r="3" fill="#ffb3b3"/></svg>
-      <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
+      <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" id="homeSub" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
     </div>
     <div class="grid">
       <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
@@ -410,8 +434,11 @@
       <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
       <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
       <button class="tile k" data-game="sach" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere, Körper, Jahreszeiten & Verkehr</span><span class="mini" id="best-sach">★ 0</span></button>
+      <button class="tile mu" data-game="musik"><span class="emoji">🎵</span><span class="name">Musik</span><span class="sub">Instrumente & Töne</span><span class="mini" id="best-musik">★ 0</span></button>
+      <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen & Welt</span><span class="mini" id="best-geo">★ 0</span></button>
       <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
     </div>
+    <button class="back" id="pokaleBtn" style="margin:1rem auto 0;display:block">🏆 Meine Pokale</button>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
   </div>
 
@@ -528,6 +555,39 @@
     </div>
   </div>
 
+  <!-- VIER GEWINNT -->
+  <div id="vier" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="vierBack">← Stopp</button><div class="spacer"></div><div class="gbadge" id="vierTurn">Du bist dran 🔴</div></div>
+    <div id="vierBoard" class="vierboard"></div>
+    <div id="vierMsg" class="muted" style="text-align:center;margin-top:.5rem">Bringe 4 in eine Reihe!</div>
+  </div>
+
+  <!-- GALGENMÄNNCHEN -->
+  <div id="galgen" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="galgenBack">← Stopp</button><div class="spacer"></div><div class="gbadge" id="galgenLife">❤️❤️❤️❤️❤️❤️</div></div>
+    <div class="card" style="gap:1rem">
+      <div id="galgenHint" class="muted"></div>
+      <div id="galgenWord" style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:2.1rem;letter-spacing:.3rem;text-align:center"></div>
+      <div id="galgenKeys" class="galgenkeys"></div>
+      <div id="galgenMsg" class="feedback" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- MALEN -->
+  <div id="malen" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="malenBack">← Zurück</button><div class="spacer"></div>
+      <div id="malenColors" class="malencolors"></div><button class="back" id="malenClear">🧽</button></div>
+    <canvas id="malenCanvas" class="malencanvas"></canvas>
+  </div>
+
+  <!-- POKALE -->
+  <div id="badges" hidden>
+    <div class="bar"><button class="back" id="badgesBack">← Zurück</button></div>
+    <h2 class="title">Meine Pokale 🏆</h2>
+    <p class="muted" id="badgesSub">Sammle Abzeichen fürs Lernen.</p>
+    <div id="badgesGrid" class="badgesgrid"></div>
+  </div>
+
   <!-- ELTERN -->
   <div id="parent" hidden>
     <div class="bar"><button class="back" id="parentBack">← Zurück</button></div>
@@ -599,13 +659,16 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0,sach:0},history:{},ballonBest:0};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:""};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
-    ["math","read","shape","clock","english","denken","sach"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
+    if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
+    ["math","read","shape","clock","english","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+  function bumpStreak(p){var today=dayKey();if(p.stats.lastDay===today)return;var y=new Date();y.setDate(y.getDate()-1);
+    p.stats.streak=(p.stats.lastDay===dayKey(y))?(p.stats.streak||0)+1:1;p.stats.lastDay=today;}
 
   /* ---------- Sound (WebAudio) ---------- */
   var actx=null, soundOn=load("antona_sound",true);
@@ -713,9 +776,16 @@
     if(plus){x=1+rnd(8);y=1+rnd(9-x>0?9-x:1);res=(x+y)*10;}else{x=3+rnd(6);y=1+rnd(x-1);res=(x-y)*10;}
     x*=10;y*=10;return{label:"Rechne mit Zehnern",speak:x+(plus?" plus ":" minus ")+y,
       render:function(z){z.className="question";z.textContent=x+(plus?" + ":" − ")+y+" = ?";},options:numOpts(res,10),correct:String(res),three:true};}
+  function m_money(){function amt(){return (1+rnd(8))+(rnd(2)?0.5:0);}
+    function fmt(x){var e=Math.floor(x);return (x-e>=0.5)?e+",50 €":e+" €";}
+    var a=amt(),b=amt(),res=a+b;
+    return{label:"Rechne mit Geld",speak:"Wie viel ist "+fmt(a)+" plus "+fmt(b)+"?",
+      render:function(z){z.className="question";z.textContent=fmt(a)+" + "+fmt(b)+" = ?";},
+      options:uniq(res,function(){return res+(rnd(2)?0.5:-0.5)*(1+rnd(4));},3).map(fmt),correct:fmt(res),word:true,three:true};}
   var MATH_LVL={
     1:{title:"Mengen & Zehnerfeld",desc:"Punkte sehen und zählen",set:[m_subitize,m_tenframe,m_bond]},
     8:{title:"Zehnerzahlen",desc:"20 + 30, 70 − 40 …",set:[m_tens]},
+    9:{title:"Mit Geld rechnen (€)",desc:"3,50 € + 2 € …",set:[m_money]},
     2:{title:"Plus & Minus bis 10",desc:"Mit Punktebildern",set:[m_add(10),m_add(10),m_sub(10)]},
     3:{title:"Plus & Minus bis 20",desc:"Etwas größere Zahlen",set:[m_add(18),m_sub(18),m_add(18)]},
     4:{title:"Plus & Minus bis 100",desc:"2. Klasse: große Zahlen",set:[m_add100,m_sub100,m_add100,m_sub100,m_double]},
@@ -750,11 +820,28 @@
     return{label:"Welcher besondere Buchstabe steckt im Wort?",speak:"Welcher besondere Buchstabe steckt in "+it.w+"?",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>'+it.w;},
       options:uniq(it.L,function(){return pick(["ä","ö","ü","ß"])},3),correct:it.L,three:true};}
+  function r_case(){var right=pick(WORDS),other=pick(WORDS.filter(function(x){return x.w!==right.w;}));
+    return{label:"Nomen schreibt man groß. Welches ist richtig?",speak:"Welches Wort ist richtig geschrieben?",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">'+right.e+'</span>';},
+      options:shuffle([right.w,right.w.toLowerCase(),other.w.toLowerCase()]),correct:right.w,word:true,three:true};}
+  var RHYMES=[["Haus","Maus"],["Baum","Traum"],["Katze","Tatze"],["Ball","Knall"],["Fisch","Tisch"],["Hose","Rose"],["Licht","Gesicht"],["Hand","Sand"],["Bär","Meer"]];
+  function r_rhyme(){var pair=pick(RHYMES),others=shuffle(RHYMES.filter(function(p){return p!==pair;})).slice(0,2);
+    return{label:"Was reimt sich auf „"+pair[0]+"“?",speak:"Was reimt sich auf "+pair[0]+"?",
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:2rem">'+pair[0]+' – ?</div>';},
+      options:shuffle([pair[1],others[0][1],others[1][0]]),correct:pair[1],word:true,three:true};}
+  var SENT=[{s:"Die Katze trinkt …",e:"🐱",a:["Milch","Auto","Stein"]},{s:"Der Hund frisst einen …",e:"🦴",a:["Knochen","Baum","Mond"]},
+    {s:"Die Sonne ist am …",e:"☀️",a:["Himmel","Teller","Schuh"]},{s:"Im Winter fällt der …",e:"❄️",a:["Schnee","Apfel","Ball"]},
+    {s:"Der Fisch schwimmt im …",e:"🐟",a:["Wasser","Bett","Baum"]},{s:"Das Kind liest ein …",e:"📖",a:["Buch","Brot","Haus"]}];
+  function r_sentence(){var it=pick(SENT);return{label:it.s,speak:it.s,render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>';},
+    options:shuffle(it.a.slice()),correct:it.a[0],word:true,three:true};}
   var READ_LVL={
     1:{title:"Anlaute",desc:"Erster Buchstabe",set:[r_anlaut]},
     2:{title:"Wörter erkennen",desc:"Wort zum Bild finden",set:[r_word,r_anlaut]},
     3:{title:"Silben",desc:"Silben zählen",set:[r_syll,r_word]},
-    4:{title:"Umlaute & ß",desc:"ä, ö, ü und ß",set:[r_umlaut]}
+    4:{title:"Umlaute & ß",desc:"ä, ö, ü und ß",set:[r_umlaut]},
+    5:{title:"Groß & klein",desc:"Nomen schreibt man groß",set:[r_case]},
+    6:{title:"Reimwörter",desc:"Was reimt sich?",set:[r_rhyme]},
+    7:{title:"Erste Sätze",desc:"Satz sinnvoll ergänzen",set:[r_sentence]}
   };
 
   /* ---------- FORMEN & FARBEN ---------- */
@@ -785,7 +872,12 @@
   function clockGen(mins){return function(){var h=1+rnd(12),m=pick(mins),correct=timeWords(h,m);
     return{label:"Wie spät ist es?",speak:"Wie spät ist es?",render:function(z){z.className="question";z.innerHTML=clockSVG(h,m);},
       options:uniq(correct,function(){return timeWords(1+rnd(12),pick(mins.concat([0,30])))},3),correct:correct,word:true,three:true};};}
-  var CLOCK_LVL={1:{title:"Volle Stunden",desc:"3 Uhr, 7 Uhr …",set:[clockGen([0])]},2:{title:"Halbe Stunden",desc:"halb 4 …",set:[clockGen([0,30])]},3:{title:"Viertelstunden",desc:"Viertel nach/vor",set:[clockGen([0,15,30,45])]}};
+  function pad2(n){return (n<10?"0":"")+n;}
+  function c_digital(){var h=1+rnd(12),m=pick([0,5,10,15,20,25,30,35,40,45,50,55]),correct=h+":"+pad2(m);
+    return{label:"Lies die digitale Uhrzeit",speak:"Wie spät ist es?",render:function(z){z.className="question";z.innerHTML=clockSVG(h,m);},
+      options:uniq(correct,function(){var h2=1+rnd(12),m2=pick([0,5,10,15,20,25,30,35,40,45,50,55]);return h2+":"+pad2(m2);},3),correct:correct,word:true,three:true};}
+  var CLOCK_LVL={1:{title:"Volle Stunden",desc:"3 Uhr, 7 Uhr …",set:[clockGen([0])]},2:{title:"Halbe Stunden",desc:"halb 4 …",set:[clockGen([0,30])]},3:{title:"Viertelstunden",desc:"Viertel nach/vor",set:[clockGen([0,15,30,45])]},
+    4:{title:"Minuten genau (digital)",desc:"3:05, 7:40 …",set:[c_digital]}};
 
   /* ---------- ENGLISCH (hören & zuordnen) ---------- */
   var EN_COLORS=[{de:"Rot",en:"Red",e:"🟥"},{de:"Blau",en:"Blue",e:"🟦"},{de:"Grün",en:"Green",e:"🟩"},{de:"Gelb",en:"Yellow",e:"🟨"},
@@ -880,18 +972,40 @@
     5:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[qa(SACH_TIERE.concat(SACH_KOERPER,SACH_JAHR,SACH_VERKEHR))]}
   };
 
+  /* ---------- MUSIK ---------- */
+  var MUS_INSTR=[{q:"Welches Instrument ist das?",e:"🎸",a:["Gitarre","Trommel","Flöte"]},{q:"Welches Instrument ist das?",e:"🥁",a:["Trommel","Geige","Klavier"]},
+    {q:"Welches Instrument ist das?",e:"🎹",a:["Klavier","Gitarre","Trompete"]},{q:"Welches Instrument ist das?",e:"🎺",a:["Trompete","Flöte","Trommel"]},
+    {q:"Welches Instrument ist das?",e:"🎻",a:["Geige","Gitarre","Klavier"]},{q:"Welches Instrument ist das?",e:"🪇",a:["Rassel","Klavier","Trompete"]}];
+  function m_pitch(){var high=Math.random()<0.5;return{label:"Ist der Ton hoch oder tief?",speak:"Ist der Ton hoch oder tief?",speakLang:"",
+    render:function(z){z.className="question";z.innerHTML='<span class="em">'+(high?"🔼":"🔽")+'</span><button class="read-btn" id="toneBtn" aria-label="Ton abspielen">🔊</button>';
+      setTimeout(function(){tone(high?880:220,.5);var tb=document.getElementById("toneBtn");if(tb)tb.addEventListener("click",function(){tone(high?880:220,.5);});},200);},
+    options:shuffle(["Hoch","Tief"]),correct:high?"Hoch":"Tief"};}
+  var MUSIK_LVL={1:{title:"Instrumente",desc:"Gitarre, Trommel …",set:[qa(MUS_INSTR)]},2:{title:"Hoch oder tief?",desc:"Töne hören",set:[m_pitch]},
+    3:{title:"Gemischt",desc:"Instrumente & Töne",set:[qa(MUS_INSTR),m_pitch]}};
+  /* ---------- GEOGRAFIE ---------- */
+  var GEO_FLAG=[{q:"Zu welchem Land gehört die Flagge?",e:"🇩🇪",a:["Deutschland","Frankreich","Italien"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇫🇷",a:["Frankreich","Spanien","Türkei"]},
+    {q:"Zu welchem Land gehört die Flagge?",e:"🇮🇹",a:["Italien","Deutschland","England"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇹🇷",a:["Türkei","Spanien","Frankreich"]},
+    {q:"Zu welchem Land gehört die Flagge?",e:"🇪🇸",a:["Spanien","Italien","Deutschland"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇬🇧",a:["England","USA","Frankreich"]}];
+  var GEO_WELT=[{q:"Auf welchem Planeten leben wir?",e:"🌍",a:["Erde","Mars","Mond"]},{q:"Was ist das größte Tier im Meer?",e:"🐋",a:["Wal","Hai","Fisch"]},
+    {q:"Wo ist es sehr kalt und eisig?",e:"🧊",a:["Am Nordpol","In der Wüste","Am Strand"]},{q:"Wo leben Kamele?",e:"🐪",a:["In der Wüste","Im Eis","Im Meer"]},
+    {q:"Was ist ganz oben am Himmel am Tag?",e:"☀️",a:["Die Sonne","Der Mond","Die Sterne"]},{q:"Wie heißt viel Wasser mit Salz?",e:"🌊",a:["Das Meer","Der Fluss","Der See"]}];
+  var GEO_LVL={1:{title:"Flaggen",desc:"Länder erkennen",set:[qa(GEO_FLAG)]},2:{title:"Unsere Welt",desc:"Erde, Meer, Wüste …",set:[qa(GEO_WELT)]},
+    3:{title:"Gemischt",desc:"Flaggen & Welt",set:[qa(GEO_FLAG),qa(GEO_WELT)]}};
+
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
     shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
     english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"},
     denken:{title:"Denken & Konzentration",lvl:DENK_LVL,color:"#00c2c2"},
-    sach:{title:"Sachkunde",lvl:SACH_LVL,color:"#2bb673"}};
-  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"}];
+    sach:{title:"Sachkunde",lvl:SACH_LVL,color:"#2bb673"},
+    musik:{title:"Musik",lvl:MUSIK_LVL,color:"#ff7a3d"},
+    geo:{title:"Geografie",lvl:GEO_LVL,color:"#2a9df4"}};
+  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"},{k:"musik",e:"🎵",n:"Musik"},{k:"geo",e:"🗺️",n:"Geografie"}];
 
   var PRAISE=["Super!","Toll!","Richtig!","Klasse!","Bravo!","Stark!","Perfekt!","Juhu!"];
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -934,7 +1048,8 @@
     $("#homeHi").textContent="Hallo, "+p.name+"!";
     $("#whoAv").textContent=p.av;$("#whoName").textContent=p.name;
     $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins||0;
-    SUBJ.forEach(function(s){$("#best-"+s.k).textContent="★ "+p.stats.best[s.k];});
+    $("#homeSub").textContent=(p.stats.streak>=2?("🔥 "+p.stats.streak+" Tage in Folge – weiter so!"):"Was üben wir heute?");
+    SUBJ.forEach(function(s){$("#best-"+s.k).textContent="★ "+(p.stats.best[s.k]||0);});
     show("home");
   }
 
@@ -1017,6 +1132,7 @@
     var p=active();p.stats.rounds++;
     if(state.earned>p.stats.best[state.key])p.stats.best[state.key]=state.earned;
     p.stats.coins=(p.stats.coins||0)+state.correct; // 1 Münze je richtige Antwort
+    bumpStreak(p);
     var dk=dayKey();if(!p.stats.history)p.stats.history={};var h=p.stats.history[dk]||{rounds:0,correct:0,stars:0};
     h.rounds++;h.correct+=state.correct;h.stars+=state.earned;p.stats.history[dk]=h;
     persist();
@@ -1087,7 +1203,8 @@
   function migrateProfiles(){
     profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
       if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
-      ["math","read","shape","clock","english","denken","sach"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
+      if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
+    ["math","read","shape","clock","english","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
   }
   $("#syncShow").addEventListener("click",function(){
     try{var code=btoa(unescape(encodeURIComponent(JSON.stringify(profiles))));
@@ -1119,7 +1236,10 @@
     {id:"memory",name:"Sternen-Memory",emoji:"🧠",cost:5,desc:"Finde die passenden Paare."},
     {id:"uno",name:"UNO (Kinder)",emoji:"🎴",cost:6,desc:"Karten gegen den Computer: Farbe oder Zahl passend legen."},
     {id:"schach",name:"Schach (Kinder)",emoji:"♟️",cost:6,desc:"Schlage den König des Computers."},
-    {id:"shop",name:"Kaufladen & Kasse",emoji:"🛒",cost:0,desc:"Live gegen den Computer kassieren: Preis, Rückgeld, bar oder Karte."}
+    {id:"shop",name:"Kaufladen & Kasse",emoji:"🛒",cost:0,desc:"Live gegen den Computer kassieren: Preis, Rückgeld, bar oder Karte."},
+    {id:"vier",name:"Vier gewinnt",emoji:"🔴",cost:5,desc:"Bringe vier Steine in eine Reihe – gegen den Computer."},
+    {id:"galgen",name:"Galgenmännchen",emoji:"🔤",cost:4,desc:"Errate das Wort Buchstabe für Buchstabe."},
+    {id:"malen",name:"Malen & Kritzeln",emoji:"🎨",cost:0,desc:"Frei malen mit vielen Farben."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -1134,7 +1254,8 @@
         +'<span class="chev">'+(g.cost>0?'🪙 '+g.cost:'Gratis')+'</span>';
       b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;
         if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();
-        else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();});
+        else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();
+        else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -1384,9 +1505,79 @@
     var box=$("#kasseStep");box.innerHTML="";var nb=document.createElement("button");nb.className="next";nb.textContent="Nächster Kunde →";nb.addEventListener("click",function(){if(KASSE.on)nextKunde();});box.appendChild(nb);
   }
 
+  /* ---------- VIER GEWINNT ---------- */
+  var VIER=null;
+  function startVier(){VIER={board:[],turn:"R",over:false};for(var r=0;r<6;r++)VIER.board.push([null,null,null,null,null,null,null]);
+    $("#vierTurn").textContent="Du bist dran 🔴";$("#vierMsg").textContent="Bringe 4 in eine Reihe!";show("vier");renderVier();}
+  function renderVier(){var b=$("#vierBoard");b.innerHTML="";for(var r=0;r<6;r++)for(var c=0;c<7;c++){(function(r,c){var s=document.createElement("div");
+    s.className="vslot"+(VIER.board[r][c]?" "+VIER.board[r][c]:"");s.addEventListener("click",function(){vierDrop(c,"R",true);});b.appendChild(s);})(r,c);}}
+  function vierLowest(c){for(var r=5;r>=0;r--)if(!VIER.board[r][c])return r;return -1;}
+  function vierFull(){return VIER.board[0].every(function(x){return x;});}
+  function vierWin(r,c,who){var dirs=[[0,1],[1,0],[1,1],[1,-1]];for(var d=0;d<4;d++){var cnt=1;for(var s=-1;s<=1;s+=2){var rr=r+dirs[d][0]*s,cc=c+dirs[d][1]*s;
+    while(rr>=0&&rr<6&&cc>=0&&cc<7&&VIER.board[rr][cc]===who){cnt++;rr+=dirs[d][0]*s;cc+=dirs[d][1]*s;}}if(cnt>=4)return true;}return false;}
+  function vierDrop(c,who,human){if(VIER.over)return;if(human&&VIER.turn!=="R")return;var r=vierLowest(c);if(r<0)return;
+    VIER.board[r][c]=who;sCorrect();renderVier();
+    if(vierWin(r,c,who)){VIER.over=true;if(who==="R")confetti();$("#vierMsg").innerHTML=(who==="R"?"🎉 Du hast gewonnen!":"Der Computer gewinnt.")+' &nbsp;<button class="next" id="vierAgain">Nochmal</button>';var ag=$("#vierAgain");if(ag)ag.addEventListener("click",startVier);return;}
+    if(vierFull()){VIER.over=true;$("#vierMsg").textContent="Unentschieden!";return;}
+    if(who==="R"){VIER.turn="Y";$("#vierTurn").textContent="Computer …";setTimeout(vierCpu,500);}else{VIER.turn="R";$("#vierTurn").textContent="Du bist dran 🔴";}}
+  function vierCpu(){if(VIER.over)return;function wins(col,who){var r=vierLowest(col);if(r<0)return false;VIER.board[r][col]=who;var w=vierWin(r,col,who);VIER.board[r][col]=null;return w;}
+    var cols=[];for(var c=0;c<7;c++)if(vierLowest(c)>=0)cols.push(c);var move=null;
+    for(var i=0;i<cols.length;i++)if(wins(cols[i],"Y")){move=cols[i];break;}
+    if(move===null)for(var j=0;j<cols.length;j++)if(wins(cols[j],"R")){move=cols[j];break;}
+    if(move===null){var order=[3,2,4,1,5,0,6].filter(function(c){return cols.indexOf(c)>=0;});move=order[0];}
+    vierDrop(move,"Y",false);}
+
+  /* ---------- GALGENMÄNNCHEN ---------- */
+  var GAL=null,GALWORDS=[{w:"HUND",h:"🐶 Tier"},{w:"KATZE",h:"🐱 Tier"},{w:"APFEL",h:"🍎 Obst"},{w:"SONNE",h:"☀️ am Himmel"},{w:"BAUM",h:"🌳 Pflanze"},{w:"AUTO",h:"🚗 Fahrzeug"},{w:"HAUS",h:"🏠 Gebäude"},{w:"BLUME",h:"🌸 Pflanze"},{w:"MAUS",h:"🐭 Tier"},{w:"STERN",h:"⭐ am Himmel"},{w:"BALL",h:"⚽ Spielzeug"},{w:"FISCH",h:"🐟 Tier"}];
+  function startGalgen(){var it=pick(GALWORDS);GAL={word:it.w,guessed:[],lives:6,over:false};$("#galgenHint").textContent="Tipp: "+it.h;$("#galgenMsg").textContent="";$("#galgenMsg").className="feedback";show("galgen");renderGalgen();}
+  function renderGalgen(){$("#galgenLife").textContent=GAL.lives>0?Array(GAL.lives+1).join("❤️"):"💀";
+    $("#galgenWord").textContent=GAL.word.split("").map(function(ch){return GAL.guessed.indexOf(ch)>=0?ch:"_";}).join(" ");
+    var keys=$("#galgenKeys");keys.innerHTML="";"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(function(ch){var b=document.createElement("button");b.textContent=ch;
+      if(GAL.guessed.indexOf(ch)>=0||GAL.over)b.disabled=true;b.addEventListener("click",function(){galGuess(ch);});keys.appendChild(b);});}
+  function galGuess(ch){if(GAL.over||GAL.guessed.indexOf(ch)>=0)return;GAL.guessed.push(ch);if(GAL.word.indexOf(ch)>=0)sCorrect();else{GAL.lives--;sWrong();}
+    var done=GAL.word.split("").every(function(c){return GAL.guessed.indexOf(c)>=0;});renderGalgen();
+    if(done){GAL.over=true;confetti();$("#galgenMsg").className="feedback ok";$("#galgenMsg").innerHTML="🎉 Richtig: "+GAL.word+' &nbsp;<button class="next" id="galAgain">Nochmal</button>';renderGalgen();var ag=$("#galAgain");if(ag)ag.addEventListener("click",startGalgen);}
+    else if(GAL.lives<=0){GAL.over=true;$("#galgenMsg").className="feedback try";$("#galgenMsg").innerHTML="Das Wort war: "+GAL.word+' &nbsp;<button class="next" id="galAgain2">Nochmal</button>';renderGalgen();var ag2=$("#galAgain2");if(ag2)ag2.addEventListener("click",startGalgen);}}
+
+  /* ---------- MALEN ---------- */
+  var MAL=null;
+  function startMalen(){show("malen");var cv=$("#malenCanvas"),ctx=cv.getContext("2d");MAL={ctx:ctx,color:"#ff5b5b",drawing:false};
+    var cols=["#ff5b5b","#ff8a3d","#ffd23f","#2bb673","#2a7fff","#b07bff","#111111","#ffffff"],pal=$("#malenColors");pal.innerHTML="";
+    cols.forEach(function(c,i){var b=document.createElement("button");b.style.background=c;b.setAttribute("aria-pressed",i===0);
+      b.addEventListener("click",function(){MAL.color=c;Array.prototype.forEach.call(pal.children,function(x){x.setAttribute("aria-pressed",x===b);});});pal.appendChild(b);});
+    setTimeout(function(){cv.width=cv.clientWidth;cv.height=cv.clientHeight;},60);
+    function pos(e){var r=cv.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+    function down(e){MAL.drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);if(e.cancelable)e.preventDefault();}
+    function move(e){if(!MAL.drawing)return;var p=pos(e);ctx.strokeStyle=MAL.color;ctx.lineWidth=9;ctx.lineCap="round";ctx.lineJoin="round";ctx.lineTo(p.x,p.y);ctx.stroke();if(e.cancelable)e.preventDefault();}
+    function up(){MAL.drawing=false;}
+    cv.onmousedown=down;cv.onmousemove=move;window.onmouseup=up;cv.ontouchstart=down;cv.ontouchmove=move;cv.ontouchend=up;}
+  function clearMalen(){var cv=$("#malenCanvas");if(MAL&&MAL.ctx)MAL.ctx.clearRect(0,0,cv.width,cv.height);}
+
+  /* ---------- POKALE / ABZEICHEN ---------- */
+  var BADGES=[
+    {id:"first",e:"⭐",n:"Erster Stern",d:"Sammle 1 Stern",ok:function(s){return s.stars>=1;}},
+    {id:"stars25",e:"🌟",n:"Stern-Sammler",d:"25 Sterne",ok:function(s){return s.stars>=25;}},
+    {id:"stars100",e:"✨",n:"Stern-Meister",d:"100 Sterne",ok:function(s){return s.stars>=100;}},
+    {id:"correct50",e:"✅",n:"Fleißig",d:"50 richtige Antworten",ok:function(s){return s.correct>=50;}},
+    {id:"allsubj",e:"🎓",n:"Entdecker",d:"Jedes Fach probiert",ok:function(s){return SUBJ.every(function(x){return (s.best[x.k]||0)>0;});}},
+    {id:"streak3",e:"🔥",n:"Dranbleiber",d:"3 Tage in Folge",ok:function(s){return (s.streak||0)>=3;}},
+    {id:"coins50",e:"🪙",n:"Münz-König",d:"50 Münzen",ok:function(s){return (s.coins||0)>=50;}},
+    {id:"ballon15",e:"🎈",n:"Ballon-Profi",d:"15 bei Zahlen-Ballons",ok:function(s){return (s.ballonBest||0)>=15;}}
+  ];
+  function openBadges(){var p=active();if(!p)return;var g=$("#badgesGrid");g.innerHTML="";var got=0;
+    BADGES.forEach(function(bd){var earned=bd.ok(p.stats);if(earned)got++;var d=document.createElement("div");d.className="badge"+(earned?"":" locked");
+      d.innerHTML='<div class="be">'+(earned?bd.e:"🔒")+'</div><div class="bn">'+bd.n+'</div><div class="bd">'+bd.d+'</div>';g.appendChild(d);});
+    $("#badgesSub").textContent=got+" von "+BADGES.length+" Abzeichen gesammelt.";show("badges");}
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
   $("#shopBack").addEventListener("click",function(){KASSE.on=false;openGames();});
+  $("#vierBack").addEventListener("click",function(){if(VIER)VIER.over=true;openGames();});
+  $("#galgenBack").addEventListener("click",function(){if(GAL)GAL.over=true;openGames();});
+  $("#malenBack").addEventListener("click",openGames);
+  $("#malenClear").addEventListener("click",clearMalen);
+  $("#badgesBack").addEventListener("click",enterHome);
+  $("#pokaleBtn").addEventListener("click",openBadges);
   $("#gamesBack").addEventListener("click",enterHome);
   $("#ballonBack").addEventListener("click",function(){stopBallon();openGames();});
   $("#blitzBack").addEventListener("click",function(){stopBlitz();openGames();});
