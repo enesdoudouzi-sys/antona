@@ -7,7 +7,6 @@
 <meta name="theme-color" content="#f7f8fb">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lernsterne">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Lernsterne</title>
@@ -921,9 +920,15 @@
     return{label:"Rechne mit Geld",speak:"Wie viel ist "+fmt(a)+" plus "+fmt(b)+"?",
       render:function(z){z.className="question";z.textContent=fmt(a)+" + "+fmt(b)+" = ?";},
       options:uniq(res,function(){return res+(rnd(2)?0.5:-0.5)*(1+rnd(4));},3).map(fmt),correct:fmt(res),word:true,three:true};}
+  function m_div(){var b=2+rnd(8),c=2+rnd(8),a=b*c;return{label:"Teile (Division)",speak:a+" geteilt durch "+b,render:function(z){z.className="question";z.textContent=a+" : "+b+" = ?";},options:numOpts(c,3),correct:String(c),three:true};}
+  function m_missing(){var plus=Math.random()<0.5,a,res,miss;
+    if(plus){a=2+rnd(15);miss=2+rnd(15);res=a+miss;return{label:"Welche Zahl fehlt?",speak:a+" plus wie viel ergibt "+res+"?",render:function(z){z.className="question";z.textContent=a+" + ☐ = "+res;},options:numOpts(miss,3),correct:String(miss),three:true};}
+    res=2+rnd(15);miss=1+rnd(res-1);a=res+miss;return{label:"Welche Zahl fehlt?",speak:a+" minus wie viel ergibt "+res+"?",render:function(z){z.className="question";z.textContent=a+" − ☐ = "+res;},options:numOpts(miss,3),correct:String(miss),three:true};}
+  function m_three(){var a=1+rnd(8),b=1+rnd(8),c=1+rnd(8),res=a+b+c;return{label:"Rechne alle zusammen",speak:a+" plus "+b+" plus "+c,render:function(z){z.className="question";z.textContent=a+" + "+b+" + "+c+" = ?";},options:numOpts(res,3),correct:String(res),three:true};}
   var MATH_LVL={
     1:{title:"Mengen & Zehnerfeld",desc:"Punkte sehen und zählen",set:[m_subitize,m_tenframe,m_bond]},
     8:{title:"Zehnerzahlen",desc:"20 + 30, 70 − 40 …",set:[m_tens]},
+    11:{title:"Experte: Teilen, ☐, 3 Zahlen",desc:"Division, fehlende Zahl, 4+3+2",set:[m_div,m_missing,m_three,m_add100]},
     9:{title:"Mit Geld rechnen (€)",desc:"3,50 € + 2 € …",set:[m_money]},
     10:{title:"Profi: gemischt & schwer",desc:"12 + 42, 76 − 38, Einmaleins, Geld",set:[m_add100,m_sub100,m_tens,m_times([2,3,4,5,6,7,8,9,10]),m_money]},
     2:{title:"Plus & Minus bis 10",desc:"Mit Punktebildern",set:[m_add(10),m_add(10),m_sub(10)]},
@@ -982,6 +987,13 @@
     return{label:"Hör das Wort und wähle die richtige Schreibweise",speak:w,speakLang:"de",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span><div class="muted" style="font-size:.85rem">Tippe 🔊 zum Nochmal-Hören</div>';},
       options:shuffle([w].concat(wrong)),correct:w,word:true,three:true};}
+  var COMP=[{w:"Haustür",a:"Haus",b:"Tür"},{w:"Fußball",a:"Fuß",b:"Ball"},{w:"Sonnenblume",a:"Sonne",b:"Blume"},{w:"Regenbogen",a:"Regen",b:"Bogen"},{w:"Apfelsaft",a:"Apfel",b:"Saft"},{w:"Schneemann",a:"Schnee",b:"Mann"},{w:"Baumhaus",a:"Baum",b:"Haus"},{w:"Taschenlampe",a:"Tasche",b:"Lampe"}];
+  function r_compound(){var it=pick(COMP),rest=shuffle(COMP.filter(function(x){return x!==it;})),o1=rest[0],o2=rest[1];
+    return{label:"Aus welchen zwei Wörtern besteht „"+it.w+"“?",speak:"Woraus besteht das Wort "+it.w+"?",render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.9rem">'+it.w+'</div>';},
+      options:shuffle([it.a+" + "+it.b,o1.a+" + "+o1.b,it.a+" + "+o2.b]),correct:it.a+" + "+it.b,word:true,three:true};}
+  var SYN=[{w:"froh",s:"glücklich",x:["traurig","müde"]},{w:"schnell",s:"flink",x:["langsam","leise"]},{w:"groß",s:"riesig",x:["klein","rund"]},{w:"schön",s:"hübsch",x:["hässlich","kalt"]},{w:"leise",s:"still",x:["laut","bunt"]},{w:"klug",s:"schlau",x:["dumm","nass"]}];
+  function r_syn(){var it=pick(SYN);return{label:"Welches Wort bedeutet das Gleiche wie „"+it.w+"“?",speak:"Was bedeutet das Gleiche wie "+it.w+"?",render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.9rem">'+it.w+'</div>';},
+    options:shuffle([it.s].concat(it.x)),correct:it.s,word:true,three:true};}
   var READ_LVL={
     1:{title:"Anlaute",desc:"Erster Buchstabe",set:[r_anlaut]},
     2:{title:"Wörter erkennen",desc:"Wort zum Bild finden",set:[r_word,r_anlaut]},
@@ -991,14 +1003,17 @@
     6:{title:"Reimwörter",desc:"Was reimt sich?",set:[r_rhyme]},
     7:{title:"Erste Sätze",desc:"Satz sinnvoll ergänzen",set:[r_sentence]},
     8:{title:"Profi: alles gemischt",desc:"Sätze, Reime, ä/ö/ü, groß/klein",set:[r_sentence,r_rhyme,r_umlaut,r_case]},
-    9:{title:"Diktat (hören)",desc:"Wort hören, richtig schreiben",set:[r_dikt]}
+    9:{title:"Diktat (hören)",desc:"Wort hören, richtig schreiben",set:[r_dikt]},
+    10:{title:"Experte: Wortschatz",desc:"Zusammengesetzte Wörter & Synonyme",set:[r_compound,r_syn]}
   };
 
   /* ---------- FORMEN & FARBEN ---------- */
   var SHAPES={Kreis:'<circle cx="60" cy="60" r="46"/>',Quadrat:'<rect x="16" y="16" width="88" height="88" rx="6"/>',
     Dreieck:'<polygon points="60,14 108,104 12,104"/>',Rechteck:'<rect x="10" y="30" width="100" height="60" rx="6"/>',
     Stern:'<polygon points="60,10 73,46 112,46 80,70 92,108 60,84 28,108 40,70 8,46 47,46"/>',
-    Herz:'<path d="M60 104 L22 64 a22 22 0 0 1 38 -22 a22 22 0 0 1 38 22 Z"/>'};
+    Herz:'<path d="M60 104 L22 64 a22 22 0 0 1 38 -22 a22 22 0 0 1 38 22 Z"/>',
+    Oval:'<ellipse cx="60" cy="60" rx="50" ry="32"/>',Raute:'<polygon points="60,12 104,60 60,108 16,60"/>',
+    Sechseck:'<polygon points="60,12 103,36 103,84 60,108 17,84 17,36"/>',Fünfeck:'<polygon points="60,12 106,46 88,104 32,104 14,46"/>'};
   var COLORS=[{n:"Rot",c:"#ff5b5b"},{n:"Blau",c:"#2aa7ff"},{n:"Grün",c:"#19b36b"},{n:"Gelb",c:"#ffc02e"},{n:"Lila",c:"#b07bff"},{n:"Orange",c:"#ff8a3d"}];
   function svgShape(p,c){return '<svg class="art" viewBox="0 0 120 120" aria-hidden="true"><g fill="'+c+'">'+p+'</g></svg>';}
   function s_color(){var names=Object.keys(SHAPES),sh=pick(names),col=pick(COLORS);
@@ -1009,7 +1024,8 @@
     return{label:"Wie heißt diese Form?",speak:"Wie heißt diese Form?",
       render:function(z){z.className="question";z.innerHTML=svgShape(SHAPES[sh],col.c);},
       options:uniq(sh,function(){return pick(names)},3),correct:sh,word:true,three:true};}
-  var SHAPE_LVL={1:{title:"Farben",desc:"Farben benennen",set:[s_color]},2:{title:"Formen",desc:"Formen benennen",set:[s_shape]},3:{title:"Gemischt",desc:"Formen und Farben",set:[s_color,s_shape]}};
+  var SHAPE_LVL={1:{title:"Farben",desc:"Farben benennen",set:[s_color]},2:{title:"Formen",desc:"Formen benennen",set:[s_shape]},3:{title:"Gemischt",desc:"Formen und Farben",set:[s_color,s_shape]},
+    4:{title:"Experte: schwere Formen",desc:"Raute, Sechseck, Oval …",set:[s_shape,s_shape,s_color]}};
 
   /* ---------- UHR ---------- */
   function clockSVG(h,m){var cx=60,cy=60;
@@ -1027,7 +1043,10 @@
     return{label:"Lies die digitale Uhrzeit",speak:"Wie spät ist es?",render:function(z){z.className="question";z.innerHTML=clockSVG(h,m);},
       options:uniq(correct,function(){var h2=1+rnd(12),m2=pick([0,5,10,15,20,25,30,35,40,45,50,55]);return h2+":"+pad2(m2);},3),correct:correct,word:true,three:true};}
   var CLOCK_LVL={1:{title:"Volle Stunden",desc:"3 Uhr, 7 Uhr …",set:[clockGen([0])]},2:{title:"Halbe Stunden",desc:"halb 4 …",set:[clockGen([0,30])]},3:{title:"Viertelstunden",desc:"Viertel nach/vor",set:[clockGen([0,15,30,45])]},
-    4:{title:"Minuten genau (digital)",desc:"3:05, 7:40 …",set:[c_digital]}};
+    4:{title:"Minuten genau (digital)",desc:"3:05, 7:40 …",set:[c_digital]},
+    5:{title:"Experte: jede Minute",desc:"4:17, 9:53 …",set:[c_dig_any]}};
+  function c_dig_any(){var h=1+rnd(12),m=rnd(60),correct=h+":"+pad2(m);return{label:"Lies die Uhrzeit ganz genau",speak:"Wie spät ist es?",render:function(z){z.className="question";z.innerHTML=clockSVG(h,m);},
+    options:uniq(correct,function(){return (1+rnd(12))+":"+pad2(rnd(60));},3),correct:correct,word:true,three:true};}
 
   /* ---------- ENGLISCH (hören & zuordnen) ---------- */
   var EN_COLORS=[{de:"Rot",en:"Red",e:"🟥"},{de:"Blau",en:"Blue",e:"🟦"},{de:"Grün",en:"Green",e:"🟩"},{de:"Gelb",en:"Yellow",e:"🟨"},
@@ -1037,6 +1056,8 @@
   var EN_NUM=[{n:1,en:"One"},{n:2,en:"Two"},{n:3,en:"Three"},{n:4,en:"Four"},{n:5,en:"Five"},{n:6,en:"Six"},{n:7,en:"Seven"},{n:8,en:"Eight"},{n:9,en:"Nine"},{n:10,en:"Ten"}];
   var EN_FOOD=[{de:"Apfel",en:"Apple",e:"🍎"},{de:"Brot",en:"Bread",e:"🍞"},{de:"Milch",en:"Milk",e:"🥛"},{de:"Ei",en:"Egg",e:"🥚"},{de:"Käse",en:"Cheese",e:"🧀"},{de:"Banane",en:"Banana",e:"🍌"},{de:"Wasser",en:"Water",e:"💧"},{de:"Fisch",en:"Fish",e:"🐟"}];
   var EN_BODY=[{de:"Hand",en:"Hand",e:"✋"},{de:"Auge",en:"Eye",e:"👁️"},{de:"Nase",en:"Nose",e:"👃"},{de:"Mund",en:"Mouth",e:"👄"},{de:"Ohr",en:"Ear",e:"👂"},{de:"Fuß",en:"Foot",e:"🦶"},{de:"Zahn",en:"Tooth",e:"🦷"},{de:"Haar",en:"Hair",e:"💇"}];
+  var EN_PHRASE=[{de:"Hallo",en:"Hello",e:"👋"},{de:"Tschüss",en:"Goodbye",e:"🙋"},{de:"Danke",en:"Thank you",e:"🙏"},{de:"Bitte",en:"Please",e:"😊"},{de:"Ja",en:"Yes",e:"✅"},{de:"Nein",en:"No",e:"❌"}];
+  var EN_WEATHER=[{de:"Sonne",en:"Sun",e:"☀️"},{de:"Regen",en:"Rain",e:"🌧️"},{de:"Schnee",en:"Snow",e:"❄️"},{de:"Wind",en:"Wind",e:"💨"},{de:"Wolke",en:"Cloud",e:"☁️"}];
   function e_vocab(list){return function(){var it=pick(list),others=shuffle(list.filter(function(x){return x.en!==it.en})).slice(0,2),opts=shuffle([it].concat(others));
     return{label:"Wie heißt das auf Englisch?",speak:it.en,speakLang:"en",
       render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span><span style="font-size:1.05rem;color:var(--ink-soft);font-weight:800">'+it.de+'</span>';},
@@ -1057,7 +1078,8 @@
     5:{title:"Körper (Body)",desc:"Hand, Auge, Nase …",set:[e_vocab(EN_BODY)]},
     6:{title:"Alles gemischt",desc:"Alle Themen zusammen",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_vocab(EN_FOOD),e_vocab(EN_BODY)]},
     7:{title:"Zahlen 11–20",desc:"Eleven … Twenty",set:[e_num2]},
-    8:{title:"Profi: alles & 1–20",desc:"Alle Themen + Zahlen bis 20",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_num2,e_vocab(EN_FOOD),e_vocab(EN_BODY)]}
+    8:{title:"Profi: alles & 1–20",desc:"Alle Themen + Zahlen bis 20",set:[e_vocab(EN_COLORS),e_vocab(EN_ANIMALS),e_num,e_num2,e_vocab(EN_FOOD),e_vocab(EN_BODY)]},
+    9:{title:"Experte: Wörter & Sätze",desc:"Begrüßung, Wetter, alles",set:[e_vocab(EN_PHRASE),e_vocab(EN_WEATHER),e_num2,e_vocab(EN_ANIMALS),e_vocab(EN_BODY)]}
   };
 
   /* ---------- DENKEN & KONZENTRATION (Kompetenzbereich „Muster und Strukturen" + Aufmerksamkeit) ---------- */
@@ -1098,8 +1120,15 @@
     2:{title:"Zahlenreihen",desc:"Die nächste Zahl finden",set:[d_numseq]},
     3:{title:"Was passt nicht?",desc:"Den Ausreißer finden",set:[d_odd]},
     4:{title:"Finde das Gleiche",desc:"Genau hinschauen (Konzentration)",set:[d_same]},
-    5:{title:"Alles gemischt",desc:"Muster, Reihen & Logik",set:[d_pattern,d_numseq,d_odd,d_same]}
+    5:{title:"Alles gemischt",desc:"Muster, Reihen & Logik",set:[d_pattern,d_numseq,d_odd,d_same]},
+    6:{title:"Experte: schwere Reihen",desc:"Verdoppeln, größere Schritte",set:[d_seq2,d_numseq,d_pattern]}
   };
+  function d_seq2(){var mode=rnd(3),seq=[],next,a;
+    if(mode===0){var s=2+rnd(5),st=3+rnd(4);for(a=0;a<4;a++)seq.push(s+st*a);next=s+st*4;}
+    else if(mode===1){a=1+rnd(3);for(var i=0;i<4;i++){seq.push(a);a*=2;}next=a;}
+    else{var bb=24+rnd(30),dd=3+rnd(4);for(a=0;a<4;a++)seq.push(bb-dd*a);next=bb-dd*4;if(next<0)next=0;}
+    return{label:"Welche Zahl kommt als Nächstes?",speak:"Welche Zahl kommt als Nächstes?",render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.8rem">'+seq.join(" · ")+' · ?</div>';},
+      options:numOpts(next,Math.max(2,Math.abs(next-seq[3]))),correct:String(next),three:true};}
 
   /* ---------- SACHKUNDE (Sachunterricht 2. Klasse) ---------- */
   function qa(pool){return function(){var it=pick(pool),opts=shuffle(it.a.slice());
@@ -1158,15 +1187,20 @@
     {q:"Zu welchem Land gehört die Flagge?",e:"🇵🇱",a:["Polen","Deutschland","England"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇺🇸",a:["USA","England","Frankreich"]}];
   var GEO_CONT=[{q:"Auf welchem Kontinent liegt Deutschland?",e:"🌍",a:["Europa","Afrika","Asien"]},{q:"Wo leben Pinguine?",e:"🐧",a:["Am Südpol","In der Wüste","Im Dschungel"]},
     {q:"Welcher ist der größte Ozean?",e:"🌊",a:["Pazifik","Nordsee","Bodensee"]},{q:"Wo leben Löwen in freier Natur?",e:"🦁",a:["In Afrika","Am Nordpol","In Europa"]}];
+  var GEO_CAP=[{q:"Hauptstadt von Deutschland?",e:"🇩🇪",a:["Berlin","München","Hamburg"]},{q:"Hauptstadt von Frankreich?",e:"🇫🇷",a:["Paris","Lyon","Rom"]},{q:"Hauptstadt von Italien?",e:"🇮🇹",a:["Rom","Mailand","Madrid"]},{q:"Hauptstadt der Türkei?",e:"🇹🇷",a:["Ankara","Istanbul","Izmir"]},{q:"Hauptstadt von Spanien?",e:"🇪🇸",a:["Madrid","Barcelona","Paris"]}];
   var GEO_LVL={1:{title:"Flaggen",desc:"Länder erkennen",set:[qa(GEO_FLAG)]},2:{title:"Unsere Welt",desc:"Erde, Meer, Wüste …",set:[qa(GEO_WELT)]},
     3:{title:"Gemischt",desc:"Flaggen & Welt",set:[qa(GEO_FLAG),qa(GEO_WELT)]},
-    4:{title:"Profi: mehr Länder & Kontinente",desc:"Flaggen, Ozeane, Kontinente",set:[qa(GEO_FLAG2),qa(GEO_CONT),qa(GEO_FLAG)]}};
+    4:{title:"Profi: mehr Länder & Kontinente",desc:"Flaggen, Ozeane, Kontinente",set:[qa(GEO_FLAG2),qa(GEO_CONT),qa(GEO_FLAG)]},
+    5:{title:"Experte: Hauptstädte",desc:"Berlin, Paris, Ankara …",set:[qa(GEO_CAP),qa(GEO_FLAG2)]}};
 
   /* ---------- TÜRKISCH ---------- */
   var TR_COLORS=[{q:"„Rot“ auf Türkisch?",e:"🟥",a:["Kırmızı","Mavi","Sarı"]},{q:"„Blau“ auf Türkisch?",e:"🟦",a:["Mavi","Yeşil","Kırmızı"]},{q:"„Grün“ auf Türkisch?",e:"🟩",a:["Yeşil","Sarı","Mavi"]},{q:"„Gelb“ auf Türkisch?",e:"🟨",a:["Sarı","Kırmızı","Yeşil"]},{q:"„Schwarz“ auf Türkisch?",e:"⬛",a:["Siyah","Beyaz","Mavi"]},{q:"„Weiß“ auf Türkisch?",e:"⬜",a:["Beyaz","Siyah","Sarı"]}];
   var TR_ANIMALS=[{q:"„Hund“ auf Türkisch?",e:"🐶",a:["Köpek","Kedi","Kuş"]},{q:"„Katze“ auf Türkisch?",e:"🐱",a:["Kedi","Köpek","Balık"]},{q:"„Vogel“ auf Türkisch?",e:"🐦",a:["Kuş","At","İnek"]},{q:"„Fisch“ auf Türkisch?",e:"🐟",a:["Balık","Kedi","Kuş"]},{q:"„Pferd“ auf Türkisch?",e:"🐴",a:["At","İnek","Köpek"]},{q:"„Kuh“ auf Türkisch?",e:"🐮",a:["İnek","At","Kedi"]}];
   var TR_NUM=[{q:"„Eins“ auf Türkisch?",e:"1️⃣",a:["Bir","İki","Üç"]},{q:"„Zwei“ auf Türkisch?",e:"2️⃣",a:["İki","Bir","Dört"]},{q:"„Drei“ auf Türkisch?",e:"3️⃣",a:["Üç","İki","Beş"]},{q:"„Vier“ auf Türkisch?",e:"4️⃣",a:["Dört","Üç","Beş"]},{q:"„Fünf“ auf Türkisch?",e:"5️⃣",a:["Beş","Dört","Altı"]}];
-  var TR_LVL={1:{title:"Farben (Renkler)",desc:"Kırmızı, Mavi …",set:[qa(TR_COLORS)]},2:{title:"Tiere (Hayvanlar)",desc:"Köpek, Kedi …",set:[qa(TR_ANIMALS)]},3:{title:"Zahlen (Sayılar)",desc:"Bir, İki …",set:[qa(TR_NUM)]},4:{title:"Alles gemischt",desc:"Farben, Tiere, Zahlen",set:[qa(TR_COLORS),qa(TR_ANIMALS),qa(TR_NUM)]}};
+  var TR_FAM=[{q:"„Mutter“ auf Türkisch?",e:"👩",a:["Anne","Baba","Abla"]},{q:"„Vater“ auf Türkisch?",e:"👨",a:["Baba","Anne","Dede"]},{q:"„Oma“ auf Türkisch?",e:"👵",a:["Nine","Dede","Abla"]},{q:"„Opa“ auf Türkisch?",e:"👴",a:["Dede","Nine","Baba"]}];
+  var TR_FOOD=[{q:"„Brot“ auf Türkisch?",e:"🍞",a:["Ekmek","Su","Elma"]},{q:"„Wasser“ auf Türkisch?",e:"💧",a:["Su","Süt","Çay"]},{q:"„Apfel“ auf Türkisch?",e:"🍎",a:["Elma","Muz","Ekmek"]},{q:"„Milch“ auf Türkisch?",e:"🥛",a:["Süt","Su","Çay"]}];
+  var TR_LVL={1:{title:"Farben (Renkler)",desc:"Kırmızı, Mavi …",set:[qa(TR_COLORS)]},2:{title:"Tiere (Hayvanlar)",desc:"Köpek, Kedi …",set:[qa(TR_ANIMALS)]},3:{title:"Zahlen (Sayılar)",desc:"Bir, İki …",set:[qa(TR_NUM)]},4:{title:"Alles gemischt",desc:"Farben, Tiere, Zahlen",set:[qa(TR_COLORS),qa(TR_ANIMALS),qa(TR_NUM)]},
+    5:{title:"Experte: Familie & Essen",desc:"Anne, Baba, Ekmek …",set:[qa(TR_FAM),qa(TR_FOOD)]}};
 
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
     tr:{title:"Türkisch",lvl:TR_LVL,color:"#e30a17"},
