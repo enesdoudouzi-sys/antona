@@ -98,6 +98,18 @@
   .lessonrow .lt{font-family:"Fredoka",sans-serif;font-size:1.1rem}
   .lessonrow .lst{margin-left:auto;font-size:.85rem;color:var(--ink-soft);font-weight:800}
   .goalrow{font-size:.92rem;color:var(--ink-soft);font-weight:800;margin-bottom:.25rem}
+  .tabs{display:flex;gap:.4rem;background:var(--bg2);border-radius:999px;padding:.3rem;margin-bottom:1rem}
+  .tab{flex:1;border:none;background:transparent;color:var(--ink-soft);border-radius:999px;padding:.55rem;font-weight:800;font-family:"Fredoka",sans-serif;cursor:pointer;font-size:.98rem}
+  .tab.on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow-sm)}
+  .morebtns{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+  .morecard{display:flex;flex-direction:column;align-items:center;gap:.35rem;background:var(--panel);border:1px solid var(--line);border-radius:1.2rem;padding:1.3rem .6rem;box-shadow:0 .2rem 0 var(--line);cursor:pointer;font-size:2.2rem;transition:transform .1s}
+  .morecard:active{transform:translateY(2px)}
+  .morecard span{font-size:1rem;font-weight:800;font-family:"Nunito",sans-serif;color:var(--ink)}
+  @keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .screen-in{animation:screenIn .28s ease}
+  @keyframes wob{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg)}}
+  .greetMascot{animation:wob 3.5s ease-in-out infinite;transform-origin:50% 85%}
+  @media(prefers-reduced-motion:reduce){.greetMascot{animation:none}.screen-in{animation:none}}
 
   /* Profile */
   .profiles{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:.5rem}
@@ -452,25 +464,31 @@
       <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" id="homeSub" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
     </div>
     <div id="homeGoal" class="homegoal"></div>
-    <button class="next" id="schoolBtn" style="width:100%;margin-bottom:1rem">🏫 Lernzeit – wie in der Schule</button>
-    <div class="grid">
-      <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
-      <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
-      <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
-      <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
-      <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
-      <button class="tile tr" data-game="tr"><span class="emoji">🇹🇷</span><span class="name">Türkisch</span><span class="sub">Renkler · Hayvanlar · Sayılar</span><span class="mini" id="best-tr">★ 0</span></button>
-      <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
-      <button class="tile k" data-game="sach" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere, Körper, Jahreszeiten & Verkehr</span><span class="mini" id="best-sach">★ 0</span></button>
-      <button class="tile mu" data-game="musik"><span class="emoji">🎵</span><span class="name">Musik</span><span class="sub">Instrumente & Töne</span><span class="mini" id="best-musik">★ 0</span></button>
-      <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen & Welt</span><span class="mini" id="best-geo">★ 0</span></button>
-      <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
+    <div class="tabs" id="homeTabs"><button class="tab on" data-tab="learn">📚 Lernen</button><button class="tab" data-tab="more">🎮 Spiele & Mehr</button></div>
+    <div id="tab-learn">
+      <div class="grid">
+        <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
+        <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
+        <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
+        <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
+        <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
+        <button class="tile tr" data-game="tr"><span class="emoji">🇹🇷</span><span class="name">Türkisch</span><span class="sub">Renkler · Hayvanlar · Sayılar</span><span class="mini" id="best-tr">★ 0</span></button>
+        <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
+        <button class="tile k" data-game="sach" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere, Körper, Jahreszeiten & Verkehr</span><span class="mini" id="best-sach">★ 0</span></button>
+        <button class="tile mu" data-game="musik"><span class="emoji">🎵</span><span class="name">Musik</span><span class="sub">Instrumente & Töne</span><span class="mini" id="best-musik">★ 0</span></button>
+        <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen & Welt</span><span class="mini" id="best-geo">★ 0</span></button>
+      </div>
+      <button class="next" id="schoolBtn" style="width:100%;margin-top:1rem">🏫 Lernzeit – wie in der Schule</button>
     </div>
-    <div style="display:flex;gap:.6rem;justify-content:center;margin-top:1rem;flex-wrap:wrap">
-      <button class="back" id="pokaleBtn">🏆 Pokale</button>
-      <button class="back" id="avatarBtn">🙂 Avatar</button>
-      <button class="back" id="petBtn">🐣 Mein Tier</button>
-      <button class="back" id="chestBtn">🎁 Schatztruhe</button>
+    <div id="tab-more" hidden>
+      <div class="morebtns">
+        <button class="morecard" id="gamesEntry">🎮<span>Spiele</span></button>
+        <button class="morecard" id="petBtn">🐣<span>Mein Tier</span></button>
+        <button class="morecard" id="chestBtn">🎁<span>Schatztruhe</span></button>
+        <button class="morecard" id="pokaleBtn">🏆<span>Pokale</span></button>
+        <button class="morecard" id="avatarBtn">🙂<span>Avatar</span></button>
+        <button class="morecard" id="schoolBtn2">🏫<span>Lernzeit</span></button>
+      </div>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
   </div>
@@ -1224,6 +1242,7 @@
     $("#coinPill").hidden=!hasActive||pre;
     $("#parentBtn").hidden=!hasActive||pre||id==="parent";
     try{window.speechSynthesis.cancel();}catch(e){}
+    try{var el=$("#"+id);if(el){el.classList.remove("screen-in");void el.offsetWidth;el.classList.add("screen-in");}}catch(e){}
   }
 
   /* ---------- Profile-UI ---------- */
@@ -1261,6 +1280,8 @@
     $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins||0;
     $("#homeSub").textContent=(p.stats.streak>=2?("🔥 "+p.stats.streak+" Tage in Folge – weiter so!"):"Was üben wir heute?");
     SUBJ.forEach(function(s){$("#best-"+s.k).textContent="★ "+(p.stats.best[s.k]||0);});
+    Array.prototype.forEach.call(document.querySelectorAll("#homeTabs .tab"),function(x){x.classList.toggle("on",x.getAttribute("data-tab")==="learn");});
+    $("#tab-learn").hidden=false;$("#tab-more").hidden=true;
     renderGoal();show("home");
   }
 
@@ -1927,6 +1948,11 @@
   $("#homeBtn").addEventListener("click",function(){SCHOOL.on=false;enterHome();});
   $("#againBtn").addEventListener("click",function(){if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;if(last){showZeugnis();}else schoolAdvance();}else startGame();});
   $("#schoolBtn").addEventListener("click",startSchool);
+  $("#schoolBtn2").addEventListener("click",startSchool);
+  $("#gamesEntry").addEventListener("click",openGames);
+  Array.prototype.forEach.call(document.querySelectorAll("#homeTabs .tab"),function(tb){tb.addEventListener("click",function(){
+    Array.prototype.forEach.call(document.querySelectorAll("#homeTabs .tab"),function(x){x.classList.toggle("on",x===tb);});
+    var t=tb.getAttribute("data-tab");$("#tab-learn").hidden=(t!=="learn");$("#tab-more").hidden=(t!=="more");});});
   $("#schoolBack").addEventListener("click",enterHome);
   $("#schoolStart").addEventListener("click",schoolBegin);
   $("#chestBtn").addEventListener("click",openChest);
