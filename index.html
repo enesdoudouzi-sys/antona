@@ -138,6 +138,7 @@
   .tile.k .emoji{font-size:2.1rem}
   .tile.mu{background:linear-gradient(145deg,#ffa05e,#ff6b6b)}
   .tile.geo{background:linear-gradient(145deg,#5fb0ff,#2a73d6)}
+  .tile.tr{background:linear-gradient(145deg,#ff6a6a,#e30a17)}
   /* Spiel */
   .gbadge{display:flex;align-items:center;gap:.3rem;background:var(--panel);border:1px solid var(--line);border-radius:999px;
     padding:.3rem .7rem;font-family:"Fredoka",sans-serif;font-size:1rem;box-shadow:var(--shadow-sm)}
@@ -365,6 +366,7 @@
   :root[data-skin="pro"] .tile.k .emoji{background:#e3f6e8}
   :root[data-skin="pro"] .tile.mu .emoji{background:#ffe6dc}
   :root[data-skin="pro"] .tile.geo .emoji{background:#e1f0ff}
+  :root[data-skin="pro"] .tile.tr .emoji{background:#ffe0e0}
   :root[data-skin="pro"] .tile.g .emoji{background:#fff2d9}
   :root[data-skin="pro"] .tile .name{color:var(--ink);text-shadow:none;font-size:1.15rem}
   :root[data-skin="pro"] .tile .sub{color:var(--ink-soft);opacity:1}
@@ -458,6 +460,7 @@
       <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
       <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
       <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
+      <button class="tile tr" data-game="tr"><span class="emoji">🇹🇷</span><span class="name">Türkisch</span><span class="sub">Renkler · Hayvanlar · Sayılar</span><span class="mini" id="best-tr">★ 0</span></button>
       <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
       <button class="tile k" data-game="sach" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere, Körper, Jahreszeiten & Verkehr</span><span class="mini" id="best-sach">★ 0</span></button>
       <button class="tile mu" data-game="musik"><span class="emoji">🎵</span><span class="name">Musik</span><span class="sub">Instrumente & Töne</span><span class="mini" id="best-musik">★ 0</span></button>
@@ -465,8 +468,10 @@
       <button class="tile g" data-game="spiele" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🎮</span><span class="name">Spiele</span><span class="sub">Mit Münzen freispielen – spielend lernen</span></button>
     </div>
     <div style="display:flex;gap:.6rem;justify-content:center;margin-top:1rem;flex-wrap:wrap">
-      <button class="back" id="pokaleBtn">🏆 Meine Pokale</button>
+      <button class="back" id="pokaleBtn">🏆 Pokale</button>
       <button class="back" id="avatarBtn">🙂 Avatar</button>
+      <button class="back" id="petBtn">🐣 Mein Tier</button>
+      <button class="back" id="chestBtn">🎁 Schatztruhe</button>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
   </div>
@@ -649,6 +654,38 @@
     </div>
   </div>
 
+  <!-- SCHATZTRUHE -->
+  <div id="chest" hidden>
+    <div class="bar"><button class="back" id="chestBack">← Zurück</button></div>
+    <div class="done" style="min-height:60vh">
+      <div class="big" id="chestEmoji" style="font-size:5rem">🎁</div>
+      <h2 id="chestTitle">Tägliche Schatztruhe</h2>
+      <p class="muted" id="chestText" style="margin:0">Jeden Tag ein Geschenk – mach sie auf!</p>
+      <button class="next" id="chestOpen">Truhe öffnen</button>
+    </div>
+  </div>
+
+  <!-- HAUSTIER -->
+  <div id="pet" hidden>
+    <div class="bar"><button class="back" id="petBack">← Zurück</button></div>
+    <div class="done" style="min-height:60vh">
+      <div class="big" id="petEmoji" style="font-size:6rem">🥚</div>
+      <h2 id="petName">Mein Tier</h2>
+      <p class="muted" id="petText" style="margin:0"></p>
+      <div class="barmini" style="width:70%;max-width:18rem"><i id="petBar" style="width:0%"></i></div>
+      <button class="next" id="petPet">Streicheln ❤️</button>
+    </div>
+  </div>
+
+  <!-- ZEUGNIS -->
+  <div id="zeugnis" hidden>
+    <div class="bar"><button class="back" id="zeugBack">← Zur Startseite</button></div>
+    <h2 class="title">Dein Zeugnis 🎓</h2>
+    <p class="muted">So lief deine Lernzeit heute:</p>
+    <div id="zeugGrid" class="schoolplan"></div>
+    <button class="next" id="zeugDone" style="margin-top:1rem;width:100%">Super gemacht! 🎉</button>
+  </div>
+
   <!-- LERNZEIT (Schule) -->
   <div id="school" hidden>
     <div class="bar"><button class="back" id="schoolBack">← Zurück</button></div>
@@ -705,6 +742,11 @@
         <button class="back" id="voiceTest" style="margin-top:.5rem">🔊 Stimme testen</button>
       </div>
       <div class="sheet">
+        <h3>Anzeige</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Für bessere Lesbarkeit – gut bei Lese-Schwäche.</p>
+        <button class="primary" id="bigBtn">Große Schrift: Aus</button>
+      </div>
+      <div class="sheet">
         <h3>Tagesziel</h3>
         <p class="muted" id="goalText" style="margin:.2rem 0 .5rem"></p>
         <div id="goalPick" class="diffpick" style="justify-content:flex-start"><span class="muted">Sterne pro Tag:</span>
@@ -749,13 +791,14 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[]};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:""};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
     if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
     if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
-    ["math","read","shape","clock","english","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
+    if(p.stats.lastChest===undefined)p.stats.lastChest="";
+    ["math","read","shape","clock","english","tr","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
   function bumpStreak(p){var today=dayKey();if(p.stats.lastDay===today)return;var y=new Date();y.setDate(y.getDate()-1);
@@ -931,6 +974,14 @@
     {s:"Der Fisch schwimmt im …",e:"🐟",a:["Wasser","Bett","Baum"]},{s:"Das Kind liest ein …",e:"📖",a:["Buch","Brot","Haus"]}];
   function r_sentence(){var it=pick(SENT);return{label:it.s,speak:it.s,render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span>';},
     options:shuffle(it.a.slice()),correct:it.a[0],word:true,three:true};}
+  function r_dikt(){var it=pick(WORDS),w=it.w,wrong=[];
+    var lw=w.toLowerCase();if(lw!==w)wrong.push(lw);
+    var sw=w.replace("a","e").replace("o","u").replace("i","e");if(sw!==w&&wrong.indexOf(sw)<0)wrong.push(sw);
+    var dbl=w.charAt(0)+w;if(wrong.indexOf(dbl)<0)wrong.push(dbl);
+    wrong=shuffle(wrong).slice(0,2);while(wrong.length<2)wrong.push((w.slice(0,-1)||w)+"n");
+    return{label:"Hör das Wort und wähle die richtige Schreibweise",speak:w,speakLang:"de",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span><div class="muted" style="font-size:.85rem">Tippe 🔊 zum Nochmal-Hören</div>';},
+      options:shuffle([w].concat(wrong)),correct:w,word:true,three:true};}
   var READ_LVL={
     1:{title:"Anlaute",desc:"Erster Buchstabe",set:[r_anlaut]},
     2:{title:"Wörter erkennen",desc:"Wort zum Bild finden",set:[r_word,r_anlaut]},
@@ -939,7 +990,8 @@
     5:{title:"Groß & klein",desc:"Nomen schreibt man groß",set:[r_case]},
     6:{title:"Reimwörter",desc:"Was reimt sich?",set:[r_rhyme]},
     7:{title:"Erste Sätze",desc:"Satz sinnvoll ergänzen",set:[r_sentence]},
-    8:{title:"Profi: alles gemischt",desc:"Sätze, Reime, ä/ö/ü, groß/klein",set:[r_sentence,r_rhyme,r_umlaut,r_case]}
+    8:{title:"Profi: alles gemischt",desc:"Sätze, Reime, ä/ö/ü, groß/klein",set:[r_sentence,r_rhyme,r_umlaut,r_case]},
+    9:{title:"Diktat (hören)",desc:"Wort hören, richtig schreiben",set:[r_dikt]}
   };
 
   /* ---------- FORMEN & FARBEN ---------- */
@@ -1110,20 +1162,27 @@
     3:{title:"Gemischt",desc:"Flaggen & Welt",set:[qa(GEO_FLAG),qa(GEO_WELT)]},
     4:{title:"Profi: mehr Länder & Kontinente",desc:"Flaggen, Ozeane, Kontinente",set:[qa(GEO_FLAG2),qa(GEO_CONT),qa(GEO_FLAG)]}};
 
+  /* ---------- TÜRKISCH ---------- */
+  var TR_COLORS=[{q:"„Rot“ auf Türkisch?",e:"🟥",a:["Kırmızı","Mavi","Sarı"]},{q:"„Blau“ auf Türkisch?",e:"🟦",a:["Mavi","Yeşil","Kırmızı"]},{q:"„Grün“ auf Türkisch?",e:"🟩",a:["Yeşil","Sarı","Mavi"]},{q:"„Gelb“ auf Türkisch?",e:"🟨",a:["Sarı","Kırmızı","Yeşil"]},{q:"„Schwarz“ auf Türkisch?",e:"⬛",a:["Siyah","Beyaz","Mavi"]},{q:"„Weiß“ auf Türkisch?",e:"⬜",a:["Beyaz","Siyah","Sarı"]}];
+  var TR_ANIMALS=[{q:"„Hund“ auf Türkisch?",e:"🐶",a:["Köpek","Kedi","Kuş"]},{q:"„Katze“ auf Türkisch?",e:"🐱",a:["Kedi","Köpek","Balık"]},{q:"„Vogel“ auf Türkisch?",e:"🐦",a:["Kuş","At","İnek"]},{q:"„Fisch“ auf Türkisch?",e:"🐟",a:["Balık","Kedi","Kuş"]},{q:"„Pferd“ auf Türkisch?",e:"🐴",a:["At","İnek","Köpek"]},{q:"„Kuh“ auf Türkisch?",e:"🐮",a:["İnek","At","Kedi"]}];
+  var TR_NUM=[{q:"„Eins“ auf Türkisch?",e:"1️⃣",a:["Bir","İki","Üç"]},{q:"„Zwei“ auf Türkisch?",e:"2️⃣",a:["İki","Bir","Dört"]},{q:"„Drei“ auf Türkisch?",e:"3️⃣",a:["Üç","İki","Beş"]},{q:"„Vier“ auf Türkisch?",e:"4️⃣",a:["Dört","Üç","Beş"]},{q:"„Fünf“ auf Türkisch?",e:"5️⃣",a:["Beş","Dört","Altı"]}];
+  var TR_LVL={1:{title:"Farben (Renkler)",desc:"Kırmızı, Mavi …",set:[qa(TR_COLORS)]},2:{title:"Tiere (Hayvanlar)",desc:"Köpek, Kedi …",set:[qa(TR_ANIMALS)]},3:{title:"Zahlen (Sayılar)",desc:"Bir, İki …",set:[qa(TR_NUM)]},4:{title:"Alles gemischt",desc:"Farben, Tiere, Zahlen",set:[qa(TR_COLORS),qa(TR_ANIMALS),qa(TR_NUM)]}};
+
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
+    tr:{title:"Türkisch",lvl:TR_LVL,color:"#e30a17"},
     shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
     english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"},
     denken:{title:"Denken & Konzentration",lvl:DENK_LVL,color:"#00c2c2"},
     sach:{title:"Sachkunde",lvl:SACH_LVL,color:"#2bb673"},
     musik:{title:"Musik",lvl:MUSIK_LVL,color:"#ff7a3d"},
     geo:{title:"Geografie",lvl:GEO_LVL,color:"#2a9df4"}};
-  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"},{k:"musik",e:"🎵",n:"Musik"},{k:"geo",e:"🗺️",n:"Geografie"}];
+  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"tr",e:"🇹🇷",n:"Türkisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"},{k:"musik",e:"🎵",n:"Musik"},{k:"geo",e:"🗺️",n:"Geografie"}];
 
   var PRAISE=["Super!","Toll!","Richtig!","Klasse!","Bravo!","Stark!","Perfekt!","Juhu!"];
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1261,9 +1320,10 @@
     $("#doneTitle").textContent=got>=9?"Fantastisch!":got>=6?"Super gemacht!":"Gut geübt!";
     $("#doneText").textContent="Du hast "+got+" von "+ROUNDS+" richtig – "+state.earned+" Sterne und "+state.correct+" Münzen 🪙 verdient.";
     if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;
+      SCHOOL.results[SCHOOL.idx]={name:SCHOOL.lessons[SCHOOL.idx].name,emoji:SCHOOL.lessons[SCHOOL.idx].emoji,earned:state.earned};
       $("#doneTitle").textContent=last?"Lernzeit geschafft! 🎓":"Stunde "+(SCHOOL.idx+1)+" geschafft!";
       if(last)$("#doneEmoji").textContent="🎓";
-      $("#againBtn").textContent=last?"Fertig 🎉":"🔔 Nächste Stunde →";
+      $("#againBtn").textContent=last?"Zeugnis ansehen 🎓":"🔔 Nächste Stunde →";
       $("#homeBtn").style.display=last?"none":"";$("#homeBtn").textContent="Lernzeit abbrechen";
     } else {$("#againBtn").textContent="Nochmal";$("#homeBtn").style.display="";$("#homeBtn").textContent="Zur Startseite";}
     show("done");if(got>=6||SCHOOL.on)confetti();speak($("#doneTitle").textContent);
@@ -1335,7 +1395,8 @@
       if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
       if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
     if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
-    ["math","read","shape","clock","english","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
+    if(p.stats.lastChest===undefined)p.stats.lastChest="";
+    ["math","read","shape","clock","english","tr","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});});
   }
   $("#syncShow").addEventListener("click",function(){
     try{var code=btoa(unescape(encodeURIComponent(JSON.stringify(profiles))));
@@ -1769,16 +1830,40 @@
     $("#homeGoal").innerHTML='<div class="goalrow">🎯 Tagesziel: <b>'+today+' / '+goal+' ⭐</b>'+(today>=goal?' <span style="color:var(--good)">geschafft! 🎉</span>':'')+'</div><div class="barmini"><i style="width:'+pct+'%"></i></div>';}
 
   /* ---------- LERNZEIT (Schulmodus: mehrere Stunden nacheinander) ---------- */
-  var SCHOOL={on:false,lessons:[],idx:0};
-  function startSchool(){var picks=shuffle(SUBJ).slice(0,4);
-    SCHOOL={on:false,lessons:picks.map(function(s){return {key:s.k,level:2,emoji:s.e,name:s.n};}),idx:0};
-    var plan=$("#schoolPlan");plan.innerHTML="";
+  var SCHOOL={on:false,lessons:[],idx:0,results:[]};
+  function renderSchoolPlan(){var plan=$("#schoolPlan");plan.innerHTML="";
     SCHOOL.lessons.forEach(function(L,i){var d=document.createElement("div");d.className="lessonrow";
-      d.innerHTML='<span class="no">'+(i+1)+'</span><span class="ic">'+L.emoji+'</span><span class="lt">'+L.name+'</span><span class="lst">Stunde '+(i+1)+'</span>';plan.appendChild(d);});
-    show("school");}
-  function schoolBegin(){if(!SCHOOL.lessons.length)return;SCHOOL.on=true;SCHOOL.idx=0;runLesson();}
+      d.innerHTML='<span class="no">'+(i+1)+'</span><span class="ic">'+L.emoji+'</span><span class="lt">'+L.name+'</span><span class="lst">tippen zum Wechseln ↻</span>';
+      d.addEventListener("click",function(){var idx=SUBJ.map(function(s){return s.k;}).indexOf(L.key),ns=SUBJ[(idx+1)%SUBJ.length];L.key=ns.k;L.emoji=ns.e;L.name=ns.n;renderSchoolPlan();});
+      plan.appendChild(d);});}
+  function startSchool(){var picks=shuffle(SUBJ).slice(0,4);SCHOOL={on:false,lessons:picks.map(function(s){return {key:s.k,level:2,emoji:s.e,name:s.n};}),idx:0,results:[]};renderSchoolPlan();show("school");}
+  function schoolBegin(){if(!SCHOOL.lessons.length)return;SCHOOL.on=true;SCHOOL.idx=0;SCHOOL.results=[];runLesson();}
   function runLesson(){var L=SCHOOL.lessons[SCHOOL.idx];curGame=L.key;curLevel=L.level;try{tone(880,.15);setTimeout(function(){tone(660,.2);},160);}catch(e){}toast("🔔 Stunde "+(SCHOOL.idx+1)+": "+L.name);startGame();}
-  function schoolAdvance(){SCHOOL.idx++;if(SCHOOL.idx>=SCHOOL.lessons.length){SCHOOL.on=false;enterHome();return;}runLesson();}
+  function schoolAdvance(){SCHOOL.idx++;if(SCHOOL.idx>=SCHOOL.lessons.length){return showZeugnis();}runLesson();}
+  function showZeugnis(){SCHOOL.on=false;confetti();var g=$("#zeugGrid");g.innerHTML="";
+    SCHOOL.results.forEach(function(r,i){var stars=r.earned>=9?"★★★":r.earned>=6?"★★":r.earned>=1?"★":"☆";var d=document.createElement("div");d.className="lessonrow";
+      d.innerHTML='<span class="no">'+(i+1)+'</span><span class="ic">'+r.emoji+'</span><span class="lt">'+r.name+'</span><span class="lst" style="color:var(--star)">'+stars+' · '+r.earned+'/10</span>';g.appendChild(d);});
+    show("zeugnis");}
+  /* Schatztruhe */
+  function openChest(){var p=active();if(!p)return;
+    if(p.stats.lastChest===dayKey()){$("#chestEmoji").textContent="📦";$("#chestTitle").textContent="Heute schon geöffnet";$("#chestText").textContent="Komm morgen wieder für ein neues Geschenk!";$("#chestOpen").style.display="none";}
+    else{$("#chestEmoji").textContent="🎁";$("#chestTitle").textContent="Tägliche Schatztruhe";$("#chestText").textContent="Jeden Tag ein Geschenk – mach sie auf!";$("#chestOpen").style.display="";}
+    show("chest");}
+  function doOpenChest(){var p=active();if(!p||p.stats.lastChest===dayKey())return;var coins=3+rnd(6),stars=1+rnd(3);
+    p.stats.coins=(p.stats.coins||0)+coins;p.stats.stars=(p.stats.stars||0)+stars;p.stats.lastChest=dayKey();persist();
+    $("#coinCount").textContent=p.stats.coins;$("#starCount").textContent=p.stats.stars;confetti();sStar();
+    $("#chestEmoji").textContent="🎉";$("#chestTitle").textContent="Geschenk!";$("#chestText").innerHTML="Du bekommst <b>"+coins+" 🪙</b> und <b>"+stars+" ⭐</b>!";$("#chestOpen").style.display="none";}
+  /* Haustier */
+  var PETS=[{min:0,e:"🥚",n:"Ei"},{min:10,e:"🐣",n:"Küken"},{min:30,e:"🐥",n:"Vögelchen"},{min:60,e:"🐔",n:"Huhn"},{min:100,e:"🦚",n:"Prachtvogel"}];
+  function openPet(){var p=active();if(!p)return;var st=p.stats.stars||0,stage=PETS[0],next=null;
+    for(var i=0;i<PETS.length;i++){if(st>=PETS[i].min){stage=PETS[i];next=PETS[i+1]||null;}}
+    $("#petEmoji").textContent=stage.e;$("#petName").textContent="Dein Tier: "+stage.n;
+    if(next){$("#petText").textContent="Noch "+(next.min-st)+" Sterne bis "+next.e+".";$("#petBar").style.width=Math.round((st-stage.min)/(next.min-stage.min)*100)+"%";}
+    else{$("#petText").textContent="Höchste Stufe erreicht – toll! 🎉";$("#petBar").style.width="100%";}
+    show("pet");}
+  function petStreichel(){sStar();var e=$("#petEmoji");e.style.transition="transform .2s";e.style.transform="scale(1.2)";setTimeout(function(){e.style.transform="";},220);toast("❤️");}
+  /* Große Schrift */
+  function applyBig(){try{document.documentElement.style.fontSize=load("antona_big",false)?"18.5px":"";}catch(e){}}
 
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
@@ -1806,10 +1891,20 @@
   $("#lvlBack").addEventListener("click",enterHome);
   $("#backBtn").addEventListener("click",function(){openLevels(state?state.key:curGame);});
   $("#homeBtn").addEventListener("click",function(){SCHOOL.on=false;enterHome();});
-  $("#againBtn").addEventListener("click",function(){if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;if(last){SCHOOL.on=false;enterHome();}else schoolAdvance();}else startGame();});
+  $("#againBtn").addEventListener("click",function(){if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;if(last){showZeugnis();}else schoolAdvance();}else startGame();});
   $("#schoolBtn").addEventListener("click",startSchool);
   $("#schoolBack").addEventListener("click",enterHome);
   $("#schoolStart").addEventListener("click",schoolBegin);
+  $("#chestBtn").addEventListener("click",openChest);
+  $("#chestBack").addEventListener("click",enterHome);
+  $("#chestOpen").addEventListener("click",doOpenChest);
+  $("#petBtn").addEventListener("click",openPet);
+  $("#petBack").addEventListener("click",enterHome);
+  $("#petPet").addEventListener("click",petStreichel);
+  $("#zeugBack").addEventListener("click",enterHome);
+  $("#zeugDone").addEventListener("click",enterHome);
+  (function(){var bigBtn=$("#bigBtn");if(!bigBtn)return;function upd(){bigBtn.textContent="Große Schrift: "+(load("antona_big",false)?"An":"Aus");}
+    bigBtn.addEventListener("click",function(){save("antona_big",!load("antona_big",false));applyBig();upd();});upd();})();
   $("#speakBtn").addEventListener("click",function(){if(state&&state.current)speak(state.current.speak,state.current.speakLang);});
   $("#whoBtn").addEventListener("click",function(){renderProfiles();show("profiles");});
   $("#parentBtn").addEventListener("click",openParent);
@@ -1822,7 +1917,7 @@
   function toast(msg){if(!toastEl){toastEl=document.createElement("div");toastEl.className="toast";document.body.appendChild(toastEl);}
     toastEl.textContent=msg;toastEl.classList.add("on");clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove("on");},1500);}
   var skinBtn=$("#themeBtn");skinBtn.textContent="🎨";skinBtn.title="Design wechseln";skinBtn.setAttribute("aria-label","Design wechseln");
-  applySkin(load("antona_skin","pro"));
+  applySkin(load("antona_skin","pro"));applyBig();
   skinBtn.addEventListener("click",function(){
     var cur=load("antona_skin","pro"),nx=SKINS[(SKINS.indexOf(cur)+1)%SKINS.length];
     save("antona_skin",nx);applySkin(nx);toast("Design: "+SKIN_NAME[nx]);
