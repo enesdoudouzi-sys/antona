@@ -92,6 +92,12 @@
   .bubble{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:.7rem 1rem;box-shadow:var(--shadow-sm);flex:1;min-width:0}
   .bubble::before{content:"";position:absolute;left:-.48rem;top:1.25rem;border:.4rem solid transparent;border-right-color:var(--panel)}
   .homegoal{margin:.1rem 0 .4rem}
+  .schoolplan{display:flex;flex-direction:column;gap:.6rem}
+  .lessonrow{display:flex;align-items:center;gap:.9rem;background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:.8rem;box-shadow:var(--shadow-sm)}
+  .lessonrow .no{width:2.4rem;height:2.4rem;border-radius:.7rem;background:var(--accent);color:#fff;display:grid;place-items:center;font-family:"Fredoka",sans-serif;font-weight:700;flex:none}
+  .lessonrow .ic{font-size:1.7rem}
+  .lessonrow .lt{font-family:"Fredoka",sans-serif;font-size:1.1rem}
+  .lessonrow .lst{margin-left:auto;font-size:.85rem;color:var(--ink-soft);font-weight:800}
   .goalrow{font-size:.92rem;color:var(--ink-soft);font-weight:800;margin-bottom:.25rem}
 
   /* Profile */
@@ -445,6 +451,7 @@
       <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" id="homeSub" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
     </div>
     <div id="homeGoal" class="homegoal"></div>
+    <button class="next" id="schoolBtn" style="width:100%;margin-bottom:1rem">🏫 Lernzeit – wie in der Schule</button>
     <div class="grid">
       <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
       <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
@@ -640,6 +647,15 @@
       <div id="pyraAns" class="answers three"></div>
       <div id="pyraFb" class="feedback" aria-live="polite"></div>
     </div>
+  </div>
+
+  <!-- LERNZEIT (Schule) -->
+  <div id="school" hidden>
+    <div class="bar"><button class="back" id="schoolBack">← Zurück</button></div>
+    <h2 class="title">Lernzeit 🏫</h2>
+    <p class="muted">Dein Stundenplan für heute – vier Stunden nacheinander, wie in der Schule. Zwischendurch läutet die Schulglocke. 🔔</p>
+    <div id="schoolPlan" class="schoolplan"></div>
+    <button class="next" id="schoolStart" style="margin-top:1rem;width:100%">🔔 Lernzeit starten</button>
   </div>
 
   <!-- POKALE -->
@@ -1107,7 +1123,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra"];
+  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1244,7 +1260,13 @@
     $("#doneEmoji").textContent=got>=9?"🏆":got>=6?"🎉":"🌟";
     $("#doneTitle").textContent=got>=9?"Fantastisch!":got>=6?"Super gemacht!":"Gut geübt!";
     $("#doneText").textContent="Du hast "+got+" von "+ROUNDS+" richtig – "+state.earned+" Sterne und "+state.correct+" Münzen 🪙 verdient.";
-    show("done");if(got>=6)confetti();speak($("#doneTitle").textContent);
+    if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;
+      $("#doneTitle").textContent=last?"Lernzeit geschafft! 🎓":"Stunde "+(SCHOOL.idx+1)+" geschafft!";
+      if(last)$("#doneEmoji").textContent="🎓";
+      $("#againBtn").textContent=last?"Fertig 🎉":"🔔 Nächste Stunde →";
+      $("#homeBtn").style.display=last?"none":"";$("#homeBtn").textContent="Lernzeit abbrechen";
+    } else {$("#againBtn").textContent="Nochmal";$("#homeBtn").style.display="";$("#homeBtn").textContent="Zur Startseite";}
+    show("done");if(got>=6||SCHOOL.on)confetti();speak($("#doneTitle").textContent);
   }
 
   /* ---------- Eltern-Bereich ---------- */
@@ -1746,6 +1768,18 @@
     var pct=Math.min(100,Math.round(today/goal*100));
     $("#homeGoal").innerHTML='<div class="goalrow">🎯 Tagesziel: <b>'+today+' / '+goal+' ⭐</b>'+(today>=goal?' <span style="color:var(--good)">geschafft! 🎉</span>':'')+'</div><div class="barmini"><i style="width:'+pct+'%"></i></div>';}
 
+  /* ---------- LERNZEIT (Schulmodus: mehrere Stunden nacheinander) ---------- */
+  var SCHOOL={on:false,lessons:[],idx:0};
+  function startSchool(){var picks=shuffle(SUBJ).slice(0,4);
+    SCHOOL={on:false,lessons:picks.map(function(s){return {key:s.k,level:2,emoji:s.e,name:s.n};}),idx:0};
+    var plan=$("#schoolPlan");plan.innerHTML="";
+    SCHOOL.lessons.forEach(function(L,i){var d=document.createElement("div");d.className="lessonrow";
+      d.innerHTML='<span class="no">'+(i+1)+'</span><span class="ic">'+L.emoji+'</span><span class="lt">'+L.name+'</span><span class="lst">Stunde '+(i+1)+'</span>';plan.appendChild(d);});
+    show("school");}
+  function schoolBegin(){if(!SCHOOL.lessons.length)return;SCHOOL.on=true;SCHOOL.idx=0;runLesson();}
+  function runLesson(){var L=SCHOOL.lessons[SCHOOL.idx];curGame=L.key;curLevel=L.level;try{tone(880,.15);setTimeout(function(){tone(660,.2);},160);}catch(e){}toast("🔔 Stunde "+(SCHOOL.idx+1)+": "+L.name);startGame();}
+  function schoolAdvance(){SCHOOL.idx++;if(SCHOOL.idx>=SCHOOL.lessons.length){SCHOOL.on=false;enterHome();return;}runLesson();}
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
   $("#shopBack").addEventListener("click",function(){KASSE.on=false;openGames();});
@@ -1771,8 +1805,11 @@
   Array.prototype.forEach.call(document.querySelectorAll("#schDiff button"),function(btn){btn.addEventListener("click",function(){chLevel=+btn.getAttribute("data-lv");startChess();});});
   $("#lvlBack").addEventListener("click",enterHome);
   $("#backBtn").addEventListener("click",function(){openLevels(state?state.key:curGame);});
-  $("#homeBtn").addEventListener("click",enterHome);
-  $("#againBtn").addEventListener("click",startGame);
+  $("#homeBtn").addEventListener("click",function(){SCHOOL.on=false;enterHome();});
+  $("#againBtn").addEventListener("click",function(){if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;if(last){SCHOOL.on=false;enterHome();}else schoolAdvance();}else startGame();});
+  $("#schoolBtn").addEventListener("click",startSchool);
+  $("#schoolBack").addEventListener("click",enterHome);
+  $("#schoolStart").addEventListener("click",schoolBegin);
   $("#speakBtn").addEventListener("click",function(){if(state&&state.current)speak(state.current.speak,state.current.speakLang);});
   $("#whoBtn").addEventListener("click",function(){renderProfiles();show("profiles");});
   $("#parentBtn").addEventListener("click",openParent);
