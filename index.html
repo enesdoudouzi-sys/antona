@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="de" data-skin="pro">
+<html lang="de" data-skin="premium">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f7f8fb">
+<meta name="theme-color" content="#f5f7fc">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lernsterne">
@@ -435,6 +435,87 @@
     border:1px solid var(--line);box-shadow:var(--shadow);border-radius:999px;padding:.5rem 1rem;font-family:"Fredoka",sans-serif;
     font-size:.95rem;opacity:0;transition:opacity .25s, transform .25s;z-index:80;pointer-events:none}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ===== ANTONA PREMIUM: ruhiges, modernes Lernprodukt ===== */
+  :root[data-skin="premium"]{
+    --bg:#f5f7fc;--bg2:#edf1f8;--panel:#ffffff;--ink:#20283a;--ink-soft:#748097;--line:#e5eaf3;
+    --accent:#5865e8;--accent-2:#8792ff;--math:#f07878;--read:#399ee8;--shape:#29b995;--clock:#9b7be8;
+    --good:#22a879;--bad:#e96b79;--star:#f2b94b;
+    --shadow:0 18px 42px -26px rgba(31,45,75,.28);--shadow-sm:0 8px 22px -16px rgba(31,45,75,.24);
+    color-scheme:light;
+  }
+  :root[data-skin="premium"] body{
+    background:radial-gradient(900px 420px at 50% -12%,rgba(88,101,232,.10),transparent 68%),
+      linear-gradient(180deg,#f8f9fd 0%,#eef2f9 100%);background-attachment:fixed;
+    font-family:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;
+  }
+  :root[data-skin="premium"] .wrap{max-width:48rem;padding-top:1.15rem}
+  :root[data-skin="premium"] .top{padding:.45rem .2rem .8rem;border-bottom:1px solid rgba(130,145,175,.16);margin-bottom:1.15rem}
+  :root[data-skin="premium"] .brand{font-size:1.48rem;letter-spacing:-.035em}
+  :root[data-skin="premium"] .brand .logo{filter:drop-shadow(0 3px 5px rgba(242,185,75,.28))}
+  :root[data-skin="premium"] h2.title{font-size:1.75rem;letter-spacing:-.035em;line-height:1.15;margin:.35rem 0 .45rem}
+  :root[data-skin="premium"] .muted{line-height:1.55;font-weight:700}
+  :root[data-skin="premium"] .bubble,:root[data-skin="premium"] .sheet,
+  :root[data-skin="premium"] .focus-panel,:root[data-skin="premium"] .card{
+    border-color:rgba(210,218,234,.8);box-shadow:var(--shadow);border-radius:1.35rem
+  }
+  :root[data-skin="premium"] .bubble{padding:.9rem 1.1rem}
+  :root[data-skin="premium"] .tile{
+    border:1px solid rgba(255,255,255,.72);border-radius:1.35rem;min-height:9rem;padding:1.25rem;
+    box-shadow:0 12px 26px -18px rgba(32,45,80,.38);transition:transform .22s ease,box-shadow .22s ease,filter .22s ease
+  }
+  :root[data-skin="premium"] .tile:hover{transform:translateY(-3px);box-shadow:0 18px 34px -20px rgba(32,45,80,.42);filter:saturate(1.04)}
+  :root[data-skin="premium"] .tile:active{transform:scale(.985)}
+  :root[data-skin="premium"] .tile .emoji{
+    display:grid;place-items:center;width:3.15rem;height:3.15rem;border-radius:1rem;
+    background:rgba(255,255,255,.22);font-size:1.8rem;margin-bottom:.2rem
+  }
+  :root[data-skin="premium"] .tile .name{font-size:1.35rem;letter-spacing:-.02em}
+  :root[data-skin="premium"] .morecard,:root[data-skin="premium"] .pcard,:root[data-skin="premium"] .lvl,
+  :root[data-skin="premium"] .lessonrow,:root[data-skin="premium"] .badge{
+    border:1px solid var(--line);border-radius:1.2rem;box-shadow:var(--shadow-sm);
+    transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease
+  }
+  :root[data-skin="premium"] .morecard:hover,:root[data-skin="premium"] .pcard:hover,
+  :root[data-skin="premium"] .lvl:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  :root[data-skin="premium"] .morecard{min-height:8rem;padding:1.2rem .7rem;background:linear-gradient(180deg,var(--panel),#fafbff)}
+  :root[data-skin="premium"] .morecard>span{font-weight:800}
+  :root[data-skin="premium"] .pcard{background:linear-gradient(180deg,#fff,#fafbff)}
+  :root[data-skin="premium"] .pcard .av{background:#eef1ff}
+  :root[data-skin="premium"] .primary,:root[data-skin="premium"] .next{
+    background:linear-gradient(135deg,var(--accent),#737ff0);border-radius:1rem;
+    box-shadow:0 8px 18px -10px rgba(88,101,232,.72);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease
+  }
+  :root[data-skin="premium"] .primary:hover,:root[data-skin="premium"] .next:hover{filter:brightness(1.04);box-shadow:0 12px 22px -10px rgba(88,101,232,.72);transform:translateY(-1px)}
+  :root[data-skin="premium"] .back,:root[data-skin="premium"] .iconbtn,:root[data-skin="premium"] .who,
+  :root[data-skin="premium"] .pill{border-color:var(--line);box-shadow:var(--shadow-sm);border-radius:1rem}
+  :root[data-skin="premium"] .progress{height:.65rem;background:#e8ecf5;border-radius:999px}
+  :root[data-skin="premium"] .progress>i{background:linear-gradient(90deg,#5865e8,#35b9a0);box-shadow:0 0 10px rgba(88,101,232,.22)}
+  :root[data-skin="premium"] .sheet{padding:1.2rem;margin-bottom:1rem;background:rgba(255,255,255,.94)}
+  :root[data-skin="premium"] .sheet h3{font-size:1.2rem;letter-spacing:-.02em}
+  :root[data-skin="premium"] .statrow{padding:.72rem .1rem;border-color:#edf0f6}
+  :root[data-skin="premium"] .statrow .ic{border-radius:.8rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+  :root[data-skin="premium"] .statrow .val{font-size:1.2rem;color:var(--ink)}
+  :root[data-skin="premium"] .focus-metric>div{background:linear-gradient(180deg,#f8f9ff,#eff2fb);border:1px solid #e8ecf6;border-radius:1rem;padding:.9rem .5rem}
+  :root[data-skin="premium"] .focus-metric b{color:var(--accent)}
+  :root[data-skin="premium"] .focus-choice{border-radius:1rem;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+  :root[data-skin="premium"] .focus-choice:hover{transform:translateY(-1px);border-color:var(--accent)}
+  :root[data-skin="premium"] .tab{transition:background .18s ease,color .18s ease}
+  :root[data-skin="premium"] .tab.on{color:var(--accent)}
+  :root[data-skin="premium"] .screen-in{animation:premiumEnter .32s cubic-bezier(.2,.75,.25,1)}
+  @keyframes premiumEnter{from{opacity:0;transform:translateY(10px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @media(max-width:460px){
+    :root[data-skin="premium"] .wrap{padding-top:.7rem}
+    :root[data-skin="premium"] .grid{gap:.7rem}
+    :root[data-skin="premium"] .tile{min-height:8.2rem;padding:1rem}
+    :root[data-skin="premium"] .tile .emoji{width:2.7rem;height:2.7rem;font-size:1.55rem}
+    :root[data-skin="premium"] .tile .name{font-size:1.18rem}
+  }
+  @media(prefers-reduced-motion:reduce){
+    :root[data-skin="premium"] .screen-in{animation:none}
+    :root[data-skin="premium"] .tile,:root[data-skin="premium"] .morecard,:root[data-skin="premium"] .pcard{transition:none}
+  }
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2148,15 +2229,15 @@
   $("#parentBack").addEventListener("click",enterHome);
 
   /* Design-Umschalter (3 Designs) */
-  var SKINS=["pro","neon","soft","sunny"],SKIN_NAME={pro:"Pro (hell, App-Look)",neon:"Neon (dunkel)",soft:"Soft (hell)",sunny:"Sonnig (warm)"};
+  var SKINS=["premium","pro","neon","soft","sunny"],SKIN_NAME={premium:"Premium (modern)",pro:"Pro (hell, App-Look)",neon:"Neon (dunkel)",soft:"Soft (hell)",sunny:"Sonnig (warm)"};
   function applySkin(s){if(SKINS.indexOf(s)<0)s="pro";document.documentElement.setAttribute("data-skin",s);}
   var toastEl=null,toastT=0;
   function toast(msg){if(!toastEl){toastEl=document.createElement("div");toastEl.className="toast";document.body.appendChild(toastEl);}
     toastEl.textContent=msg;toastEl.classList.add("on");clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove("on");},1500);}
   var skinBtn=$("#themeBtn");skinBtn.textContent="🎨";skinBtn.title="Design wechseln";skinBtn.setAttribute("aria-label","Design wechseln");
-  applySkin(load("antona_skin","pro"));applyBig();
+  applySkin(load("antona_skin","premium"));applyBig();
   skinBtn.addEventListener("click",function(){
-    var cur=load("antona_skin","pro"),nx=SKINS[(SKINS.indexOf(cur)+1)%SKINS.length];
+    var cur=load("antona_skin","premium"),nx=SKINS[(SKINS.indexOf(cur)+1)%SKINS.length];
     save("antona_skin",nx);applySkin(nx);toast("Design: "+SKIN_NAME[nx]);
   });
 
