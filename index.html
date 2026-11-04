@@ -1481,16 +1481,20 @@
 
   /* ---------- Profile-UI ---------- */
   function renderProfiles(){
-    var box=$("#profileList");box.innerHTML="";
+    var box=$("#profileList");if(!box)return;box.innerHTML="";
+    if(!Array.isArray(profiles))profiles=[];
+    profiles=profiles.filter(function(p){return p&&typeof p==="object";});
     profiles.forEach(function(p){
-      var b=document.createElement("button");b.className="pcard";
-      b.innerHTML='<span class="av">'+p.av+'</span><span class="pn">'+p.name+'</span><span class="ps">★ '+p.stats.stars+'</span>';
-      b.addEventListener("click",function(){activeId=p.id;persist();enterHome();});
+      if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};
+      var b=document.createElement("button");b.type="button";b.className="pcard";b.style.position="relative";b.style.zIndex="2";b.style.pointerEvents="auto";
+      b.innerHTML='<span class="av">'+(p.av||"⭐")+'</span><span class="pn"></span><span class="ps">★ '+(p.stats.stars||0)+'</span>';
+      b.querySelector(".pn").textContent=p.name||"Kind";
+      b.onclick=function(ev){if(ev)ev.preventDefault();activeId=p.id;persist();enterHome();};
       box.appendChild(b);
     });
-    var add=document.createElement("button");add.className="pcard add";
+    var add=document.createElement("button");add.type="button";add.className="pcard add";add.style.position="relative";add.style.zIndex="2";add.style.pointerEvents="auto";
     add.innerHTML='<span class="av">＋</span><span class="pn">Neu</span><span class="ps">Kind anlegen</span>';
-    add.addEventListener("click",openNewProfile);box.appendChild(add);
+    add.onclick=function(ev){if(ev)ev.preventDefault();openNewProfile();};box.appendChild(add);
   }
   var pickedAv=AVATARS[0];
   function openNewProfile(){
