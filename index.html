@@ -558,6 +558,7 @@
   </div>
 
   <!-- PROFILE -->
+  <button id="profileAddFixed" type="button" aria-label="Kind anlegen" style="display:none;position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:2147483647;width:calc(100% - 32px);max-width:420px;margin:auto;padding:18px 22px;border:0;border-radius:18px;background:#5b6cff;color:#fff;font:800 18px system-ui;box-shadow:0 8px 28px rgba(20,30,80,.35);touch-action:manipulation;pointer-events:auto" onclick="var b=document.querySelector('#profileList .pcard.add');if(b){b.click()}else{document.getElementById('profiles').hidden=true;document.getElementById('newProfile').hidden=false;}">＋ Kind anlegen</button>
   <div id="profiles">
     <h2 class="title">Wer lernt heute?</h2>
     <p class="muted">Wähle dein Profil oder lege ein neues an.</p>
@@ -1469,7 +1470,7 @@
 
   /* ---------- Screens ---------- */
   var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
-  function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
+  function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display=(id==="profiles"?"block":"none");SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
     $("#starPill").hidden=!hasActive||pre;
