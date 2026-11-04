@@ -8,7 +8,23 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lernsterne">
-<style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+  /* ANTONA FOKUS – ruhige, kurze Konzentrationseinheiten */
+  .focus-panel{background:var(--panel);border:1px solid var(--line);border-radius:1.2rem;padding:1rem;box-shadow:var(--shadow-sm);margin:.7rem 0}
+  .focus-moods,.focus-options{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+  .focus-choice{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:1rem;padding:.7rem .9rem;font:inherit;cursor:pointer}
+  .focus-choice[aria-pressed="true"]{border-color:var(--accent);background:var(--bg2);box-shadow:0 0 0 2px var(--accent)}
+  .focus-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.45rem;width:100%;max-width:25rem;margin:.8rem auto}
+  .focus-cell{aspect-ratio:1;border:1px solid var(--line);background:var(--bg2);border-radius:.8rem;font-size:1.65rem;cursor:pointer}
+  .focus-cell.selected{background:#dff7ec;border-color:var(--good)}
+  .focus-cell:disabled{opacity:.65}
+  .focus-metric{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .focus-metric>div{background:var(--bg2);border-radius:.8rem;padding:.7rem;text-align:center}
+  .focus-metric b{display:block;font:600 1.4rem Fredoka,sans-serif}
+  .focus-input{width:min(100%,18rem);padding:.8rem;border:1px solid var(--line);border-radius:.8rem;background:var(--panel);color:var(--ink);font:inherit;text-align:center}
+  .focus-note{font-size:.9rem;color:var(--ink-soft);text-align:center}
+
+</style>
 <title>Lernsterne</title>
 <style>
   /* Layout: Echte-App-Look — Profil-Auswahl → Fächer-Home → Stufen → Vollbild-Aufgabe → Belohnung; eigener Eltern-Bereich. */
@@ -487,9 +503,87 @@
         <button class="morecard" id="pokaleBtn">🏆<span>Pokale</span></button>
         <button class="morecard" id="avatarBtn">🙂<span>Avatar</span></button>
         <button class="morecard" id="schoolBtn2">🏫<span>Lernzeit</span></button>
+        <button class="morecard" id="focusEntry">🧠<span>Fokus & Konzentration</span></button>
+        <button class="morecard" id="coachEntry">🌱<span>Lerncoach</span></button>
       </div>
     </div>
     <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
+  </div>
+
+
+  <!-- ANTONA FOKUS -->
+  <div id="focus" hidden>
+    <div class="bar"><button class="back" id="focusBack">← Zurück</button><span class="spacer"></span><span class="gbadge">🧠 Fokuszeit</span></div>
+    <h2 class="title">ANTONA FOKUS</h2>
+    <p class="muted">Kurze Spiele für Aufmerksamkeit, Gedächtnis und konzentriertes Arbeiten.</p>
+    <section id="focusStart" class="focus-panel">
+      <h3 class="title" style="margin:.2rem 0">Wie fühlst du dich gerade?</h3>
+      <p class="focus-note">Es gibt kein Richtig oder Falsch. Wir passen die Übung an.</p>
+      <div class="focus-moods">
+        <button class="focus-choice" data-mood="bereit" aria-pressed="true">🟢 Bereit</button>
+        <button class="focus-choice" data-mood="unruhig" aria-pressed="false">🟡 Etwas unruhig</button>
+        <button class="focus-choice" data-mood="pause" aria-pressed="false">🔴 Brauche erst Ruhe</button>
+      </div>
+      <p id="focusStartHint" class="focus-note">Wir starten mit einer kurzen, ruhigen Einheit.</p>
+      <button class="next" id="focusStartBtn" style="width:100%">Fokus-Einheit starten · ca. 3 Minuten</button>
+    </section>
+    <section id="focusPlay" class="focus-panel" hidden>
+      <div class="bar"><span class="gbadge" id="focusStep">Übung 1/4</span><span class="spacer"></span><span class="round" id="focusLevel">Stufe 1</span></div>
+      <div class="progress"><i id="focusProgress" style="width:0%"></i></div>
+      <h3 class="title" id="focusTitle" style="text-align:center">Augen auf!</h3>
+      <p id="focusPrompt" class="muted" style="text-align:center">Finde alle Sterne.</p>
+      <div id="focusBoard"></div>
+      <div id="focusFeedback" class="feedback" aria-live="polite"></div>
+      <button class="next" id="focusCheck" style="width:100%">Prüfen</button>
+      <p class="focus-note">Du kannst dir Zeit nehmen. Es geht um genaues Hinschauen, nicht um Schnelligkeit.</p>
+    </section>
+    <section id="focusResult" class="focus-panel" hidden>
+      <div style="font-size:2.8rem;text-align:center">🌟</div>
+      <h3 class="title" style="text-align:center">Das hast du geschafft!</h3>
+      <div class="focus-metric">
+        <div><b id="focusCorrect">0/4</b><span class="focus-note">Aufgaben</span></div>
+        <div><b id="focusAccuracy">0%</b><span class="focus-note">Genauigkeit</span></div>
+        <div><b id="focusBest">1</b><span class="focus-note">Deine Stufe</span></div>
+      </div>
+      <p class="muted" id="focusCoachText" style="margin:.8rem 0"></p>
+      <h3 class="title" style="text-align:center">Wie war die Konzentration?</h3>
+      <div class="focus-options">
+        <button class="focus-choice" data-reflect="leicht">😊 Leicht</button>
+        <button class="focus-choice" data-reflect="mittel">😐 Ganz okay</button>
+        <button class="focus-choice" data-reflect="schwer">😮‍💨 Anstrengend</button>
+      </div>
+      <p class="focus-note" id="focusSaved" aria-live="polite"></p>
+      <button class="next" id="focusAgain" style="width:100%">Noch eine Fokus-Einheit</button>
+      <button class="back" id="focusHome" style="width:100%;margin-top:.5rem">Zur Startseite</button>
+    </section>
+  </div>
+
+  <!-- LERNCOACH -->
+  <div id="coach" hidden>
+    <div class="bar"><button class="back" id="coachBack">← Zurück</button></div>
+    <h2 class="title">Dein Lerncoach 🌱</h2>
+    <p class="muted">Kleine Schritte helfen beim Lernen. Fehler zeigen, was wir als Nächstes üben können.</p>
+    <div class="focus-panel">
+      <h3 class="title">Dein persönlicher Lernstand</h3>
+      <div class="focus-metric">
+        <div><b id="coachSessions">0</b><span class="focus-note">Fokus-Einheiten</span></div>
+        <div><b id="coachMinutes">0</b><span class="focus-note">Fokus-Minuten</span></div>
+        <div><b id="coachLevel">1</b><span class="focus-note">Fokus-Stufe</span></div>
+      </div>
+      <p id="coachAdvice" class="muted" style="margin:1rem 0 .3rem"></p>
+    </div>
+    <div class="focus-panel">
+      <h3 class="title">Unsere Lernregeln</h3>
+      <p>⭐ Wir üben in kleinen Schritten.</p><p>💚 Pausen sind erlaubt und sinnvoll.</p>
+      <p>🧩 Fehler sind Hinweise – kein Grund, aufzugeben.</p>
+      <p>🌱 Wir vergleichen dich nicht mit anderen, sondern freuen uns über deinen eigenen Fortschritt.</p>
+    </div>
+    <div class="focus-panel">
+      <h3 class="title">Eine kleine Strategie</h3>
+      <p>1. Aufgabe anschauen.</p><p>2. Einen Schritt nach dem anderen machen.</p>
+      <p>3. Bei Ablenkung kurz stoppen und freundlich zur Aufgabe zurückkehren.</p>
+      <p>4. Danach prüfen: Brauche ich Hilfe oder eine Pause?</p>
+    </div>
   </div>
 
   <!-- STUFEN -->
@@ -1233,7 +1327,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
+  var SCREENS=["profiles","newProfile","home","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1919,8 +2013,84 @@
   /* Große Schrift */
   function applyBig(){try{document.documentElement.style.fontSize=load("antona_big",false)?"18.5px":"";}catch(e){}}
 
+
+  /* ---------- ANTONA FOKUS: Aufmerksamkeit, Arbeitsgedächtnis, Muster & Reflexion ---------- */
+  var FOCUS={mood:"bereit",round:0,total:4,correct:0,task:null,level:1,answered:false,selected:[],sequence:[]};
+  function focusStats(p){if(!p.stats.focusSessions)p.stats.focusSessions=0;if(!p.stats.focusMinutes)p.stats.focusMinutes=0;if(!p.stats.focusLevel)p.stats.focusLevel=1;if(!p.stats.focusHistory)p.stats.focusHistory=[];}
+  function openFocus(){var p=active();if(!p)return;focusStats(p);FOCUS.mood="bereit";
+    $("#focusStart").hidden=false;$("#focusPlay").hidden=true;$("#focusResult").hidden=true;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-mood]"),function(b){b.setAttribute("aria-pressed",b.getAttribute("data-mood")==="bereit"?"true":"false");});
+    $("#focusStartHint").textContent="Wir starten mit einer kurzen, ruhigen Einheit.";show("focus");}
+  function focusBegin(){var p=active();if(!p)return;focusStats(p);
+    FOCUS={mood:FOCUS.mood,round:0,total:FOCUS.mood==="unruhig"?3:4,correct:0,task:null,level:Math.max(1,Math.min(5,p.stats.focusLevel||1)),answered:false,selected:[],sequence:[]};
+    $("#focusStart").hidden=true;$("#focusPlay").hidden=false;$("#focusResult").hidden=true;focusNext();}
+  function focusNext(){if(FOCUS.round>=FOCUS.total)return focusFinish();FOCUS.round++;FOCUS.answered=false;FOCUS.selected=[];
+    $("#focusStep").textContent="Übung "+FOCUS.round+"/"+FOCUS.total;$("#focusLevel").textContent="Stufe "+FOCUS.level;
+    $("#focusProgress").style.width=Math.round((FOCUS.round-1)/FOCUS.total*100)+"%";$("#focusFeedback").textContent="";$("#focusFeedback").className="feedback";
+    $("#focusCheck").disabled=false;$("#focusCheck").textContent="Prüfen";var kind=(FOCUS.round-1)%4;
+    if(kind===0)focusVisual();else if(kind===1)focusMemory();else if(kind===2)focusPattern();else focusInstruction();
+  }
+  function focusVisual(){var target="⭐",pool=["🌙","🍀","🎈","🌸","🔷","🐠","☀️"],count=2+Math.min(FOCUS.level,3),arr=[];
+    for(var i=0;i<count;i++)arr.push(target);while(arr.length<25)arr.push(pool[Math.floor(Math.random()*pool.length)]);
+    arr.sort(function(){return Math.random()-.5;});FOCUS.task={type:"visual",target:target,answer:count};$("#focusTitle").textContent="Aufmerksam schauen";
+    $("#focusPrompt").textContent="Tippe alle "+target+" an. Wie viele findest du?";
+    var g=$("#focusBoard");g.className="focus-grid";g.innerHTML="";
+    arr.forEach(function(v){var b=document.createElement("button");b.className="focus-cell";b.textContent=v;b.setAttribute("aria-label","Symbol");b.addEventListener("click",function(){if(FOCUS.answered||b.disabled)return;b.classList.add("selected");b.disabled=true;if(v===target)FOCUS.selected.push(1);else FOCUS.selected.push(0);});g.appendChild(b);});
+  }
+  function focusMemory(){var len=2+Math.min(FOCUS.level,3),seq=[];for(var i=0;i<len;i++)seq.push(1+Math.floor(Math.random()*9));FOCUS.task={type:"memory",answer:seq.join("")};FOCUS.sequence=seq;
+    $("#focusTitle").textContent="Merk dir die Zahlen";$("#focusPrompt").textContent="Schau dir die Zahlenfolge an und merke sie dir.";
+    var g=$("#focusBoard");g.className="";g.innerHTML='<div class="title" style="font-size:2.4rem;text-align:center;padding:1.4rem" id="focusSequence"></div><p class="focus-note">Die Zahlen verschwinden gleich.</p>';
+    $("#focusSequence").textContent=seq.join(" · ");setTimeout(function(){if(FOCUS.task&&FOCUS.task.type==="memory"&&!FOCUS.answered){$("#focusSequence").textContent="Jetzt bist du dran!";$("#focusPrompt").textContent="Schreibe die Zahlen ohne Leerzeichen auf.";g.insertAdjacentHTML("beforeend",'<input id="focusAnswer" class="focus-input" inputmode="numeric" maxlength="6" aria-label="Zahlenfolge">');}},FOCUS.mood==="unruhig"?2600:1900);
+  }
+  function focusPattern(){var a=2+FOCUS.level,b=a+2,c=b+2;FOCUS.task={type:"pattern",answer:String(c+2)};$("#focusTitle").textContent="Muster erkennen";$("#focusPrompt").textContent="Welche Zahl kommt als Nächstes?  "+a+" · "+b+" · "+c+" · ?";
+    var g=$("#focusBoard");g.className="focus-options";g.innerHTML="";[c+1,c+2,c+3,c+4].sort(function(){return Math.random()-.5;}).forEach(function(v){var b=document.createElement("button");b.className="focus-choice";b.textContent=v;b.addEventListener("click",function(){if(FOCUS.answered)return;FOCUS.selected=[String(v)];Array.prototype.forEach.call(g.children,function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});});g.appendChild(b);});
+  }
+  function focusInstruction(){var words=["ROT","BLAU","GRÜN","GELB"],seq=FOCUS.level>2?["ROT","GRÜN","BLAU"]:["BLAU","GELB"];FOCUS.task={type:"instruction",answer:seq.join(",")};
+    $("#focusTitle").textContent="Schritt für Schritt";$("#focusPrompt").textContent="Merke dir die Reihenfolge und tippe sie danach ein.";
+    var g=$("#focusBoard");g.className="";g.innerHTML='<div class="title" style="font-size:1.5rem;padding:1rem" id="focusInstructionText">'+seq.join(" → ")+'</div>';
+    setTimeout(function(){if(FOCUS.task&&FOCUS.task.type==="instruction"&&!FOCUS.answered){$("#focusInstructionText").textContent="Welche Reihenfolge war es?";$("#focusPrompt").textContent="Schreibe die Farben in der richtigen Reihenfolge.";g.insertAdjacentHTML("beforeend",'<input id="focusAnswer" class="focus-input" aria-label="Reihenfolge" placeholder="z. B. BLAU,GELB">');}},FOCUS.mood==="unruhig"?2600:1900);
+  }
+  function focusCheck(){if(FOCUS.answered||!FOCUS.task)return;var ok=false,t=FOCUS.task;
+    if(t.type==="visual"){var found=FOCUS.selected.filter(function(x){return x===1;}).length,wrong=FOCUS.selected.filter(function(x){return x===0;}).length;ok=found===t.answer&&wrong===0;}
+    else if(t.type==="pattern"){ok=FOCUS.selected[0]===t.answer;}
+    else{var inp=$("#focusAnswer");if(!inp){$("#focusFeedback").textContent="Warte kurz, bis die Aufgabe bereit ist.";return;}var val=inp.value.replace(/[^0-9A-Za-zÄÖÜäöü,]/g,"").toUpperCase().replace(/,/g,"");var ans=String(t.answer).replace(/,/g,"");ok=val===ans;}
+    FOCUS.answered=true;if(ok){FOCUS.correct++;$("#focusFeedback").className="feedback ok";$("#focusFeedback").textContent="Genau hingeschaut! 🌟";}else{$("#focusFeedback").className="feedback try";$("#focusFeedback").textContent="Guter Versuch. Fehler helfen uns beim Üben – weiter geht’s!";}
+    $("#focusCheck").disabled=true;$("#focusCheck").textContent="Weiter →";$("#focusCheck").onclick=focusNext;
+  }
+  function focusFinish(){var p=active();if(!p)return;focusStats(p);var pct=Math.round(FOCUS.correct/FOCUS.total*100);
+    p.stats.focusSessions++;p.stats.focusMinutes+=(FOCUS.total===3?2:3);p.stats.focusHistory.push({date:dayKey(),score:FOCUS.correct,total:FOCUS.total,mood:FOCUS.mood});
+    if(p.stats.focusHistory.length>30)p.stats.focusHistory.shift();
+    if(pct>=75&&p.stats.focusLevel<5)p.stats.focusLevel++;else if(pct<40&&p.stats.focusLevel>1)p.stats.focusLevel--;
+    p.stats.focusLastMood=FOCUS.mood;persist();$("#focusProgress").style.width="100%";
+    $("#focusPlay").hidden=true;$("#focusResult").hidden=false;$("#focusCorrect").textContent=FOCUS.correct+"/"+FOCUS.total;$("#focusAccuracy").textContent=pct+"%";$("#focusBest").textContent=p.stats.focusLevel;
+    var tip=pct>=75?"Du hast dich heute richtig gut konzentriert. Beim nächsten Mal wartet eine etwas anspruchsvollere Übung.":pct>=40?"Du bist drangeblieben. Wir üben weiter in kleinen Schritten – das ist genau richtig.":"Heute war es anspruchsvoll. Eine kurze Pause, etwas trinken und später noch einmal probieren kann helfen.";
+    if(FOCUS.mood==="pause")tip="Du hast auf dich gehört. Eine Pause ist eine gute Entscheidung. Du kannst später wiederkommen.";
+    $("#focusCoachText").textContent=tip;$("#focusSaved").textContent="Dein Fortschritt wurde nur auf diesem Gerät im Profil gespeichert.";$("#focusCheck").onclick=focusCheck;
+  }
+  function focusReflect(value){var p=active();if(!p)return;focusStats(p);p.stats.focusLastReflection=value;persist();
+    $("#focusSaved").textContent=value==="leicht"?"Schön, dass es heute leicht ging!":value==="mittel"?"Danke für deine ehrliche Einschätzung.":"Gut, dass du merkst, wann etwas anstrengend ist. Eine Pause ist okay.";}
+  function openCoach(){var p=active();if(!p)return;focusStats(p);$("#coachSessions").textContent=p.stats.focusSessions;$("#coachMinutes").textContent=p.stats.focusMinutes;$("#coachLevel").textContent=p.stats.focusLevel;
+    var hist=p.stats.focusHistory||[],last=hist.length?hist[hist.length-1]:null;
+    $("#coachAdvice").textContent=last?(last.score>=last.total*.75?"Deine letzte Einheit lief gut. Wir erhöhen die Schwierigkeit langsam.":"Wir bleiben bei kurzen Übungen und wiederholen die Grundlagen."):"Starte mit einer kurzen Fokus-Einheit. Danach passen wir die nächste Übung an deinen Fortschritt an.";
+    show("coach");}
+
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
+
+  $("#focusEntry").addEventListener("click",openFocus);
+  $("#coachEntry").addEventListener("click",openCoach);
+  $("#focusBack").addEventListener("click",enterHome);
+  $("#coachBack").addEventListener("click",enterHome);
+  $("#focusStartBtn").addEventListener("click",focusBegin);
+  $("#focusCheck").addEventListener("click",focusCheck);
+  $("#focusAgain").addEventListener("click",openFocus);
+  $("#focusHome").addEventListener("click",enterHome);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-mood]"),function(b){b.addEventListener("click",function(){
+    FOCUS.mood=b.getAttribute("data-mood");Array.prototype.forEach.call(document.querySelectorAll("[data-mood]"),function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});
+    $("#focusStartHint").textContent=FOCUS.mood==="pause"?"Mach zuerst eine kleine Pause. Du kannst starten, wenn du bereit bist.":FOCUS.mood==="unruhig"?"Wir machen eine kürzere Einheit mit weniger Aufgaben.":"Wir starten mit einer kurzen, ruhigen Einheit.";
+  });});
+  Array.prototype.forEach.call(document.querySelectorAll("[data-reflect]"),function(b){b.addEventListener("click",function(){focusReflect(b.getAttribute("data-reflect"));});});
+
   $("#shopBack").addEventListener("click",function(){KASSE.on=false;openGames();});
   $("#vierBack").addEventListener("click",function(){if(VIER)VIER.over=true;openGames();});
   $("#galgenBack").addEventListener("click",function(){if(GAL)GAL.over=true;openGames();});
