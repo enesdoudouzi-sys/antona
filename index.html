@@ -516,6 +516,26 @@
     :root[data-skin="premium"] .tile,:root[data-skin="premium"] .morecard,:root[data-skin="premium"] .pcard{transition:none}
   }
 
+
+  /* Lehrplan: klare, reduzierte Lernoberfläche */
+  .curriculum-intro{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.5rem 0 1rem}
+  .eyebrow{font-size:.72rem;letter-spacing:.12em;font-weight:900;color:var(--accent)}
+  .quick-tools{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1rem}
+  .quick-tool{display:flex;align-items:center;gap:.65rem;text-align:left;padding:.85rem;background:var(--panel);border:1px solid var(--line);border-radius:1rem;color:var(--ink);font:inherit;box-shadow:var(--shadow-sm);cursor:pointer}
+  .quick-tool>span:first-child{font-size:1.5rem}.quick-tool b,.quick-tool small{display:block}.quick-tool small{font-size:.76rem;color:var(--ink-soft);margin-top:.15rem}
+  .curr-card{background:var(--panel);border:1px solid var(--line);border-radius:1.25rem;padding:1rem;margin:.85rem 0;box-shadow:var(--shadow-sm)}
+  .curr-head{display:flex;align-items:center;gap:.75rem}.curr-icon{width:2.8rem;height:2.8rem;border-radius:.9rem;background:var(--bg2);display:grid;place-items:center;font-size:1.5rem}
+  .curr-head h3{margin:0;font:700 1.15rem "Fredoka",sans-serif}.curr-head p{margin:.15rem 0 0;color:var(--ink-soft);font-size:.85rem}
+  .curr-card ul{padding-left:1.25rem;color:var(--ink);line-height:1.55}.curr-card li{padding:.12rem 0}
+  .curr-actions{display:flex;flex-wrap:wrap;gap:.45rem}.curr-btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:.8rem;padding:.55rem .7rem;font:800 .82rem "Nunito",sans-serif;cursor:pointer}
+  .curr-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .curr-note{font-size:.78rem;color:var(--ink-soft);line-height:1.5;margin:.7rem 0 0}
+  .reflection-box{background:var(--bg);border-radius:1rem;padding:.85rem;margin-top:.8rem}.reflection-box p{font-size:.88rem;color:var(--ink-soft);margin:.35rem 0}
+  .reflection-box label{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem 0;font-size:.88rem}.reflection-box input{accent-color:var(--accent);margin-top:.2rem}
+  .curr-honest{background:var(--bg2);box-shadow:none}.curr-honest p{font-size:.85rem;line-height:1.5;margin:.4rem 0 0;color:var(--ink-soft)}
+  .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  @media(max-width:460px){.curriculum-intro{align-items:flex-start;flex-direction:column}.quick-tools{grid-template-columns:1fr}}
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -560,37 +580,63 @@
       <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" id="homeSub" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
     </div>
     <div id="homeGoal" class="homegoal"></div>
-    <div class="tabs" id="homeTabs"><button class="tab on" data-tab="learn">📚 Lernen</button><button class="tab" data-tab="more">🎮 Spiele & Mehr</button></div>
-    <div id="tab-learn">
-      <div class="grid">
-        <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Rechnen</span><span class="sub">Mengen · bis 100 · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
-        <button class="tile r" data-game="read"><span class="emoji">🔤</span><span class="name">Lesen</span><span class="sub">Anlaute · Wörter · ä ö ü ß</span><span class="mini" id="best-read">★ 0</span></button>
-        <button class="tile s" data-game="shape"><span class="emoji">🔺</span><span class="name">Formen & Farben</span><span class="sub">Erkennen & benennen</span><span class="mini" id="best-shape">★ 0</span></button>
-        <button class="tile c" data-game="clock"><span class="emoji">🕐</span><span class="name">Die Uhr</span><span class="sub">Uhrzeit lesen</span><span class="mini" id="best-clock">★ 0</span></button>
-        <button class="tile e" data-game="english" style="grid-column:1/-1;min-height:6.5rem"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Hören & zuordnen: Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
-        <button class="tile tr" data-game="tr"><span class="emoji">🇹🇷</span><span class="name">Türkisch</span><span class="sub">Renkler · Hayvanlar · Sayılar</span><span class="mini" id="best-tr">★ 0</span></button>
-        <button class="tile d" data-game="denken" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🧠</span><span class="name">Denken & Konzentration</span><span class="sub">Muster, Zahlenreihen & Logik – genau hinschauen</span><span class="mini" id="best-denken">★ 0</span></button>
-        <button class="tile k" data-game="sach" style="grid-column:1/-1;min-height:6rem"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere, Körper, Jahreszeiten & Verkehr</span><span class="mini" id="best-sach">★ 0</span></button>
-        <button class="tile mu" data-game="musik"><span class="emoji">🎵</span><span class="name">Musik</span><span class="sub">Instrumente & Töne</span><span class="mini" id="best-musik">★ 0</span></button>
-        <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen & Welt</span><span class="mini" id="best-geo">★ 0</span></button>
-      </div>
-      <button class="next" id="schoolBtn" style="width:100%;margin-top:1rem">🏫 Lernzeit – wie in der Schule</button>
+    <div class="curriculum-intro">
+      <div><span class="eyebrow">LERNPLAN · KLASSE 2</span><h2 class="title" style="margin:.25rem 0">Was möchtest du heute üben?</h2><p class="muted" style="margin:0">Wähle ein Lerngebiet. Kleine Schritte bringen dich weiter.</p></div>
+      <button class="back" id="curriculumOpen">Alle Lernziele</button>
     </div>
-    <div id="tab-more" hidden>
-      <div class="morebtns">
-        <button class="morecard" id="gamesEntry">🎮<span>Spiele</span></button>
-        <button class="morecard" id="petBtn">🐣<span>Mein Tier</span></button>
-        <button class="morecard" id="chestBtn">🎁<span>Schatztruhe</span></button>
-        <button class="morecard" id="pokaleBtn">🏆<span>Pokale</span></button>
-        <button class="morecard" id="avatarBtn">🙂<span>Avatar</span></button>
-        <button class="morecard" id="schoolBtn2">🏫<span>Lernzeit</span></button>
-        <button class="morecard" id="focusEntry">🧠<span>Fokus & Konzentration</span></button>
-        <button class="morecard" id="coachEntry">🌱<span>Lerncoach</span></button>
-      </div>
+    <div class="grid">
+      <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Mathematik</span><span class="sub">Zahlen bis 100 · Plus · Minus · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
+      <button class="tile r" data-game="read"><span class="emoji">📖</span><span class="name">Deutsch</span><span class="sub">Lesen · Wörter · Sätze · Rechtschreibung</span><span class="mini" id="best-read">★ 0</span></button>
+      <button class="tile s" data-game="shape"><span class="emoji">📐</span><span class="name">Formen & Daten</span><span class="sub">Formen erkennen · vergleichen · ordnen</span><span class="mini" id="best-shape">★ 0</span></button>
+      <button class="tile c" data-game="clock"><span class="emoji">🕒</span><span class="name">Zeit & Uhr</span><span class="sub">Volle · halbe · Viertelstunden</span><span class="mini" id="best-clock">★ 0</span></button>
     </div>
-    <div class="foot">Tipp: Mit 🔊 wird die Aufgabe vorgelesen.</div>
+    <div class="quick-tools">
+      <button class="quick-tool" id="focusEntry">🧠 <span><b>Fokus trainieren</b><small>Aufmerksamkeit und Gedächtnis</small></span></button>
+      <button class="quick-tool" id="coachEntry">🌱 <span><b>Lerncoach</b><small>Tipps für deinen nächsten Schritt</small></span></button>
+    </div>
+    <button class="next" id="schoolBtn" style="width:100%;margin-top:.7rem">🏫 Lernzeit starten</button>
+    <div class="sr-only" aria-hidden="true">
+      <span id="best-english">0</span><span id="best-tr">0</span><span id="best-denken">0</span><span id="best-sach">0</span><span id="best-musik">0</span><span id="best-geo">0</span>
+    </div>
+    <div class="foot">Du darfst dir Zeit lassen. Fehler helfen dir beim Lernen.</div>
   </div>
 
+
+
+  <!-- KOMPETENZPLAN KLASSE 2 -->
+  <div id="curriculum" hidden>
+    <div class="bar"><button class="back" id="curriculumBack">← Startseite</button><span class="spacer"></span><span class="gbadge">Lehrplan Klasse 2</span></div>
+    <h2 class="title">Dein Lernplan 🎓</h2>
+    <p class="muted">Die Lernziele orientieren sich an den Themen aus deinem Schulbogen. Wähle ein Thema und übe in deinem Tempo.</p>
+    <section class="curr-card">
+      <div class="curr-head"><span class="curr-icon">🔢</span><div><h3>Mathematik</h3><p>Zahlen und Rechnen bis 100</p></div></div>
+      <ul><li>Zahlen ordnen, vergleichen und zerlegen</li><li>Plus und Minus bis 100</li><li>Rechenwege erklären und Rechentricks nutzen</li><li>Kernaufgaben und Einmaleins</li><li>Einfache Geteilt-Aufgaben</li><li>Sachaufgaben verstehen und lösen</li></ul>
+      <div class="curr-actions"><button class="curr-btn" data-curr-game="math" data-curr-level="4">Plus & Minus bis 100</button><button class="curr-btn" data-curr-game="math" data-curr-level="5">Zahlen vergleichen</button><button class="curr-btn" data-curr-game="math" data-curr-level="6">Einmaleins</button><button class="curr-btn" data-curr-game="math" data-curr-level="11">Teilen & Knobelaufgaben</button></div>
+    </section>
+    <section class="curr-card">
+      <div class="curr-head"><span class="curr-icon">📖</span><div><h3>Deutsch</h3><p>Sprechen, Lesen und Schreiben</p></div></div>
+      <ul><li>Wörter und Sätze lesen und verstehen</li><li>Silben, Reime und besondere Buchstaben</li><li>Groß- und Kleinschreibung</li><li>Wörter richtig schreiben und Lernwörter üben</li><li>Eigene Sätze und Geschichten entwickeln</li><li>Aufmerksam zuhören und Erlebnisse erzählen</li></ul>
+      <div class="curr-actions"><button class="curr-btn" data-curr-game="read" data-curr-level="7">Sätze verstehen</button><button class="curr-btn" data-curr-game="read" data-curr-level="5">Nomen großschreiben</button><button class="curr-btn" data-curr-game="read" data-curr-level="9">Wörter schreiben</button><button class="curr-btn" data-curr-game="read" data-curr-level="3">Silben erkennen</button></div>
+    </section>
+    <section class="curr-card">
+      <div class="curr-head"><span class="curr-icon">📏</span><div><h3>Messen, Formen und Daten</h3><p>Mathematik im Alltag</p></div></div>
+      <ul><li>Längen in Meter und Zentimeter einschätzen</li><li>Mit Geld rechnen</li><li>Uhrzeiten und Zeitspannen verstehen</li><li>Formen und Körper erkennen und beschreiben</li><li>Lagebeziehungen und Spiegelbilder entdecken</li><li>Tabellen lesen und Daten eintragen</li></ul>
+      <div class="curr-actions"><button class="curr-btn" data-curr-game="math" data-curr-level="9">Mit Geld rechnen</button><button class="curr-btn" data-curr-game="clock" data-curr-level="2">Uhrzeiten üben</button><button class="curr-btn" data-curr-game="shape" data-curr-level="2">Formen erkennen</button><button class="curr-btn" data-curr-game="shape" data-curr-level="4">Formen für Fortgeschrittene</button></div>
+      <p class="curr-note">Längen, Körper, Symmetrie und Tabellen werden als Lernziele geführt; dafür ergänzen wir anschließend eigene Aufgabenmodule.</p>
+    </section>
+    <section class="curr-card">
+      <div class="curr-head"><span class="curr-icon">🤝</span><div><h3>Miteinander und selbstständig lernen</h3><p>Soziale und persönliche Kompetenzen</p></div></div>
+      <ul><li>Freundlich und respektvoll mit anderen umgehen</li><li>Klassen- und Gesprächsregeln beachten</li><li>Streit friedlich lösen und Mitgefühl zeigen</li><li>Aufgaben zuverlässig und selbstständig erledigen</li><li>Konzentriert arbeiten und sorgfältig mit Dingen umgehen</li></ul>
+      <div class="reflection-box"><b>Meine Lern-Challenge heute</b><p>Wähle eine Sache, die du heute ausprobieren möchtest:</p>
+        <label><input type="checkbox" class="social-goal" value="Ich höre anderen aufmerksam zu."> Ich höre anderen aufmerksam zu.</label>
+        <label><input type="checkbox" class="social-goal" value="Ich bleibe bei einer Aufgabe dran."> Ich bleibe bei einer Aufgabe dran.</label>
+        <label><input type="checkbox" class="social-goal" value="Ich bitte freundlich um Hilfe."> Ich bitte freundlich um Hilfe.</label>
+        <label><input type="checkbox" class="social-goal" value="Ich räume meine Sachen ordentlich auf."> Ich räume meine Sachen ordentlich auf.</label>
+        <p id="socialGoalFeedback" class="curr-note" aria-live="polite">Kleine Schritte zählen. Du kannst eine Challenge auswählen.</p>
+      </div>
+    </section>
+    <section class="curr-card curr-honest"><b>Wichtig zum Lernstand</b><p>Die Themen zeigen, was geübt werden soll. Ein Lernziel gilt erst dann als sicher, wenn passende Aufgaben dazu regelmäßig erfolgreich gelöst werden. Nicht alle genannten Kompetenzen haben bereits ein eigenes digitales Übungsmodul.</p></section>
+  </div>
 
   <!-- ANTONA FOKUS -->
   <div id="focus" hidden>
@@ -1415,7 +1461,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
   function show(id){SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2162,6 +2208,17 @@
     var hist=p.stats.focusHistory||[],last=hist.length?hist[hist.length-1]:null;
     $("#coachAdvice").textContent=last?(last.score>=last.total*.75?"Deine letzte Einheit lief gut. Wir erhöhen die Schwierigkeit langsam.":"Wir bleiben bei kurzen Übungen und wiederholen die Grundlagen."):"Starte mit einer kurzen Fokus-Einheit. Danach passen wir die nächste Übung an deinen Fortschritt an.";
     show("coach");}
+
+
+  /* ---------- Lehrplan-Navigation ---------- */
+  $("#curriculumOpen").addEventListener("click",function(){show("curriculum");});
+  $("#curriculumBack").addEventListener("click",enterHome);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-curr-game]"),function(b){
+    b.addEventListener("click",function(){curGame=b.getAttribute("data-curr-game");curLevel=+b.getAttribute("data-curr-level");openLevels(curGame);});
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".social-goal"),function(c){
+    c.addEventListener("change",function(){var chosen=document.querySelectorAll(".social-goal:checked").length;$("#socialGoalFeedback").textContent=chosen?chosen+" Lern-Challenge"+(chosen===1?"":"s")+" ausgewählt. Nimm dir heute eine davon vor.":"Kleine Schritte zählen. Du kannst eine Challenge auswählen.";});
+  });
 
   /* ---------- Navigation ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".tile"),function(t){t.addEventListener("click",function(){openLevels(t.getAttribute("data-game"));});});
