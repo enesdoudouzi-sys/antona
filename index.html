@@ -2278,10 +2278,10 @@
   $("#malenBack").addEventListener("click",openGames);
   $("#malenClear").addEventListener("click",clearMalen);
   $("#badgesBack").addEventListener("click",enterHome);
-  $("#pokaleBtn").addEventListener("click",openBadges);
+  var pokaleBtn=$("#pokaleBtn");if(pokaleBtn)pokaleBtn.addEventListener("click",openBadges);
   $("#quizBack").addEventListener("click",function(){stopQuiz();openGames();});
   $("#avatarBack").addEventListener("click",enterHome);
-  $("#avatarBtn").addEventListener("click",function(){openAvatar();});
+  var avatarBtn=$("#avatarBtn");if(avatarBtn)avatarBtn.addEventListener("click",function(){openAvatar();});
   $("#rmemBack").addEventListener("click",function(){RMEM.on=false;openGames();});
   $("#pyraBack").addEventListener("click",function(){PYRA.on=false;openGames();});
   $("#gamesBack").addEventListener("click",enterHome);
@@ -2298,17 +2298,17 @@
   $("#homeBtn").addEventListener("click",function(){SCHOOL.on=false;enterHome();});
   $("#againBtn").addEventListener("click",function(){if(SCHOOL.on){var last=SCHOOL.idx>=SCHOOL.lessons.length-1;if(last){showZeugnis();}else schoolAdvance();}else startGame();});
   $("#schoolBtn").addEventListener("click",startSchool);
-  $("#schoolBtn2").addEventListener("click",startSchool);
-  $("#gamesEntry").addEventListener("click",openGames);
+  var schoolBtn2=$("#schoolBtn2");if(schoolBtn2)schoolBtn2.addEventListener("click",startSchool);
+  var gamesEntry=$("#gamesEntry");if(gamesEntry)gamesEntry.addEventListener("click",openGames);
   Array.prototype.forEach.call(document.querySelectorAll("#homeTabs .tab"),function(tb){tb.addEventListener("click",function(){
     Array.prototype.forEach.call(document.querySelectorAll("#homeTabs .tab"),function(x){x.classList.toggle("on",x===tb);});
     var t=tb.getAttribute("data-tab");$("#tab-learn").hidden=(t!=="learn");$("#tab-more").hidden=(t!=="more");});});
   $("#schoolBack").addEventListener("click",enterHome);
   $("#schoolStart").addEventListener("click",schoolBegin);
-  $("#chestBtn").addEventListener("click",openChest);
+  var chestBtn=$("#chestBtn");if(chestBtn)chestBtn.addEventListener("click",openChest);
   $("#chestBack").addEventListener("click",enterHome);
   $("#chestOpen").addEventListener("click",doOpenChest);
-  $("#petBtn").addEventListener("click",openPet);
+  var petBtn=$("#petBtn");if(petBtn)petBtn.addEventListener("click",openPet);
   $("#petBack").addEventListener("click",enterHome);
   $("#petPet").addEventListener("click",petStreichel);
   $("#zeugBack").addEventListener("click",enterHome);
