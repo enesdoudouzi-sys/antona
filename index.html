@@ -1484,17 +1484,21 @@
     var box=$("#profileList");if(!box)return;box.innerHTML="";
     if(!Array.isArray(profiles))profiles=[];
     profiles=profiles.filter(function(p){return p&&typeof p==="object";});
+    var add=document.createElement("button");add.type="button";add.className="pcard add";add.setAttribute("aria-label","Neues Kinderprofil anlegen");
+    add.style.cssText="position:relative;z-index:9999;pointer-events:auto;display:flex;width:100%;max-width:24rem;min-height:4.5rem;margin:0 auto 1rem;flex-direction:row;justify-content:center;background:var(--accent);color:white;border:0;touch-action:manipulation;cursor:pointer";
+    add.innerHTML='<span class="av" style="background:transparent">＋</span><span class="pn">Kind anlegen</span>';
+    add.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();openNewProfile();});
+    add.addEventListener("touchend",function(ev){ev.preventDefault();openNewProfile();},{passive:false});
+    box.appendChild(add);
     profiles.forEach(function(p){
       if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};
-      var b=document.createElement("button");b.type="button";b.className="pcard";b.style.position="relative";b.style.zIndex="2";b.style.pointerEvents="auto";
+      var b=document.createElement("button");b.type="button";b.className="pcard";b.style.cssText="position:relative;z-index:9999;pointer-events:auto;touch-action:manipulation;cursor:pointer";
       b.innerHTML='<span class="av">'+(p.av||"⭐")+'</span><span class="pn"></span><span class="ps">★ '+(p.stats.stars||0)+'</span>';
       b.querySelector(".pn").textContent=p.name||"Kind";
-      b.onclick=function(ev){if(ev)ev.preventDefault();activeId=p.id;persist();enterHome();};
+      b.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();activeId=p.id;persist();enterHome();});
+      b.addEventListener("touchend",function(ev){ev.preventDefault();activeId=p.id;persist();enterHome();},{passive:false});
       box.appendChild(b);
     });
-    var add=document.createElement("button");add.type="button";add.className="pcard add";add.style.position="relative";add.style.zIndex="2";add.style.pointerEvents="auto";
-    add.innerHTML='<span class="av">＋</span><span class="pn">Neu</span><span class="ps">Kind anlegen</span>';
-    add.onclick=function(ev){if(ev)ev.preventDefault();openNewProfile();};box.appendChild(add);
   }
   var pickedAv=AVATARS[0];
   function openNewProfile(){
