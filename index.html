@@ -833,6 +833,13 @@
         <div class="statrow"><div class="ic" style="background:var(--good)">✓</div><div class="nm">Richtige Antworten</div><div class="val" id="pCorrect">0</div></div>
       </div>
       <div class="sheet">
+        <h3>Konzentration & Fokus</h3>
+        <div class="statrow"><div class="ic" style="background:var(--accent)">🧠</div><div class="nm">Fokus-Einheiten</div><div class="val" id="pFocusSessions">0</div></div>
+        <div class="statrow"><div class="ic" style="background:var(--good)">⏱️</div><div class="nm">Fokus-Minuten</div><div class="val" id="pFocusMinutes">0</div></div>
+        <div class="statrow"><div class="ic" style="background:var(--star)">🌱</div><div class="nm">Aktuelle Fokus-Stufe</div><div class="val" id="pFocusLevel">1</div></div>
+        <p class="muted" style="margin:.5rem 0 0">Die Werte zeigen Übungsaktivität, keine medizinische oder psychologische Diagnose.</p>
+      </div>
+      <div class="sheet">
         <h3>Letzte 7 Tage</h3>
         <div id="pChart"></div>
         <p class="muted" id="pChartNote" style="margin:.5rem 0 0"></p>
@@ -1494,6 +1501,7 @@
     var p=active();if(!p)return;
     $("#parentWho").textContent="Fortschritt von "+p.name;
     $("#pStars").textContent=p.stats.stars;$("#pRounds").textContent=p.stats.rounds;$("#pCorrect").textContent=p.stats.correct;
+    focusStats(p);$("#pFocusSessions").textContent=p.stats.focusSessions;$("#pFocusMinutes").textContent=p.stats.focusMinutes;$("#pFocusLevel").textContent=p.stats.focusLevel;
     // 7-Tage-Diagramm (Sterne pro Tag)
     var days=[],d0=new Date(),LBL=["So","Mo","Di","Mi","Do","Fr","Sa"];
     for(var di=6;di>=0;di--){var x=new Date(d0);x.setDate(d0.getDate()-di);days.push({k:dayKey(x),l:LBL[x.getDay()]});}
@@ -2050,12 +2058,12 @@
     var g=$("#focusBoard");g.className="";g.innerHTML='<div class="title" style="font-size:1.5rem;padding:1rem" id="focusInstructionText">'+seq.join(" → ")+'</div>';
     setTimeout(function(){if(FOCUS.task&&FOCUS.task.type==="instruction"&&!FOCUS.answered){$("#focusInstructionText").textContent="Welche Reihenfolge war es?";$("#focusPrompt").textContent="Schreibe die Farben in der richtigen Reihenfolge.";g.insertAdjacentHTML("beforeend",'<input id="focusAnswer" class="focus-input" aria-label="Reihenfolge" placeholder="z. B. BLAU,GELB">');}},FOCUS.mood==="unruhig"?2600:1900);
   }
-  function focusCheck(){if(FOCUS.answered||!FOCUS.task)return;var ok=false,t=FOCUS.task;
+  function focusCheck(){if(FOCUS.answered)return focusNext();if(!FOCUS.task)return;var ok=false,t=FOCUS.task;
     if(t.type==="visual"){var found=FOCUS.selected.filter(function(x){return x===1;}).length,wrong=FOCUS.selected.filter(function(x){return x===0;}).length;ok=found===t.answer&&wrong===0;}
     else if(t.type==="pattern"){ok=FOCUS.selected[0]===t.answer;}
     else{var inp=$("#focusAnswer");if(!inp){$("#focusFeedback").textContent="Warte kurz, bis die Aufgabe bereit ist.";return;}var val=inp.value.replace(/[^0-9A-Za-zÄÖÜäöü,]/g,"").toUpperCase().replace(/,/g,"");var ans=String(t.answer).replace(/,/g,"");ok=val===ans;}
     FOCUS.answered=true;if(ok){FOCUS.correct++;$("#focusFeedback").className="feedback ok";$("#focusFeedback").textContent="Genau hingeschaut! 🌟";}else{$("#focusFeedback").className="feedback try";$("#focusFeedback").textContent="Guter Versuch. Fehler helfen uns beim Üben – weiter geht’s!";}
-    $("#focusCheck").disabled=true;$("#focusCheck").textContent="Weiter →";$("#focusCheck").onclick=focusNext;
+    $("#focusCheck").disabled=false;$("#focusCheck").textContent="Weiter →";
   }
   function focusFinish(){var p=active();if(!p)return;focusStats(p);var pct=Math.round(FOCUS.correct/FOCUS.total*100);
     p.stats.focusSessions++;p.stats.focusMinutes+=(FOCUS.total===3?2:3);p.stats.focusHistory.push({date:dayKey(),score:FOCUS.correct,total:FOCUS.total,mood:FOCUS.mood});
@@ -2065,7 +2073,7 @@
     $("#focusPlay").hidden=true;$("#focusResult").hidden=false;$("#focusCorrect").textContent=FOCUS.correct+"/"+FOCUS.total;$("#focusAccuracy").textContent=pct+"%";$("#focusBest").textContent=p.stats.focusLevel;
     var tip=pct>=75?"Du hast dich heute richtig gut konzentriert. Beim nächsten Mal wartet eine etwas anspruchsvollere Übung.":pct>=40?"Du bist drangeblieben. Wir üben weiter in kleinen Schritten – das ist genau richtig.":"Heute war es anspruchsvoll. Eine kurze Pause, etwas trinken und später noch einmal probieren kann helfen.";
     if(FOCUS.mood==="pause")tip="Du hast auf dich gehört. Eine Pause ist eine gute Entscheidung. Du kannst später wiederkommen.";
-    $("#focusCoachText").textContent=tip;$("#focusSaved").textContent="Dein Fortschritt wurde nur auf diesem Gerät im Profil gespeichert.";$("#focusCheck").onclick=focusCheck;
+    $("#focusCoachText").textContent=tip;$("#focusSaved").textContent="Dein Fortschritt wurde nur auf diesem Gerät im Profil gespeichert.";
   }
   function focusReflect(value){var p=active();if(!p)return;focusStats(p);p.stats.focusLastReflection=value;persist();
     $("#focusSaved").textContent=value==="leicht"?"Schön, dass es heute leicht ging!":value==="mittel"?"Danke für deine ehrliche Einschätzung.":"Gut, dass du merkst, wann etwas anstrengend ist. Eine Pause ist okay.";}
