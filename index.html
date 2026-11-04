@@ -517,6 +517,11 @@
   }
 
 
+  .curr-progress-row{display:grid;grid-template-columns:1fr auto;gap:.3rem .7rem;align-items:center;padding:.55rem 0;border-top:1px solid var(--line)}
+  .curr-progress-row:first-child{border-top:0}.curr-progress-row b{font-size:.9rem}
+  .curr-progress-row small{font-size:.78rem;color:var(--ink-soft);font-weight:800}
+  .curr-progress-row .barmini{grid-column:1/-1;margin:0}
+  .curr-progress-row .barmini>i{background:linear-gradient(90deg,var(--accent),var(--good))}
   /* Lehrplan: klare, reduzierte Lernoberfläche */
   .curriculum-intro{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.5rem 0 1rem}
   .eyebrow{font-size:.72rem;letter-spacing:.12em;font-weight:900;color:var(--accent)}
@@ -608,6 +613,7 @@
     <div class="bar"><button class="back" id="curriculumBack">← Startseite</button><span class="spacer"></span><span class="gbadge">Lehrplan Klasse 2</span></div>
     <h2 class="title">Dein Lernplan 🎓</h2>
     <p class="muted">Die Lernziele orientieren sich an den Themen aus deinem Schulbogen. Wähle ein Thema und übe in deinem Tempo.</p>
+    <section class="focus-panel" id="curriculumProgress"><h3 class="title">Dein Lernfortschritt</h3><p class="muted">Wird aus deinen bisherigen Übungsergebnissen berechnet.</p><div id="curriculumProgressRows"></div></section>
     <section class="curr-card">
       <div class="curr-head"><span class="curr-icon">🔢</span><div><h3>Mathematik</h3><p>Zahlen und Rechnen bis 100</p></div></div>
       <ul><li>Zahlen ordnen, vergleichen und zerlegen</li><li>Plus und Minus bis 100</li><li>Rechenwege erklären und Rechentricks nutzen</li><li>Kernaufgaben und Einmaleins</li><li>Einfache Geteilt-Aufgaben</li><li>Sachaufgaben verstehen und lösen</li></ul>
@@ -971,6 +977,7 @@
         <div id="pChart"></div>
         <p class="muted" id="pChartNote" style="margin:.5rem 0 0"></p>
       </div>
+      <div class="sheet"><h3>Lernplan Klasse 2 · Kompetenzübersicht</h3><p class="muted" id="parentCurriculumSummary" style="margin:.2rem 0 .7rem"></p><div id="parentCurriculumRows"></div></div>
       <div class="sheet">
         <h3>Nach Fach</h3>
         <div id="pSubjects"></div>
@@ -1625,6 +1632,7 @@
   });
   $("#gateInput").addEventListener("keydown",function(e){if(e.key==="Enter")$("#gateGo").click();});
   function renderParent(){
+    renderCurriculumProgress();
     var p=active();if(!p)return;
     $("#parentWho").textContent="Fortschritt von "+p.name;
     $("#pStars").textContent=p.stats.stars;$("#pRounds").textContent=p.stats.rounds;$("#pCorrect").textContent=p.stats.correct;
@@ -2210,8 +2218,35 @@
     show("coach");}
 
 
+  /* ---------- Lernplan-Fortschritt für Kinder und Eltern ---------- */
+  var CURR_GROUPS=[
+    {name:"Mathematik · Zahlen und Rechnen",game:"math"},
+    {name:"Deutsch · Lesen und Schreiben",game:"read"},
+    {name:"Messen, Formen und Daten",game:"shape"},
+    {name:"Uhrzeit und Zeitspannen",game:"clock"},
+    {name:"Arbeiten, Denken und Konzentration",game:"denken"},
+    {name:"Sachaufgaben und Alltag",game:"sach"}
+  ];
+  function curriculumProgressHtml(p){
+    var total=0,mastered=0,html="";
+    CURR_GROUPS.forEach(function(g){
+      var score=(p.stats.best&&p.stats.best[g.game])||0;
+      var pct=Math.max(0,Math.min(100,Math.round(score/10*100)));
+      total++;if(score>=8)mastered++;
+      html+='<div class="curr-progress-row"><b>'+g.name+'</b><small>'+score+'/10 Punkte</small><div class="barmini"><i style="width:'+pct+'%"></i></div></div>';
+    });
+    return {html:html,total:total,mastered:mastered};
+  }
+  function renderCurriculumProgress(){
+    var p=active();if(!p)return;
+    var d=curriculumProgressHtml(p);
+    $("#curriculumProgressRows").innerHTML=d.html;
+    $("#parentCurriculumRows").innerHTML=d.html;
+    $("#parentCurriculumSummary").textContent=d.mastered+" von "+d.total+" Lernbereichen zeigen aktuell mindestens 8 von 10 Punkten in der jeweils zugeordneten Übung. Das ist ein Übungsindikator, keine Schulnote.";
+  }
+
   /* ---------- Lehrplan-Navigation ---------- */
-  $("#curriculumOpen").addEventListener("click",function(){show("curriculum");});
+  $("#curriculumOpen").addEventListener("click",function(){renderCurriculumProgress();show("curriculum");});
   $("#curriculumBack").addEventListener("click",enterHome);
   Array.prototype.forEach.call(document.querySelectorAll("[data-curr-game]"),function(b){
     b.addEventListener("click",function(){curGame=b.getAttribute("data-curr-game");curLevel=+b.getAttribute("data-curr-level");openLevels(curGame);});
