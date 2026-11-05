@@ -1483,23 +1483,39 @@
   /* ---------- Profile-UI ---------- */
   function renderProfiles(){
     var box=$("#profileList");if(!box)return;box.innerHTML="";
+    box.style.position="relative";box.style.zIndex="10";box.style.pointerEvents="auto";
     if(!Array.isArray(profiles))profiles=[];
     profiles=profiles.filter(function(p){return p&&typeof p==="object";});
-    var add=document.createElement("button");add.type="button";add.className="pcard add";add.setAttribute("aria-label","Neues Kinderprofil anlegen");
-    add.style.cssText="position:relative;z-index:9999;pointer-events:auto;display:flex;width:100%;max-width:24rem;min-height:4.5rem;margin:0 auto 1rem;flex-direction:row;justify-content:center;background:var(--accent);color:white;border:0;touch-action:manipulation;cursor:pointer";
-    add.innerHTML='<span class="av" style="background:transparent">＋</span><span class="pn">Kind anlegen</span>';
-    add.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();openNewProfile();});
-    add.addEventListener("touchend",function(ev){ev.preventDefault();openNewProfile();},{passive:false});
+    var add=document.createElement("button");add.type="button";add.className="pcard add";
+    add.setAttribute("aria-label","Neues Kinderprofil anlegen");
+    add.innerHTML='<span class="av">＋</span><span class="pn">Kind anlegen</span>';
     box.appendChild(add);
     profiles.forEach(function(p){
       if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};
-      var b=document.createElement("button");b.type="button";b.className="pcard";b.style.cssText="position:relative;z-index:9999;pointer-events:auto;touch-action:manipulation;cursor:pointer";
+      var b=document.createElement("button");b.type="button";b.className="pcard";
+      b.setAttribute("data-profile-id",String(p.id));
       b.innerHTML='<span class="av">'+(p.av||"⭐")+'</span><span class="pn"></span><span class="ps">★ '+(p.stats.stars||0)+'</span>';
       b.querySelector(".pn").textContent=p.name||"Kind";
-      b.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();activeId=p.id;persist();enterHome();});
-      b.addEventListener("touchend",function(ev){ev.preventDefault();activeId=p.id;persist();enterHome();},{passive:false});
       box.appendChild(b);
     });
+    /* Delegierter Pointer-/Click-Handler: funktioniert auch auf Touchscreens */
+    if(!box.dataset.profileHandler){
+      box.dataset.profileHandler="1";
+      function activate(ev){
+        var card=ev.target.closest("button.pcard");
+        if(!card||!box.contains(card))return;
+        ev.preventDefault();ev.stopPropagation();
+        if(card.classList.contains("add")){openNewProfile();return;}
+        var id=card.getAttribute("data-profile-id");
+        var chosen=profiles.filter(function(p){return String(p.id)===id;})[0];
+        if(!chosen)return;
+        activeId=chosen.id;persist();enterHome();
+      }
+      box.addEventListener("click",activate);
+      box.addEventListener("keydown",function(ev){
+        if((ev.key==="Enter"||ev.key===" ")&&ev.target.closest("button.pcard"))activate(ev);
+      });
+    }
   }
   var pickedAv=AVATARS[0];
   function openNewProfile(){
