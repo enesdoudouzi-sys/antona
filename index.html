@@ -555,6 +555,21 @@
   .ws-grid button{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:5px;font:800 1.05rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer;padding:0}
   .ws-grid button.sel{background:var(--accent);color:#fff}
   .ws-grid button.ok{background:#bdebcf;color:var(--good)}
+  /* Geld zählen */
+  .mo-coins{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+  .mo-coins button{border:2px solid #d4af37;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e8b84b);color:#5a4210;border-radius:999px;min-width:3.4rem;height:3.4rem;font:800 .9rem 'Nunito',sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  .mo-coins button.bill{border-radius:.5rem;background:linear-gradient(135deg,#bfe8c8,#8fd6a6);border-color:#5ba873;color:#17492b;width:4.6rem}
+  /* Simon */
+  .simon-pads{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;width:min(80vw,280px);margin:0 auto}
+  .simon-pad{aspect-ratio:1;border:0;border-radius:1.2rem;cursor:pointer;opacity:.55;transition:opacity .12s,transform .12s;box-shadow:0 4px 10px rgba(0,0,0,.15)}
+  .simon-pad.lit{opacity:1;transform:scale(1.04)}
+  /* Buchstabensalat */
+  .an-slots{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;min-height:3rem}
+  .an-slots .slot{width:2.6rem;height:3rem;border:2px dashed var(--line);border-radius:.6rem;display:grid;place-items:center;font:800 1.5rem 'Fredoka',sans-serif;background:var(--panel);cursor:pointer}
+  .an-slots .slot.filled{border-style:solid;border-color:var(--accent);color:var(--accent)}
+  .an-letters{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
+  .an-letters button{width:2.9rem;height:3.1rem;border:1px solid var(--line);background:var(--bg2);border-radius:.6rem;font:800 1.5rem 'Fredoka',sans-serif;color:var(--ink);cursor:pointer}
+  .an-letters button:disabled{opacity:.3}
   /* Rechen-Rennen */
   .race-track{display:flex;flex-direction:column;gap:.5rem;width:100%}
   .race-lane{position:relative;width:100%;height:2.6rem;background:var(--bg2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
@@ -1007,6 +1022,72 @@
       <div class="question" id="raceQ"></div>
       <div id="raceAns" class="answers three"></div>
       <div id="raceFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
+  <!-- UHR STELLEN -->
+  <div id="clockset" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="csBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🕐 <span id="csScore">0</span>/6</div></div>
+    <div class="card" style="gap:.7rem">
+      <div class="qlabel" id="csTask" style="justify-content:center">Stelle die Uhr!</div>
+      <div id="csClock"></div>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <div style="text-align:center"><div class="muted">Stunde</div><div style="display:flex;gap:.4rem;align-items:center"><button class="back cs-btn" data-a="h-">−</button><b id="csH" style="font-size:1.3rem;min-width:1.6rem;display:inline-block">3</b><button class="back cs-btn" data-a="h+">+</button></div></div>
+        <div style="text-align:center"><div class="muted">Minute</div><div style="display:flex;gap:.4rem;align-items:center"><button class="back cs-btn" data-a="m-">−</button><b id="csM" style="font-size:1.3rem;min-width:2.4rem;display:inline-block">00</b><button class="back cs-btn" data-a="m+">+</button></div></div>
+      </div>
+      <button class="next" id="csCheck" style="width:100%">Prüfen</button>
+      <div id="csFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
+  <!-- GELD ZÄHLEN -->
+  <div id="money" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="moBack">← Stopp</button><div class="spacer"></div><div class="gbadge">💶 <span id="moScore">0</span>/6</div></div>
+    <div class="card" style="gap:.7rem">
+      <div class="qlabel" id="moTask" style="justify-content:center">Bezahle genau!</div>
+      <div id="moDisplay" style="font:700 1.6rem 'Fredoka',sans-serif;text-align:center;min-height:2rem"></div>
+      <div id="moCoins" class="mo-coins"></div>
+      <div style="display:flex;gap:.6rem"><button class="back" id="moReset">↺ Zurücksetzen</button><button class="next" id="moPay" style="flex:1">Bezahlen</button></div>
+      <div id="moFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
+  <!-- SIMON -->
+  <div id="simon" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="siBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🎵 Runde <span id="siRound">1</span></div></div>
+    <div class="card" style="gap:1rem">
+      <div class="muted" id="siMsg" style="text-align:center">Schau genau hin und tippe die Reihe nach!</div>
+      <div id="simonPads" class="simon-pads">
+        <button class="simon-pad" data-i="0" style="background:#ff6b6b"></button>
+        <button class="simon-pad" data-i="1" style="background:#2aa7ff"></button>
+        <button class="simon-pad" data-i="2" style="background:#19b36b"></button>
+        <button class="simon-pad" data-i="3" style="background:#ffc02e"></button>
+      </div>
+      <button class="next" id="siStart" style="width:100%">▶ Los geht's</button>
+    </div>
+  </div>
+
+  <!-- BUCHSTABENSALAT -->
+  <div id="anagram" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="anBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🔤 <span id="anScore">0</span>/6</div></div>
+    <div class="card" style="gap:.8rem">
+      <div class="muted">Bringe die Buchstaben in die richtige Reihenfolge!</div>
+      <div id="anPic" style="font-size:3rem;text-align:center"></div>
+      <div id="anSlots" class="an-slots"></div>
+      <div id="anLetters" class="an-letters"></div>
+      <div style="display:flex;gap:.6rem"><button class="back" id="anReset">↺ Neu</button><button class="back" id="anSpeak">🔊 Tipp</button></div>
+      <div id="anFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
+  <!-- LABYRINTH -->
+  <div id="maze" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="mzBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🧭 <span id="mzLevel">1</span></div></div>
+    <div class="muted" style="text-align:center;margin:.2rem">Bring 🐭 zum 🧀 – finde den Weg!</div>
+    <canvas id="mazeCanvas" width="320" height="320" style="width:min(92vw,340px);height:min(92vw,340px);margin:.2rem auto;background:var(--panel);border:2px solid var(--line);border-radius:1rem;touch-action:none"></canvas>
+    <div id="mazePad" style="display:grid;grid-template-columns:repeat(3,3.2rem);justify-content:center;gap:.4rem;margin:.4rem auto">
+      <span></span><button class="back maze-dir" data-dir="up">⬆️</button><span></span>
+      <button class="back maze-dir" data-dir="left">⬅️</button><button class="back maze-dir" data-dir="down">⬇️</button><button class="back maze-dir" data-dir="right">➡️</button>
     </div>
   </div>
 
@@ -1769,7 +1850,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2079,7 +2160,12 @@
     {id:"sudoku",name:"Kinder-Sudoku",emoji:"🧩",cost:4,desc:"4×4-Sudoku mit Zahlen 1–4 – Logik & Konzentration."},
     {id:"wordsearch",name:"Wortsuche",emoji:"🔎",cost:4,desc:"Versteckte Wörter im Buchstabengitter finden."},
     {id:"snake",name:"Zahlen-Snake",emoji:"🐍",cost:5,desc:"Friss die Zahlen in der richtigen Reihenfolge."},
-    {id:"race",name:"Rechen-Rennen",emoji:"🏎️",cost:4,desc:"Rechne schnell und gewinne das Rennen gegen den Computer."}
+    {id:"race",name:"Rechen-Rennen",emoji:"🏎️",cost:4,desc:"Rechne schnell und gewinne das Rennen gegen den Computer."},
+    {id:"clockset",name:"Uhr stellen",emoji:"🕐",cost:0,desc:"Stelle die Zeiger auf die richtige Uhrzeit."},
+    {id:"money",name:"Geld bezahlen",emoji:"💶",cost:0,desc:"Lege den genauen Betrag mit Münzen und Scheinen."},
+    {id:"simon",name:"Simon – Farben merken",emoji:"🎵",cost:4,desc:"Merke dir die Farbfolge und tippe sie nach."},
+    {id:"anagram",name:"Buchstabensalat",emoji:"🔤",cost:0,desc:"Bringe die Buchstaben in die richtige Reihenfolge."},
+    {id:"maze",name:"Labyrinth",emoji:"🧭",cost:4,desc:"Finde den Weg durch das Labyrinth zum Ziel."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -2098,7 +2184,9 @@
         else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();
         else if(g.id==="quiz")startQuiz();else if(g.id==="rmem")startRmem();else if(g.id==="pyra")startPyra();
         else if(g.id==="trace")startTrace();else if(g.id==="story")startStory();else if(g.id==="sudoku")startSudoku();
-        else if(g.id==="wordsearch")startWordsearch();else if(g.id==="snake")startSnake();else if(g.id==="race")startRace();});
+        else if(g.id==="wordsearch")startWordsearch();else if(g.id==="snake")startSnake();else if(g.id==="race")startRace();
+        else if(g.id==="clockset")startClockset();else if(g.id==="money")startMoney();else if(g.id==="simon")startSimon();
+        else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -2575,6 +2663,93 @@
     fb.innerHTML=(win?"🏆 Du hast gewonnen!":"🚗 Knapp verloren – nochmal?")+' &nbsp;<button class="next" id="raceAgain">Nochmal</button>';
     $("#raceAns").innerHTML="";$("#raceQ").textContent="";if(win)reward(3,2);var ag=$("#raceAgain");if(ag)ag.addEventListener("click",startRace);}
 
+  /* ---------- UHR STELLEN ---------- */
+  var CS={h:12,m:0,th:3,tm:0,score:0,round:0};
+  function startClockset(){CS.score=0;CS.round=0;csNext();show("clockset");}
+  function csNext(){if(CS.round>=6)return csEnd();CS.round++;$("#csScore").textContent=CS.score;
+    CS.th=1+rnd(12);CS.tm=pick([0,0,15,30,30,45,5,10,20,40,50]);CS.h=12;CS.m=0;
+    $("#csTask").innerHTML="Stelle die Uhr auf <b>"+CS.th+":"+pad2(CS.tm)+" Uhr</b>";csRender();$("#csFb").textContent="";$("#csFb").className="feedback";
+    speak("Stelle die Uhr auf "+CS.th+" Uhr "+(CS.tm?CS.tm:""));}
+  function csRender(){$("#csClock").innerHTML=clockSVG(CS.h,CS.m);$("#csH").textContent=CS.h;$("#csM").textContent=pad2(CS.m);}
+  function csAdjust(a){if(a==="h+")CS.h=CS.h%12+1;else if(a==="h-")CS.h=(CS.h+10)%12+1;else if(a==="m+")CS.m=(CS.m+5)%60;else if(a==="m-")CS.m=(CS.m+55)%60;csRender();}
+  function csCheck(){if((CS.h%12===CS.th%12)&&(CS.m===CS.tm)){CS.score++;$("#csScore").textContent=CS.score;sCorrect();reward(1,1);$("#csFb").className="feedback ok";$("#csFb").innerHTML="⭐ Richtig!";setTimeout(csNext,1100);}
+    else{sWrong();$("#csFb").className="feedback try";$("#csFb").textContent="Noch nicht – prüfe Stunde und Minute.";}}
+  function csEnd(){confetti();$("#csFb").className="feedback ok";$("#csFb").innerHTML=CS.score+"/6 richtig! 🎉";if(CS.score>=4)reward(2,1);setTimeout(openGames,1500);}
+
+  /* ---------- GELD BEZAHLEN ---------- */
+  var MONEY={target:0,sum:0,score:0,round:0};
+  var COINS=[{v:1,l:"1 ct"},{v:2,l:"2 ct"},{v:5,l:"5 ct"},{v:10,l:"10 ct"},{v:20,l:"20 ct"},{v:50,l:"50 ct"},{v:100,l:"1 €",bill:true},{v:200,l:"2 €",bill:true}];
+  function moFmt(c){return Math.floor(c/100)+","+pad2(c%100)+" €";}
+  function startMoney(){MONEY.score=0;MONEY.round=0;renderMoCoins();moNext();show("money");}
+  function renderMoCoins(){var box=$("#moCoins");box.innerHTML="";COINS.forEach(function(c){var b=document.createElement("button");if(c.bill)b.className="bill";b.textContent=c.l;b.addEventListener("click",function(){MONEY.sum+=c.v;moShow();});box.appendChild(b);});}
+  function moNext(){if(MONEY.round>=6)return moEnd();MONEY.round++;MONEY.sum=0;$("#moScore").textContent=MONEY.score;
+    var euros=rnd(5),cents=pick([0,5,10,20,25,50,70,90,15,30,45,60,80,95]);MONEY.target=euros*100+cents;if(MONEY.target===0)MONEY.target=pick([5,10,20,50]);
+    $("#moTask").innerHTML="Bezahle genau <b>"+moFmt(MONEY.target)+"</b>";moShow();$("#moFb").textContent="";$("#moFb").className="feedback";speak("Bezahle genau "+moFmt(MONEY.target));}
+  function moShow(){$("#moDisplay").innerHTML='<span style="color:var(--accent)">'+moFmt(MONEY.sum)+'</span> / '+moFmt(MONEY.target);}
+  function moPay(){if(MONEY.sum===MONEY.target){MONEY.score++;sCorrect();reward(1,1);$("#moFb").className="feedback ok";$("#moFb").innerHTML="⭐ Genau richtig!";setTimeout(moNext,1100);}
+    else{sWrong();$("#moFb").className="feedback try";$("#moFb").textContent=MONEY.sum<MONEY.target?"Noch zu wenig – lege mehr dazu.":"Zu viel – setze zurück und versuch es erneut.";}}
+  function moEnd(){confetti();$("#moFb").className="feedback ok";$("#moFb").innerHTML=MONEY.score+"/6 richtig! 🎉";if(MONEY.score>=4)reward(2,1);setTimeout(openGames,1500);}
+
+  /* ---------- SIMON (Farben merken) ---------- */
+  var SIM={seq:[],step:0,round:0,accept:false,setup:false};
+  function startSimon(){SIM.seq=[];SIM.round=0;SIM.accept=false;$("#siMsg").textContent="Drücke Start – dann merke dir die Farben!";$("#siStart").style.display="";$("#siStart").textContent="▶ Los geht's";$("#siRound").textContent="1";if(!SIM.setup)simonSetup();show("simon");}
+  function simonSetup(){SIM.setup=true;Array.prototype.forEach.call(document.querySelectorAll(".simon-pad"),function(b){b.addEventListener("click",function(){simonTap(+b.getAttribute("data-i"));});});}
+  function simonBegin(){SIM.seq=[];SIM.round=0;$("#siStart").style.display="none";simonNext();}
+  function simonNext(){SIM.round++;$("#siRound").textContent=SIM.round;SIM.seq.push(rnd(4));SIM.step=0;playSeq();}
+  function litPad(i,cb){var pad=document.querySelector('.simon-pad[data-i="'+i+'"]');if(!pad){if(cb)cb();return;}pad.classList.add("lit");tone([330,440,550,660][i],.3);setTimeout(function(){pad.classList.remove("lit");setTimeout(function(){if(cb)cb();},170);},380);}
+  function playSeq(){SIM.accept=false;$("#siMsg").textContent="Merke dir die Reihe …";var i=0;(function step(){if(i>=SIM.seq.length){SIM.accept=true;$("#siMsg").textContent="Du bist dran! Tippe die Reihe.";return;}litPad(SIM.seq[i],function(){i++;step();});})();}
+  function simonTap(i){if(!SIM.accept)return;litPad(i);
+    if(i===SIM.seq[SIM.step]){SIM.step++;if(SIM.step>=SIM.seq.length){SIM.accept=false;sCorrect();reward(1,0);$("#siMsg").textContent="Super! Nächste Runde …";setTimeout(simonNext,900);}}
+    else{SIM.accept=false;sWrong();$("#siMsg").textContent="Leider falsch! Du hast "+(SIM.round-1)+" Runden geschafft.";if(SIM.round>3)reward(2,1);$("#siStart").style.display="";$("#siStart").textContent="▶ Nochmal";}}
+
+  /* ---------- BUCHSTABENSALAT ---------- */
+  var ANA={word:"",slots:[],letters:[],score:0,round:0,pool:[]};
+  var ANAWORDS=[{w:"HUND",e:"🐶"},{w:"KATZE",e:"🐱"},{w:"MAUS",e:"🐭"},{w:"BAUM",e:"🌳"},{w:"HAUS",e:"🏠"},{w:"BALL",e:"⚽"},{w:"SONNE",e:"☀️"},{w:"STERN",e:"⭐"},{w:"BLUME",e:"🌸"},{w:"FISCH",e:"🐟"},{w:"APFEL",e:"🍎"},{w:"VOGEL",e:"🐦"},{w:"AUTO",e:"🚗"},{w:"HERZ",e:"❤️"}];
+  function startAnagram(){ANA.score=0;ANA.round=0;ANA.pool=shuffle(ANAWORDS.slice());anNext();show("anagram");}
+  function anNext(){if(ANA.round>=6)return anEnd();var it=ANA.pool[ANA.round%ANA.pool.length];ANA.round++;ANA.word=it.w;$("#anScore").textContent=ANA.score;$("#anPic").textContent=it.e;$("#anFb").textContent="";$("#anFb").className="feedback";
+    var letters=it.w.split(""),scr;do{scr=shuffle(letters);}while(scr.join("")===it.w&&it.w.length>1);
+    ANA.letters=scr.map(function(ch,i){return {ch:ch,used:false,id:i};});ANA.slots=[];anRender();speak("Welches Wort ist das?");}
+  function anRender(){var slots=$("#anSlots");slots.innerHTML="";
+    for(var i=0;i<ANA.word.length;i++){(function(i){var d=document.createElement("div");var fid=ANA.slots[i];var filled=(fid!=null);d.className="slot"+(filled?" filled":"");d.textContent=filled?ANA.letters[fid].ch:"";
+      d.addEventListener("click",function(){if(ANA.slots[i]!=null){ANA.letters[ANA.slots[i]].used=false;ANA.slots[i]=null;anRender();}});slots.appendChild(d);})(i);}
+    var lets=$("#anLetters");lets.innerHTML="";
+    ANA.letters.forEach(function(L){var b=document.createElement("button");b.textContent=L.ch;b.disabled=L.used;
+      b.addEventListener("click",function(){var free=-1;for(var k=0;k<ANA.word.length;k++)if(ANA.slots[k]==null){free=k;break;}if(free<0)return;L.used=true;ANA.slots[free]=L.id;anRender();anMaybeCheck();});lets.appendChild(b);});}
+  function anMaybeCheck(){for(var i=0;i<ANA.word.length;i++)if(ANA.slots[i]==null)return;
+    var guess="";for(var j=0;j<ANA.word.length;j++)guess+=ANA.letters[ANA.slots[j]].ch;
+    if(guess===ANA.word){ANA.score++;sCorrect();reward(1,1);$("#anFb").className="feedback ok";$("#anFb").innerHTML="⭐ Richtig: "+ANA.word;setTimeout(anNext,1200);}
+    else{sWrong();$("#anFb").className="feedback try";$("#anFb").textContent="Noch nicht – tippe einen Buchstaben zum Zurücklegen.";}}
+  function anReset(){ANA.slots=[];ANA.letters.forEach(function(L){L.used=false;});anRender();}
+  function anEnd(){confetti();$("#anFb").className="feedback ok";$("#anFb").innerHTML=ANA.score+"/6 richtig! 🎉";if(ANA.score>=4)reward(2,1);setTimeout(openGames,1500);}
+
+  /* ---------- LABYRINTH ---------- */
+  var MAZE={n:6,cells:[],px:0,py:0,gx:0,gy:0,level:1,cell:0,setup:false};
+  function genMaze(n){var g=[],y,x;for(y=0;y<n;y++){g.push([]);for(x=0;x<n;x++)g[y].push({w:[true,true,true,true],v:false});}
+    var stack=[],cx=0,cy=0,visited=1,total=n*n;g[0][0].v=true;
+    while(visited<total){var nb=[];
+      if(cy>0&&!g[cy-1][cx].v)nb.push([cx,cy-1,0]);if(cx<n-1&&!g[cy][cx+1].v)nb.push([cx+1,cy,1]);
+      if(cy<n-1&&!g[cy+1][cx].v)nb.push([cx,cy+1,2]);if(cx>0&&!g[cy][cx-1].v)nb.push([cx-1,cy,3]);
+      if(nb.length){var ch=nb[rnd(nb.length)],nx=ch[0],ny=ch[1],dir=ch[2];g[cy][cx].w[dir]=false;g[ny][nx].w[(dir+2)%4]=false;stack.push([cx,cy]);cx=nx;cy=ny;g[cy][cx].v=true;visited++;}
+      else{var pop=stack.pop();cx=pop[0];cy=pop[1];}}
+    return g;}
+  function startMaze(){var n=6+Math.min(4,MAZE.level-1);MAZE.n=n;MAZE.cells=genMaze(n);MAZE.px=0;MAZE.py=0;MAZE.gx=n-1;MAZE.gy=n-1;
+    var c=$("#mazeCanvas");MAZE.cell=c.width/n;$("#mzLevel").textContent=MAZE.level;if(!MAZE.setup)mazeSetup();show("maze");mazeDraw();}
+  function mazeSetup(){MAZE.setup=true;Array.prototype.forEach.call(document.querySelectorAll(".maze-dir"),function(b){b.addEventListener("click",function(){mazeMove(b.getAttribute("data-dir"));});});
+    var c=$("#mazeCanvas"),sx=0,sy=0;c.addEventListener("pointerdown",function(e){var r=c.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;});
+    c.addEventListener("pointerup",function(e){var r=c.getBoundingClientRect(),dx=(e.clientX-r.left)-sx,dy=(e.clientY-r.top)-sy;if(Math.abs(dx)<15&&Math.abs(dy)<15)return;if(Math.abs(dx)>Math.abs(dy))mazeMove(dx>0?"right":"left");else mazeMove(dy>0?"down":"up");});}
+  function mazeMove(d){if(!MAZE.cells.length)return;var cell=MAZE.cells[MAZE.py][MAZE.px];
+    if(d==="up"&&!cell.w[0])MAZE.py--;else if(d==="right"&&!cell.w[1])MAZE.px++;else if(d==="down"&&!cell.w[2])MAZE.py++;else if(d==="left"&&!cell.w[3])MAZE.px--;else{sWrong();return;}
+    tone(520,.05);mazeDraw();
+    if(MAZE.px===MAZE.gx&&MAZE.py===MAZE.gy){sCorrect();confetti();reward(2,1);MAZE.level++;var c=$("#mazeCanvas"),ctx=c.getContext("2d");ctx.fillStyle="rgba(0,0,0,.5)";ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle="#fff";ctx.font="700 22px Fredoka,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("Geschafft! 🧀",c.width/2,c.height/2);setTimeout(startMaze,1300);}}
+  function mazeDraw(){var c=$("#mazeCanvas"),ctx=c.getContext("2d"),n=MAZE.n,s=MAZE.cell,y,x;ctx.clearRect(0,0,c.width,c.height);ctx.strokeStyle="#3a4256";ctx.lineWidth=3;ctx.lineCap="round";
+    for(y=0;y<n;y++)for(x=0;x<n;x++){var cell=MAZE.cells[y][x],X=x*s,Y=y*s;
+      if(cell.w[0]){ctx.beginPath();ctx.moveTo(X,Y);ctx.lineTo(X+s,Y);ctx.stroke();}
+      if(cell.w[1]){ctx.beginPath();ctx.moveTo(X+s,Y);ctx.lineTo(X+s,Y+s);ctx.stroke();}
+      if(cell.w[2]){ctx.beginPath();ctx.moveTo(X,Y+s);ctx.lineTo(X+s,Y+s);ctx.stroke();}
+      if(cell.w[3]){ctx.beginPath();ctx.moveTo(X,Y);ctx.lineTo(X,Y+s);ctx.stroke();}}
+    ctx.font=(s*0.66)+"px serif";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText("🧀",MAZE.gx*s+s/2,MAZE.gy*s+s/2);ctx.fillText("🐭",MAZE.px*s+s/2,MAZE.py*s+s/2);}
+
   /* Zurück-/Steuer-Buttons der neuen Spiele (einmalig) */
   $("#traceBack").addEventListener("click",openGames);
   $("#traceNext").addEventListener("click",traceAdvance);
@@ -2587,6 +2762,23 @@
   $("#wsBack").addEventListener("click",openGames);
   $("#snakeBack").addEventListener("click",function(){snakeStop();openGames();});
   $("#raceBack").addEventListener("click",openGames);
+  // Uhr stellen
+  $("#csBack").addEventListener("click",openGames);
+  $("#csCheck").addEventListener("click",csCheck);
+  Array.prototype.forEach.call(document.querySelectorAll(".cs-btn"),function(b){b.addEventListener("click",function(){csAdjust(b.getAttribute("data-a"));});});
+  // Geld
+  $("#moBack").addEventListener("click",openGames);
+  $("#moReset").addEventListener("click",function(){MONEY.sum=0;moShow();});
+  $("#moPay").addEventListener("click",moPay);
+  // Simon
+  $("#siBack").addEventListener("click",openGames);
+  $("#siStart").addEventListener("click",simonBegin);
+  // Buchstabensalat
+  $("#anBack").addEventListener("click",openGames);
+  $("#anReset").addEventListener("click",anReset);
+  $("#anSpeak").addEventListener("click",function(){if(ANA.word)speak(ANA.word);});
+  // Labyrinth
+  $("#mzBack").addEventListener("click",openGames);
 
   /* ---------- QUIZ-DUELL AUF ZEIT ---------- */
   var QUIZPOOL=[].concat(SACH_TIERE,SACH_KOERPER,SACH_JAHR,SACH_VERKEHR,GEO_WELT,GEO_FLAG,MUS_INSTR),QUIZ={on:false,score:0,time:30,timer:0};
