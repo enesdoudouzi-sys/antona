@@ -555,6 +555,22 @@
   .ws-grid button{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:5px;font:800 1.05rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer;padding:0}
   .ws-grid button.sel{background:var(--accent);color:#fff}
   .ws-grid button.ok{background:#bdebcf;color:var(--good)}
+  /* Englisch-Memory */
+  .enmem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;width:min(94vw,360px);margin:.4rem auto}
+  .enmem-card{aspect-ratio:3/4;border:1px solid var(--line);border-radius:.7rem;background:var(--accent);color:#fff;font:800 1rem 'Nunito',sans-serif;cursor:pointer;display:grid;place-items:center;padding:2px}
+  .enmem-card span{font-size:1.5rem}
+  .enmem-card span.back{font-size:1.5rem;opacity:.8}
+  .enmem-card.open{background:var(--panel);color:var(--ink);border-color:var(--accent)}
+  .enmem-card.matched{background:#d7f5e3;color:var(--good);border-color:var(--good)}
+  .enmem-card.open span,.enmem-card.matched span{font-size:1.15rem}
+  .enmem-card.open span:not(.back){font-size:1.7rem}
+  /* Malen nach Zahlen */
+  .paint-legend{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.3rem}
+  .paint-legend button{display:flex;align-items:center;gap:.35rem;border:2px solid var(--line);background:var(--panel);border-radius:.7rem;padding:.4rem .7rem;font:800 .9rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer}
+  .paint-legend button.sel{border-color:var(--ink);box-shadow:0 0 0 2px var(--accent)}
+  .paint-legend .sw{width:1.2rem;height:1.2rem;border-radius:4px;display:inline-block}
+  .paint-grid{display:grid;gap:2px;width:min(92vw,330px);margin:.3rem auto;background:var(--line);padding:2px;border-radius:.6rem}
+  .paint-cell{aspect-ratio:1;border:0;background:var(--panel);font:800 .9rem 'Nunito',sans-serif;color:var(--ink-soft);cursor:pointer;border-radius:2px}
   /* Geld zählen */
   .mo-coins{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
   .mo-coins button{border:2px solid #d4af37;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e8b84b);color:#5a4210;border-radius:999px;min-width:3.4rem;height:3.4rem;font:800 .9rem 'Nunito',sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)}
@@ -1089,6 +1105,22 @@
       <span></span><button class="back maze-dir" data-dir="up">⬆️</button><span></span>
       <button class="back maze-dir" data-dir="left">⬅️</button><button class="back maze-dir" data-dir="down">⬇️</button><button class="back maze-dir" data-dir="right">➡️</button>
     </div>
+  </div>
+
+  <!-- ENGLISCH-MEMORY -->
+  <div id="enmem" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="enBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🇬🇧 <span id="enPairs">0</span>/6</div><div class="gbadge">🔄 <span id="enMoves">0</span></div></div>
+    <div class="muted" style="text-align:center;margin:.2rem">Finde die Paare: Bild 🖼️ und englisches Wort.</div>
+    <div id="enmemGrid" class="enmem-grid"></div>
+  </div>
+
+  <!-- MALEN NACH ZAHLEN -->
+  <div id="paint" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="paBack">← Stopp</button><div class="spacer"></div><div class="gbadge" id="paName">🎨</div></div>
+    <div class="muted" style="text-align:center;margin:.2rem">Wähle eine Farbe und tippe die Felder mit der passenden Zahl!</div>
+    <div id="paintLegend" class="paint-legend"></div>
+    <div id="paintGrid" class="paint-grid"></div>
+    <div id="paintFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
   </div>
 
   <!-- SCHATZTRUHE -->
@@ -1850,7 +1882,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2165,7 +2197,9 @@
     {id:"money",name:"Geld bezahlen",emoji:"💶",cost:0,desc:"Lege den genauen Betrag mit Münzen und Scheinen."},
     {id:"simon",name:"Simon – Farben merken",emoji:"🎵",cost:4,desc:"Merke dir die Farbfolge und tippe sie nach."},
     {id:"anagram",name:"Buchstabensalat",emoji:"🔤",cost:0,desc:"Bringe die Buchstaben in die richtige Reihenfolge."},
-    {id:"maze",name:"Labyrinth",emoji:"🧭",cost:4,desc:"Finde den Weg durch das Labyrinth zum Ziel."}
+    {id:"maze",name:"Labyrinth",emoji:"🧭",cost:4,desc:"Finde den Weg durch das Labyrinth zum Ziel."},
+    {id:"enmem",name:"Englisch-Memory",emoji:"🇬🇧",cost:4,desc:"Finde die Paare: Bild und englisches Wort."},
+    {id:"paint",name:"Malen nach Zahlen",emoji:"🎨",cost:0,desc:"Färbe die Felder nach Zahlen und enthülle ein Bild."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -2186,7 +2220,8 @@
         else if(g.id==="trace")startTrace();else if(g.id==="story")startStory();else if(g.id==="sudoku")startSudoku();
         else if(g.id==="wordsearch")startWordsearch();else if(g.id==="snake")startSnake();else if(g.id==="race")startRace();
         else if(g.id==="clockset")startClockset();else if(g.id==="money")startMoney();else if(g.id==="simon")startSimon();
-        else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();});
+        else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();
+        else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -2750,6 +2785,49 @@
     ctx.font=(s*0.66)+"px serif";ctx.textAlign="center";ctx.textBaseline="middle";
     ctx.fillText("🧀",MAZE.gx*s+s/2,MAZE.gy*s+s/2);ctx.fillText("🐭",MAZE.px*s+s/2,MAZE.py*s+s/2);}
 
+  /* ---------- ENGLISCH-MEMORY ---------- */
+  var ENMEM_WORDS=[{e:"🐶",en:"dog"},{e:"🐱",en:"cat"},{e:"🏠",en:"house"},{e:"☀️",en:"sun"},{e:"🍎",en:"apple"},{e:"⭐",en:"star"},{e:"🐟",en:"fish"},{e:"🌳",en:"tree"},{e:"🚗",en:"car"},{e:"📖",en:"book"},{e:"🌸",en:"flower"},{e:"🐦",en:"bird"}];
+  var ENM={cards:[],first:null,lock:false,pairs:0,total:6,moves:0};
+  function startEnmem(){var picks=shuffle(ENMEM_WORDS.slice()).slice(0,6),cards=[];
+    picks.forEach(function(p,i){cards.push({id:i,kind:"pic",val:p.e,en:p.en,open:false,m:false});cards.push({id:i,kind:"en",val:p.en,en:p.en,open:false,m:false});});
+    ENM={cards:shuffle(cards),first:null,lock:false,pairs:0,total:6,moves:0};$("#enPairs").textContent="0";$("#enMoves").textContent="0";renderEnmem();show("enmem");}
+  function renderEnmem(){var g=$("#enmemGrid");g.innerHTML="";ENM.cards.forEach(function(c,idx){var b=document.createElement("button");
+    b.className="enmem-card"+(c.m?" matched":(c.open?" open":""));
+    b.innerHTML=(c.open||c.m)?('<span>'+c.val+'</span>'):'<span class="back">❓</span>';
+    if(!c.m&&!c.open)b.addEventListener("click",function(){enmemFlip(idx);});g.appendChild(b);});}
+  function enmemFlip(idx){if(ENM.lock)return;var c=ENM.cards[idx];if(c.m||c.open)return;c.open=true;renderEnmem();
+    if(ENM.first===null){ENM.first=idx;return;}
+    ENM.lock=true;ENM.moves++;$("#enMoves").textContent=ENM.moves;
+    var a=ENM.cards[ENM.first],d=ENM.cards[idx];
+    if(a.id===d.id){a.m=true;d.m=true;ENM.pairs++;$("#enPairs").textContent=ENM.pairs;sCorrect();reward(1,1);speak(a.en,"en");ENM.first=null;ENM.lock=false;renderEnmem();
+      if(ENM.pairs>=ENM.total){confetti();reward(2,1);setTimeout(openGames,1500);}}
+    else{sWrong();setTimeout(function(){a.open=false;d.open=false;ENM.first=null;ENM.lock=false;renderEnmem();},850);}}
+
+  /* ---------- MALEN NACH ZAHLEN ---------- */
+  var PCOL={1:"#ff5b5b",2:"#4aa3ff",3:"#4bd07d",4:"#ffcf3a"};
+  var PCOLN={1:"Rot",2:"Blau",3:"Grün",4:"Gelb"};
+  var PAINT_PICS=[
+    {name:"❤️ Herz",rows:["2112112","1111111","1111111","2111112","2211122","2221222"]},
+    {name:"🏠 Haus",rows:["2244422","2444442","4444444","1113111","1113111","1113111"]},
+    {name:"⭐ Stern",rows:["2224222","2244422","4444444","2444442","2244422","2422242"]},
+    {name:"🌳 Baum",rows:["2233322","2333332","3333333","2233322","2221222","2221222"]}
+  ];
+  var PAINT={pic:null,sel:1,colored:{},total:0,done:0};
+  function startPaint(){PAINT.pic=pick(PAINT_PICS);PAINT.sel=1;PAINT.colored={};PAINT.done=0;
+    PAINT.total=0;PAINT.pic.rows.forEach(function(r){PAINT.total+=r.length;});
+    $("#paName").textContent="🎨 "+PAINT.pic.name;$("#paintFb").textContent="";$("#paintFb").className="feedback";
+    renderPaintLegend();renderPaint();show("paint");}
+  function renderPaintLegend(){var box=$("#paintLegend");box.innerHTML="";[1,2,3,4].forEach(function(n){var b=document.createElement("button");if(n===PAINT.sel)b.className="sel";
+    b.innerHTML='<span class="sw" style="background:'+PCOL[n]+'"></span>'+n+' '+PCOLN[n];b.addEventListener("click",function(){PAINT.sel=n;renderPaintLegend();});box.appendChild(b);});}
+  function renderPaint(){var rows=PAINT.pic.rows,w=rows[0].length,g=$("#paintGrid");g.style.gridTemplateColumns="repeat("+w+",1fr)";g.innerHTML="";
+    rows.forEach(function(r,y){r.split("").forEach(function(ch,x){var n=+ch,key=y+"_"+x,b=document.createElement("button");b.className="paint-cell";
+      if(PAINT.colored[key]){b.style.background=PCOL[n];b.textContent="";}else{b.textContent=n;}
+      b.addEventListener("click",function(){paintTap(y,x,n,b);});g.appendChild(b);});});}
+  function paintTap(y,x,n,b){var key=y+"_"+x;if(PAINT.colored[key])return;
+    if(PAINT.sel===n){PAINT.colored[key]=true;b.style.background=PCOL[n];b.textContent="";tone(500,.04);PAINT.done++;
+      if(PAINT.done>=PAINT.total){sCorrect();confetti();reward(2,1);$("#paintFb").className="feedback ok";$("#paintFb").innerHTML="🎉 Fertig gemalt: "+PAINT.pic.name+"!";setTimeout(openGames,1700);}}
+    else{sWrong();b.animate?b.animate([{transform:"translateX(-2px)"},{transform:"translateX(2px)"},{transform:"translateX(0)"}],120):0;}}
+
   /* Zurück-/Steuer-Buttons der neuen Spiele (einmalig) */
   $("#traceBack").addEventListener("click",openGames);
   $("#traceNext").addEventListener("click",traceAdvance);
@@ -2779,6 +2857,9 @@
   $("#anSpeak").addEventListener("click",function(){if(ANA.word)speak(ANA.word);});
   // Labyrinth
   $("#mzBack").addEventListener("click",openGames);
+  // Englisch-Memory & Malen nach Zahlen
+  $("#enBack").addEventListener("click",openGames);
+  $("#paBack").addEventListener("click",openGames);
 
   /* ---------- QUIZ-DUELL AUF ZEIT ---------- */
   var QUIZPOOL=[].concat(SACH_TIERE,SACH_KOERPER,SACH_JAHR,SACH_VERKEHR,GEO_WELT,GEO_FLAG,MUS_INSTR),QUIZ={on:false,score:0,time:30,timer:0};
