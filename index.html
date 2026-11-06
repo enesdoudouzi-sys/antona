@@ -1470,7 +1470,7 @@
 
   /* ---------- Screens ---------- */
   var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
-  function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display=(id==="profiles"?"block":"none");SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
+  function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
     $("#starPill").hidden=!hasActive||pre;
@@ -1483,39 +1483,30 @@
   /* ---------- Profile-UI ---------- */
   function renderProfiles(){
     var box=$("#profileList");if(!box)return;box.innerHTML="";
-    box.style.position="relative";box.style.zIndex="10";box.style.pointerEvents="auto";
-    if(!Array.isArray(profiles))profiles=[];
-    profiles=profiles.filter(function(p){return p&&typeof p==="object";});
-    var add=document.createElement("button");add.type="button";add.className="pcard add";
-    add.setAttribute("aria-label","Neues Kinderprofil anlegen");
-    add.innerHTML='<span class="av">＋</span><span class="pn">Kind anlegen</span>';
-    box.appendChild(add);
-    profiles.forEach(function(p){
-      if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};
-      var b=document.createElement("button");b.type="button";b.className="pcard";
-      b.setAttribute("data-profile-id",String(p.id));
-      b.innerHTML='<span class="av">'+(p.av||"⭐")+'</span><span class="pn"></span><span class="ps">★ '+(p.stats.stars||0)+'</span>';
-      b.querySelector(".pn").textContent=p.name||"Kind";
-      box.appendChild(b);
-    });
-    /* Delegierter Pointer-/Click-Handler: funktioniert auch auf Touchscreens */
-    if(!box.dataset.profileHandler){
-      box.dataset.profileHandler="1";
-      function activate(ev){
-        var card=ev.target.closest("button.pcard");
-        if(!card||!box.contains(card))return;
-        ev.preventDefault();ev.stopPropagation();
-        if(card.classList.contains("add")){openNewProfile();return;}
-        var id=card.getAttribute("data-profile-id");
-        var chosen=profiles.filter(function(p){return String(p.id)===id;})[0];
-        if(!chosen)return;
-        activeId=chosen.id;persist();enterHome();
+    box.style.cssText="position:relative;z-index:2147483000;pointer-events:auto;isolation:isolate";
+    profiles=Array.isArray(profiles)?profiles.filter(function(p){return p&&typeof p==="object";}):[];
+    function makeCard(p,isAdd){
+      var b=document.createElement("button");b.type="button";b.className="pcard"+(isAdd?" add":"");
+      b.style.cssText="position:relative;z-index:2147483000;pointer-events:auto;cursor:pointer;touch-action:manipulation";
+      if(isAdd){b.innerHTML='<span class="av">＋</span><span class="pn">Kind anlegen</span>';}
+      else{
+        if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};
+        b.setAttribute("data-profile-id",String(p.id));
+        b.innerHTML='<span class="av">'+(p.av||"⭐")+'</span><span class="pn"></span><span class="ps">★ '+(p.stats.stars||0)+'</span>';
+        b.querySelector(".pn").textContent=p.name||"Kind";
       }
-      box.addEventListener("click",activate);
-      box.addEventListener("keydown",function(ev){
-        if((ev.key==="Enter"||ev.key===" ")&&ev.target.closest("button.pcard"))activate(ev);
+      b.addEventListener("click",function(ev){
+        ev.preventDefault();ev.stopPropagation();
+        if(isAdd){openNewProfile();return;}
+        activeId=p.id;persist();enterHome();
       });
+      b.addEventListener("pointerup",function(ev){
+        if(ev.pointerType==="touch"){ev.preventDefault();if(isAdd)openNewProfile();else{activeId=p.id;persist();enterHome();}}
+      });
+      return b;
     }
+    box.appendChild(makeCard(null,true));
+    profiles.forEach(function(p){box.appendChild(makeCard(p,false));});
   }
   var pickedAv=AVATARS[0];
   function openNewProfile(){
