@@ -1124,12 +1124,18 @@
           <span><b>Natürliche Online-Stimme</b> <span class="muted">(empfohlen – klingt echt, braucht Internet)</span></span>
         </label>
         <div id="onlineVoiceRow" style="margin:.2rem 0 .6rem">
-          <span class="muted">Online-Stimme: </span>
-          <select id="ttsVoicePick" style="padding:.4rem;border-radius:.5rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif">
-            <option value="Vicki">Vicki (weiblich, freundlich)</option>
-            <option value="Marlene">Marlene (weiblich)</option>
-            <option value="Hans">Hans (männlich)</option>
+          <div class="muted" style="margin-bottom:.3rem">Online-Stimme auswählen (antippen & 🔊 testen):</div>
+          <select id="ttsVoicePick" style="width:100%;padding:.5rem;border-radius:.5rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif">
+            <optgroup label="Deutsch – besonders natürlich (neu)">
+              <option value="Daniel">Daniel (männlich, sehr natürlich)</option>
+              <option value="Vicki">Vicki (weiblich, sehr natürlich)</option>
+            </optgroup>
+            <optgroup label="Deutsch – klar & freundlich">
+              <option value="Marlene">Marlene (weiblich)</option>
+              <option value="Hans">Hans (männlich)</option>
+            </optgroup>
           </select>
+          <button class="back" id="ttsVoiceTest" style="margin-top:.4rem">🔊 Diese Online-Stimme testen</button>
         </div>
         <p class="muted" style="margin:.2rem 0 .5rem">Ohne Internet oder wenn die Online-Stimme nicht lädt, nutzt die App automatisch die beste Stimme deines Geräts:</p>
         <select id="voicePick" style="width:100%;padding:.55rem;border-radius:.6rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif"></select>
@@ -2019,7 +2025,8 @@
     var vt=$("#voiceTest");if(vt)vt.addEventListener("click",function(){speak("Hallo! Ich bin deine Lese-Stimme und helfe dir beim Lernen.");});
     var ov=$("#onlineVoiceChk");if(ov){ov.checked=!!onlineVoice;$("#onlineVoiceRow").style.opacity=onlineVoice?"1":".45";
       ov.addEventListener("change",function(){onlineVoice=ov.checked;ttsFailed=false;save("antona_tts_online",onlineVoice);$("#onlineVoiceRow").style.opacity=onlineVoice?"1":".45";setTimeout(function(){speak(onlineVoice?"Super! So klinge ich jetzt.":"Jetzt nutze ich die Gerätestimme.");},150);});}
-    var tv=$("#ttsVoicePick");if(tv){tv.value=ttsDeVoice;tv.addEventListener("change",function(){ttsDeVoice=tv.value;ttsFailed=false;save("antona_tts_voice",ttsDeVoice);setTimeout(function(){speak("Hallo, so klinge ich.");},150);});}})();
+    var tv=$("#ttsVoicePick");if(tv){tv.value=ttsDeVoice;tv.addEventListener("change",function(){ttsDeVoice=tv.value;ttsFailed=false;onlineVoice=true;if($("#onlineVoiceChk"))$("#onlineVoiceChk").checked=true;save("antona_tts_online",true);save("antona_tts_voice",ttsDeVoice);setTimeout(function(){speak("Hallo Lina, so klinge ich. Lass uns zusammen lernen!");},150);});}
+    var tvt=$("#ttsVoiceTest");if(tvt)tvt.addEventListener("click",function(){ttsFailed=false;onlineVoice=true;speak("Hallo Lina, so klinge ich. Lass uns zusammen lernen!");});})();
 
   /* ---------- Daten sichern & übertragen (Sync ohne Konto) ---------- */
   function migrateProfiles(){
