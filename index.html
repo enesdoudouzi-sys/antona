@@ -1249,6 +1249,7 @@
             </optgroup>
           </select>
           <button class="back" id="ttsVoiceTest" style="margin-top:.4rem">🔊 Diese Online-Stimme testen</button>
+          <div id="ttsStatus" style="margin-top:.5rem;font-weight:800;font-size:.9rem"></div>
         </div>
         <p class="muted" style="margin:.2rem 0 .5rem">Ohne Internet oder wenn die Online-Stimme nicht lädt, nutzt die App automatisch die beste Stimme deines Geräts:</p>
         <select id="voicePick" style="width:100%;padding:.55rem;border-radius:.6rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif"></select>
@@ -1392,6 +1393,8 @@
     function(t,en){return "https://api.streamelements.com/kappa/v2/speech?voice="+encodeURIComponent(en?"Amy":ttsDeVoice)+"&text="+encodeURIComponent(t);},
     function(t,en){return "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl="+(en?"en":"de")+"&q="+encodeURIComponent(t.slice(0,180));}
   ];
+  var onTtsStatus=null; // optional Rückmeldung für den Eltern-Test
+  function ttsReport(kind,info){try{if(onTtsStatus)onTtsStatus(kind,info);}catch(e){}}
   function speak(t,lang){
     if(!t)return;var en=(lang&&lang.indexOf("en")===0);
     if(onlineVoice && !ttsFailed && navigator.onLine!==false){
@@ -1399,14 +1402,15 @@
       if(ttsAudio){ttsAudio.onerror=null;ttsAudio.onplaying=null;try{ttsAudio.pause();}catch(e){}}
       tryOnline(t,lang,en,0);return;
     }
+    if(onlineVoice&&navigator.onLine===false)ttsReport("offline");
     speakDevice(t,lang);
   }
   function tryOnline(t,lang,en,idx){
-    if(idx>=TTS_PROVIDERS.length){ttsFailed=true;speakDevice(t,lang);return;}
+    if(idx>=TTS_PROVIDERS.length){ttsFailed=true;ttsReport("device");speakDevice(t,lang);return;}
     try{
       var a=ttsAudio=new Audio();a.preload="auto";a.src=TTS_PROVIDERS[idx](t,en);
       var done=false,tmr=setTimeout(function(){if(done)return;if(a.readyState<2){done=true;try{a.pause();a.src="";}catch(e){}tryOnline(t,lang,en,idx+1);}},1700);
-      a.onplaying=function(){clearTimeout(tmr);};
+      a.onplaying=function(){clearTimeout(tmr);ttsReport("online",idx);};
       a.onerror=function(){if(done)return;done=true;clearTimeout(tmr);tryOnline(t,lang,en,idx+1);};
       var pr=a.play();if(pr&&pr.catch)pr.catch(function(){if(done)return;done=true;clearTimeout(tmr);tryOnline(t,lang,en,idx+1);});
     }catch(e){tryOnline(t,lang,en,idx+1);}
@@ -2139,7 +2143,14 @@
     var ov=$("#onlineVoiceChk");if(ov){ov.checked=!!onlineVoice;$("#onlineVoiceRow").style.opacity=onlineVoice?"1":".45";
       ov.addEventListener("change",function(){onlineVoice=ov.checked;ttsFailed=false;save("antona_tts_online",onlineVoice);$("#onlineVoiceRow").style.opacity=onlineVoice?"1":".45";setTimeout(function(){speak(onlineVoice?"Super! So klinge ich jetzt.":"Jetzt nutze ich die Gerätestimme.");},150);});}
     var tv=$("#ttsVoicePick");if(tv){tv.value=ttsDeVoice;tv.addEventListener("change",function(){ttsDeVoice=tv.value;ttsFailed=false;onlineVoice=true;if($("#onlineVoiceChk"))$("#onlineVoiceChk").checked=true;save("antona_tts_online",true);save("antona_tts_voice",ttsDeVoice);setTimeout(function(){speak("Hallo Lina, so klinge ich. Lass uns zusammen lernen!");},150);});}
-    var tvt=$("#ttsVoiceTest");if(tvt)tvt.addEventListener("click",function(){ttsFailed=false;onlineVoice=true;speak("Hallo Lina, so klinge ich. Lass uns zusammen lernen!");});})();
+    var tvt=$("#ttsVoiceTest");if(tvt)tvt.addEventListener("click",function(){ttsFailed=false;onlineVoice=true;
+      var st=$("#ttsStatus");if(st){st.style.color="var(--ink-soft)";st.textContent="⏳ Teste Online-Stimme …";}
+      onTtsStatus=function(kind,info){var st=$("#ttsStatus");if(!st){onTtsStatus=null;return;}
+        if(kind==="online"){st.style.color="var(--good)";st.innerHTML="✅ Online-Stimme läuft! ("+(info===0?ttsDeVoice:"Google")+")";}
+        else if(kind==="offline"){st.style.color="var(--bad)";st.textContent="📵 Kein Internet – Gerätestimme wird genutzt.";}
+        else{st.style.color="var(--bad)";st.innerHTML="⚠️ Online-Stimme wird blockiert – es läuft die Gerätestimme.<br><span style=\"font-weight:600;color:var(--ink-soft)\">Sag das Claude: dann richten wir eine andere Lösung ein.</span>";}
+        onTtsStatus=null;};
+      speak("Hallo Lina, so klinge ich. Lass uns zusammen lernen!");});})();
 
   /* ---------- Daten sichern & übertragen (Sync ohne Konto) ---------- */
   function migrateProfiles(){
