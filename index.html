@@ -540,6 +540,26 @@
   .curr-honest{background:var(--bg2);box-shadow:none}.curr-honest p{font-size:.85rem;line-height:1.5;margin:.4rem 0 0;color:var(--ink-soft)}
   .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   @media(max-width:460px){.curriculum-intro{align-items:flex-start;flex-direction:column}.quick-tools{grid-template-columns:1fr}}
+  /* Kinder-Sudoku */
+  .sudoku-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;width:min(86vw,300px);margin:0 auto;background:var(--ink-soft);padding:3px;border-radius:.7rem}
+  .sudoku-grid .sc{aspect-ratio:1;display:grid;place-items:center;font:700 1.7rem 'Fredoka',sans-serif;background:var(--panel);color:var(--accent);cursor:pointer;border-radius:3px}
+  .sudoku-grid .sc.fixed{background:var(--bg2);color:var(--ink);cursor:default}
+  .sudoku-grid .sc.bad{background:#ffe0e0;color:var(--bad)}
+  .sudoku-grid .sc:nth-child(4n+2){border-right:2px solid var(--ink-soft)}
+  .sudoku-grid .sc.rowline{border-bottom:2px solid var(--ink-soft)}
+  /* Wortsuche */
+  .ws-words{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center}
+  .ws-words span{background:var(--bg2);border-radius:.6rem;padding:.25rem .6rem;font-weight:800;font-size:.9rem}
+  .ws-words span.found{background:#d7f5e3;color:var(--good);text-decoration:line-through}
+  .ws-grid{display:grid;gap:3px;width:min(92vw,340px);margin:0 auto}
+  .ws-grid button{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:5px;font:800 1.05rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer;padding:0}
+  .ws-grid button.sel{background:var(--accent);color:#fff}
+  .ws-grid button.ok{background:#bdebcf;color:var(--good)}
+  /* Rechen-Rennen */
+  .race-track{display:flex;flex-direction:column;gap:.5rem;width:100%}
+  .race-lane{position:relative;width:100%;height:2.6rem;background:var(--bg2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .race-car{position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:1.7rem;transition:left .5s ease}
+  .race-flag{position:absolute;right:.4rem;top:50%;transform:translateY(-50%);font-size:1.4rem}
   /* Urkunde */
   #urkunde{max-width:640px;margin:1rem auto;padding:.5rem}
   .urk-border{border:10px double #d4af37;border-radius:18px;background:linear-gradient(135deg,#fffdf4,#fff6df);
@@ -621,6 +641,7 @@
       <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen · Länder</span><span class="mini" id="best-geo">★ 0</span></button>
     </div>
     <div class="quick-tools">
+      <button class="quick-tool" id="gamesEntry">🎮 <span><b>Spiele</b><small>Belohnung: mit Münzen spielen</small></span></button>
       <button class="quick-tool" id="focusEntry">🧠 <span><b>Fokus trainieren</b><small>Aufmerksamkeit und Gedächtnis</small></span></button>
       <button class="quick-tool" id="coachEntry">🌱 <span><b>Lerncoach</b><small>Tipps für deinen nächsten Schritt</small></span></button>
     </div>
@@ -922,6 +943,73 @@
     </div>
   </div>
 
+  <!-- NACHSPUREN -->
+  <div id="trace" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="traceBack">← Stopp</button><div class="spacer"></div><div class="gbadge">✏️ <span id="traceIdx">1</span>/8</div></div>
+    <div class="card" style="gap:.7rem">
+      <div class="muted" id="traceHint">Fahre das Zeichen mit dem Finger nach.</div>
+      <div style="position:relative;width:100%;max-width:300px;margin:0 auto">
+        <div id="traceGhost" style="position:absolute;inset:0;display:grid;place-items:center;font:700 13rem/1 'Fredoka',sans-serif;color:var(--bg2);user-select:none;pointer-events:none"></div>
+        <canvas id="traceCanvas" width="300" height="300" style="width:100%;touch-action:none;border:2px dashed var(--line);border-radius:1rem;background:var(--panel)"></canvas>
+      </div>
+      <div style="display:flex;gap:.6rem"><button class="back" id="traceClear">🧽 Neu</button><button class="next" id="traceNext" style="flex:1">Weiter →</button></div>
+    </div>
+  </div>
+
+  <!-- LESEGESCHICHTEN -->
+  <div id="story" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="storyBack">← Stopp</button><div class="spacer"></div><div class="gbadge">📜 <span id="storyIdx">1</span>/6</div></div>
+    <div class="card" style="gap:1rem">
+      <div id="storyText" style="font-size:1.12rem;line-height:1.6;background:var(--bg2);padding:1rem;border-radius:1rem"></div>
+      <div class="qlabel" id="storyQ" style="justify-content:center"><span></span><button class="read-btn" id="storySpeak" aria-label="Vorlesen">🔊</button></div>
+      <div id="storyAns" class="answers three"></div>
+      <div id="storyFb" class="feedback" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- KINDER-SUDOKU -->
+  <div id="sudoku" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="sudokuBack">← Stopp</button><div class="spacer"></div><button class="back" id="sudokuNew">Neu</button><button class="next" id="sudokuCheck" style="width:auto;padding:.5rem 1rem">Prüfen</button></div>
+    <div class="card" style="gap:.8rem">
+      <div class="muted">Jede Zahl 1–4 kommt in jeder Zeile, jeder Spalte und jedem 2×2-Block genau einmal vor. Tippe ein Feld, um die Zahl zu wechseln.</div>
+      <div id="sudokuGrid" class="sudoku-grid"></div>
+      <div id="sudokuFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
+  <!-- WORTSUCHE -->
+  <div id="wordsearch" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="wsBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🔤 <span id="wsFound">0</span>/<span id="wsTotal">0</span></div></div>
+    <div class="card" style="gap:.7rem">
+      <div class="muted">Finde die Wörter! Tippe den <b>ersten</b> und dann den <b>letzten</b> Buchstaben.</div>
+      <div id="wsWords" class="ws-words"></div>
+      <div id="wsGrid" class="ws-grid"></div>
+      <div id="wsFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
+  <!-- ZAHLEN-SNAKE -->
+  <div id="snake" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="snakeBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🎯 <span id="snakeNext">1</span></div><div class="gbadge">⭐ <span id="snakeScore">0</span></div></div>
+    <div class="muted" style="text-align:center;margin:.2rem 0">Friss die Zahlen der Reihe nach: 1, 2, 3 …</div>
+    <canvas id="snakeCanvas" width="300" height="300" style="width:min(92vw,340px);height:min(92vw,340px);margin:.2rem auto;background:var(--panel);border:2px solid var(--line);border-radius:1rem;touch-action:none"></canvas>
+    <div id="snakePad" style="display:grid;grid-template-columns:repeat(3,3.2rem);justify-content:center;gap:.4rem;margin:.4rem auto">
+      <span></span><button class="back snake-dir" data-dir="up">⬆️</button><span></span>
+      <button class="back snake-dir" data-dir="left">⬅️</button><button class="back snake-dir" data-dir="down">⬇️</button><button class="back snake-dir" data-dir="right">➡️</button>
+    </div>
+  </div>
+
+  <!-- RECHEN-RENNEN -->
+  <div id="race" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="raceBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🏁 <span id="raceRound">1</span>/10</div></div>
+    <div class="card" style="gap:1rem">
+      <div class="race-track"><div class="race-lane"><span id="raceYou" class="race-car">🏎️</span><span class="race-flag">🏁</span></div><div class="race-lane"><span id="raceCpu" class="race-car">🚗</span><span class="race-flag">🏁</span></div></div>
+      <div class="question" id="raceQ"></div>
+      <div id="raceAns" class="answers three"></div>
+      <div id="raceFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
   <!-- SCHATZTRUHE -->
   <div id="chest" hidden>
     <div class="bar"><button class="back" id="chestBack">← Zurück</button></div>
@@ -1031,9 +1119,11 @@
       </div>
       <div class="sheet">
         <h3>Vorlese-Stimme</h3>
-        <p class="muted" style="margin:.2rem 0 .5rem">Je nach Gerät gibt es verschiedene Stimmen. Wähle die schönste – „online" klingt meist natürlicher.</p>
+        <p class="muted" style="margin:.2rem 0 .5rem">Die App wählt automatisch die natürlichste Stimme deines Geräts. Du kannst auch eine andere wählen – Stimmen mit „(online)" oder „Natural" klingen am menschlichsten.</p>
         <select id="voicePick" style="width:100%;padding:.55rem;border-radius:.6rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif"></select>
         <button class="back" id="voiceTest" style="margin-top:.5rem">🔊 Stimme testen</button>
+        <details style="margin-top:.6rem"><summary class="muted" style="cursor:pointer">Stimme klingt robotisch? So bekommst du eine natürliche</summary>
+          <p class="muted" style="margin:.4rem 0 0;font-size:.85rem;line-height:1.5">Die Stimme kommt vom Gerät, nicht von der App.<br>• <b>Android:</b> Einstellungen → „Sprachausgabe" → „Google Sprachausgabe" wählen und deutsche Stimme herunterladen.<br>• <b>iPhone/iPad:</b> Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch → eine <b>(Premium/Erweitert)</b>-Stimme laden.<br>• <b>Windows/Chrome:</b> meist ist „Google Deutsch" schon natürlich – oben auswählen.</p></details>
       </div>
       <div class="sheet">
         <h3>Urkunde 🏅</h3>
@@ -1120,15 +1210,26 @@
 
   /* ---------- Vorlesen: beste deutsche Stimme wählen ---------- */
   var deVoice=null,enVoice=null;
-  function bestVoice(list,prefs){
-    // 1. Natürlichste Stimmen zuerst: Online-/Neural-/Natural-Stimmen klingen am menschlichsten
-    var natural=list.filter(function(v){return /natural|neural|online|wavenet|premium/i.test(v.name||"")||v.localService===false;});
-    for(var i=0;i<prefs.length;i++)for(var j=0;j<natural.length;j++)
-      if((natural[j].name||"").indexOf(prefs[i])!==-1)return natural[j];
-    if(natural.length)return natural[0];
-    for(var i=0;i<prefs.length;i++)for(var j=0;j<list.length;j++)
-      if((list[j].name||"").indexOf(prefs[i])!==-1)return list[j];
-    return list[0];
+  // Qualitäts-Bewertung: je höher, desto natürlicher soll die Stimme klingen
+  function voiceScore(v,topNames){
+    var n=(v.name||""),s=0;
+    // beste bekannte, besonders natürliche Stimmen
+    for(var i=0;i<topNames.length;i++)if(n.indexOf(topNames[i])!==-1){s+=1000-i*40;break;}
+    // Merkmale sehr natürlicher Stimmen
+    if(/natural|neural|wavenet|journey|enhanced|premium|siri/i.test(n))s+=500;
+    if(v.localService===false)s+=300;                 // Online-Stimmen klingen meist natürlicher
+    if(/google/i.test(n))s+=250;                      // Google-Stimmen sind recht natürlich
+    if(/online/i.test(n))s+=200;
+    if(/eSpeak|espeak|compact|pico/i.test(n))s-=600;  // klar robotisch → meiden
+    // freundliche, weibliche Stimmen für Kinder bevorzugen
+    if(/katja|anna|petra|vicki|hedda|marlene|female|frau|conchita|aria|jenny|sara|neerja/i.test(n))s+=60;
+    return s;
+  }
+  function bestVoice(list,topNames){
+    if(!list.length)return null;
+    var best=list[0],bs=voiceScore(best,topNames);
+    for(var i=1;i<list.length;i++){var sc=voiceScore(list[i],topNames);if(sc>bs){bs=sc;best=list[i];}}
+    return best;
   }
   function chooseVoice(){
     try{var vs=window.speechSynthesis.getVoices();if(!vs||!vs.length)return;
@@ -1136,21 +1237,25 @@
       var en=vs.filter(function(v){return /^en(-|_|$)/i.test(v.lang||"");});
       var saved=load("antona_voice","");
       if(de.length){var sv=saved?de.filter(function(v){return v.name===saved;})[0]:null;
-        deVoice=sv||bestVoice(de,["Google Deutsch","Microsoft Katja Online","Microsoft Katja","Microsoft Hedda","Natural","Anna","Petra","Katja","Vicki","Markus"]);}
-      if(en.length)enVoice=bestVoice(en,["Google US English","Microsoft Aria Online","Google UK English Female","Microsoft Jenny","Samantha","Aria"]);
+        deVoice=sv||bestVoice(de,["Google Deutsch","Microsoft Katja Online (Natural)","Microsoft Katja Online","Anna (Enhanced)","Microsoft Katja","Microsoft Hedda","Petra","Vicki","Markus"]);}
+      if(en.length)enVoice=bestVoice(en,["Google US English","Microsoft Aria Online (Natural)","Microsoft Aria Online","Samantha (Enhanced)","Google UK English Female","Microsoft Jenny","Samantha","Aria"]);
     }catch(e){}
   }
   function populateVoices(){try{var sel=$("#voicePick");if(!sel)return;var vs=window.speechSynthesis.getVoices()||[],de=vs.filter(function(v){return /^de/i.test(v.lang||"");}),saved=load("antona_voice","");sel.innerHTML="";
     if(!de.length){var o=document.createElement("option");o.value="";o.textContent="Standard-Stimme des Geräts";sel.appendChild(o);return;}
-    de.forEach(function(v){var o=document.createElement("option");o.value=v.name;o.textContent=v.name+(v.localService===false?" (online, natürlicher)":"");if(v.name===saved)o.selected=true;sel.appendChild(o);});}catch(e){}}
+    var tn=["Google Deutsch","Microsoft Katja Online (Natural)","Microsoft Katja Online","Anna (Enhanced)","Microsoft Katja","Microsoft Hedda","Petra","Vicki"];
+    de=de.slice().sort(function(a,b){return voiceScore(b,tn)-voiceScore(a,tn);});
+    // Erste Option: automatisch die natürlichste Stimme
+    var oauto=document.createElement("option");oauto.value="";oauto.textContent="★ Automatisch beste Stimme"+(de[0]?" ("+de[0].name+")":"");if(!saved)oauto.selected=true;sel.appendChild(oauto);
+    de.forEach(function(v,i){var o=document.createElement("option");o.value=v.name;
+      var tag=i===0?" – natürlichste":(v.localService===false?" (online)":"");o.textContent=v.name+tag;if(v.name===saved)o.selected=true;sel.appendChild(o);});}catch(e){}}
   try{if("speechSynthesis"in window){chooseVoice();window.speechSynthesis.onvoiceschanged=function(){chooseVoice();populateVoices();};}}catch(e){}
   function speak(t,lang){try{if(!("speechSynthesis"in window))return;window.speechSynthesis.cancel();
     if(!deVoice&&!enVoice)chooseVoice();
     var en=(lang&&lang.indexOf("en")===0);
     var u=new SpeechSynthesisUtterance(t);u.lang=en?"en-US":"de-DE";var v=en?enVoice:deVoice;if(v)u.voice=v;
-    // Ruhiger & deutlicher für Kinder; bei Online-Stimmen natürliche Tonhöhe lassen
-    var isNat=v&&(v.localService===false||/natural|neural|online|wavenet/i.test(v.name||""));
-    u.rate=en?.86:.9;u.pitch=isNat?1.0:1.08;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
+    // Natürliche Tonhöhe (1.0) klingt am wenigsten robotisch; ruhiges Tempo für Kinder
+    u.rate=en?.92:.95;u.pitch=1.0;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
 
   /* ---------- Maskottchen ---------- */
   function drawMascot(mood){
@@ -1231,6 +1336,33 @@
     if(plus){a=2+rnd(15);miss=2+rnd(15);res=a+miss;return{label:"Welche Zahl fehlt?",speak:a+" plus wie viel ergibt "+res+"?",render:function(z){z.className="question";z.textContent=a+" + ☐ = "+res;},options:numOpts(miss,3),correct:String(miss),three:true};}
     res=2+rnd(15);miss=1+rnd(res-1);a=res+miss;return{label:"Welche Zahl fehlt?",speak:a+" minus wie viel ergibt "+res+"?",render:function(z){z.className="question";z.textContent=a+" − ☐ = "+res;},options:numOpts(miss,3),correct:String(miss),three:true};}
   function m_three(){var a=1+rnd(8),b=1+rnd(8),c=1+rnd(8),res=a+b+c;return{label:"Rechne alle zusammen",speak:a+" plus "+b+" plus "+c,render:function(z){z.className="question";z.textContent=a+" + "+b+" + "+c+" = ?";},options:numOpts(res,3),correct:String(res),three:true};}
+  /* Sachaufgaben / Textaufgaben */
+  var SACHNAMEN=["Lina","Mia","Ben","Emma","Paul","Noah","Lea","Jonas"];
+  function m_word(){
+    var name=pick(SACHNAMEN),plus=Math.random()<0.5,a,b,res,txt,things=pick([
+      {o:"Äpfel",e:"🍎"},{o:"Luftballons",e:"🎈"},{o:"Sticker",e:"⭐"},{o:"Bonbons",e:"🍬"},{o:"Murmeln",e:"🔵"},{o:"Kekse",e:"🍪"}]);
+    if(plus){a=5+rnd(30);b=3+rnd(20);res=a+b;
+      txt=name+" hat "+a+" "+things.o+". "+name+" bekommt "+b+" dazu. Wie viele sind es jetzt?";}
+    else{a=20+rnd(40);b=3+rnd(a-3);res=a-b;
+      txt=name+" hat "+a+" "+things.o+" und gibt "+b+" ab. Wie viele bleiben?";}
+    return{label:"Sachaufgabe – lies genau",speak:txt,
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.05rem;line-height:1.5;max-width:22rem;margin:0 auto">'+things.e+' '+txt+'</div>';},
+      options:numOpts(res,4),correct:String(res),three:true};}
+  /* Zahlenstrahl: Zahl ablesen */
+  function m_numline(){var max=pick([10,20,20,30]),val=1+rnd(max-1);
+    function strahl(mark){var W=320,P=20,step=(W-2*P)/max,ticks="";
+      for(var i=0;i<=max;i++){var x=P+i*step,big=(i%5===0);
+        ticks+='<line x1="'+x+'" y1="46" x2="'+x+'" y2="'+(big?30:38)+'" stroke="#8a94ad" stroke-width="'+(big?2:1)+'"/>';
+        if(big)ticks+='<text x="'+x+'" y="22" font-size="11" text-anchor="middle" fill="#8a94ad">'+i+'</text>';}
+      var mx=P+mark*step;
+      return '<svg viewBox="0 0 320 70" style="width:100%;max-width:340px"><line x1="'+P+'" y1="46" x2="'+(W-P)+'" y2="46" stroke="#8a94ad" stroke-width="2"/>'+ticks+'<polygon points="'+mx+',40 '+(mx-7)+',58 '+(mx+7)+',58" fill="#e8552d"/></svg>';}
+    return{label:"Welche Zahl zeigt der Pfeil?",speak:"Welche Zahl zeigt der rote Pfeil auf dem Zahlenstrahl?",
+      render:function(z){z.className="question";z.innerHTML=strahl(val);},
+      options:numOpts(val,3),correct:String(val),three:true};}
+  /* Rechnen mit Zehnerübergang */
+  function m_bridge(){var plus=Math.random()<0.5,a,b,res;
+    if(plus){a=5+rnd(5);b=(11-a)+rnd(6);res=a+b;return{label:"Plus mit Übergang über 10",speak:"Wie viel ist "+a+" plus "+b+"?",render:function(z){z.className="question";z.textContent=a+" + "+b+" = ?";},options:numOpts(res,3),correct:String(res),three:true};}
+    res=4+rnd(6);b=1+rnd(res-1);a=10+(res-b)+rnd(3);res=a-b;return{label:"Minus mit Übergang über 10",speak:"Wie viel ist "+a+" minus "+b+"?",render:function(z){z.className="question";z.textContent=a+" − "+b+" = ?";},options:numOpts(res,3),correct:String(res),three:true};}
   var MATH_LVL={
     1:{title:"Mengen & Zehnerfeld",desc:"Punkte sehen und zählen",set:[m_subitize,m_tenframe,m_bond]},
     8:{title:"Zehnerzahlen",desc:"20 + 30, 70 − 40 …",set:[m_tens]},
@@ -1242,7 +1374,10 @@
     4:{title:"Plus & Minus bis 100",desc:"2. Klasse: große Zahlen",set:[m_add100,m_sub100,m_add100,m_sub100,m_double]},
     5:{title:"Größer, kleiner, gleich",desc:"Zahlen bis 100 vergleichen",set:[m_compare]},
     6:{title:"Einmaleins 2 · 5 · 10",desc:"Die leichten Reihen",set:[m_times([2,5,10])]},
-    7:{title:"Einmaleins gemischt",desc:"Alle Reihen bis 10",set:[m_times([2,3,4,5,6,7,8,9,10])]}
+    7:{title:"Einmaleins gemischt",desc:"Alle Reihen bis 10",set:[m_times([2,3,4,5,6,7,8,9,10])]},
+    12:{title:"Zehnerübergang",desc:"8 + 5, 14 − 6 …",set:[m_bridge]},
+    13:{title:"Zahlenstrahl",desc:"Zahlen ablesen & einordnen",set:[m_numline]},
+    14:{title:"Sachaufgaben",desc:"Textaufgaben verstehen",set:[m_word]}
   };
 
   /* ---------- LESEN ---------- */
@@ -1300,6 +1435,36 @@
   var SYN=[{w:"froh",s:"glücklich",x:["traurig","müde"]},{w:"schnell",s:"flink",x:["langsam","leise"]},{w:"groß",s:"riesig",x:["klein","rund"]},{w:"schön",s:"hübsch",x:["hässlich","kalt"]},{w:"leise",s:"still",x:["laut","bunt"]},{w:"klug",s:"schlau",x:["dumm","nass"]}];
   function r_syn(){var it=pick(SYN);return{label:"Welches Wort bedeutet das Gleiche wie „"+it.w+"“?",speak:"Was bedeutet das Gleiche wie "+it.w+"?",render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.9rem">'+it.w+'</div>';},
     options:shuffle([it.s].concat(it.x)),correct:it.s,word:true,three:true};}
+  /* Lückenwörter: ei/ie, sp/st, Doppelkonsonanten */
+  var GAP=[{e:"🍦",w:"Eis",show:"__s",a:"Ei",o:["Ei","Ie","Ai"]},
+    {e:"🐝",w:"Biene",show:"B__ne",a:"ie",o:["ie","ei","ieh"]},
+    {e:"🚢",w:"Schiff",show:"Schi__",a:"ff",o:["ff","f","v"]},
+    {e:"⭐",w:"Stern",show:"__ern",a:"St",o:["St","Sp","Sch"]},
+    {e:"🕷️",w:"Spinne",show:"__inne",a:"Sp",o:["Sp","St","Schp"]},
+    {e:"☀️",w:"Sonne",show:"So__e",a:"nn",o:["nn","n","m"]},
+    {e:"🎈",w:"Ball",show:"Ba__",a:"ll",o:["ll","l","le"]},
+    {e:"🌳",w:"Baum",show:"B__m",a:"au",o:["au","au","eu"]},
+    {e:"🏫",w:"Schule",show:"__ule",a:"Sch",o:["Sch","St","Sp"]},
+    {e:"🧀",w:"Käse",show:"K__se",a:"ä",o:["ä","e","a"]},
+    {e:"🚂",w:"Zug",show:"__ug",a:"Z",o:["Z","S","C"]},
+    {e:"🌼",w:"Wiese",show:"W__se",a:"ie",o:["ie","ei","ih"]}];
+  function r_gap(){var it=pick(GAP);
+    return{label:"Welche Buchstaben fehlen?",speak:"Welche Buchstaben fehlen bei "+it.w+"?",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">'+it.e+'</span><div style="font-size:2rem;letter-spacing:.05em">'+it.show.replace("__",'<span style="color:#e8552d">__</span>')+'</div>';},
+      options:shuffle(it.o.slice()),correct:it.a,word:true,three:true};}
+  /* Lesen mit Verständnis: kurzer Text + Frage */
+  var STORIES=[
+    {t:"Tom hat einen roten Ball. Er spielt im Garten.",q:"Welche Farbe hat der Ball?",a:["rot","blau","grün"]},
+    {t:"Mia isst gern Äpfel. Am liebsten mag sie grüne Äpfel.",q:"Was isst Mia am liebsten?",a:["grüne Äpfel","rote Äpfel","Bananen"]},
+    {t:"Der Hund Bello läuft schnell zum Baum. Dort gräbt er ein Loch.",q:"Was macht Bello am Baum?",a:["Er gräbt ein Loch","Er schläft","Er bellt"]},
+    {t:"Lea geht am Morgen zur Schule. Sie nimmt ihren blauen Rucksack mit.",q:"Welche Farbe hat Leas Rucksack?",a:["blau","gelb","rot"]},
+    {t:"Im Herbst fallen die Blätter von den Bäumen. Paul sammelt bunte Blätter.",q:"Wann fallen die Blätter?",a:["im Herbst","im Sommer","im Winter"]},
+    {t:"Die Katze sitzt auf dem Dach. Sie schaut den Vögeln zu.",q:"Wo sitzt die Katze?",a:["auf dem Dach","im Garten","im Haus"]},
+    {t:"Ben baut einen Turm aus Bausteinen. Der Turm wird sehr hoch.",q:"Was baut Ben?",a:["einen Turm","ein Auto","ein Haus"]}];
+  function r_read(){var it=pick(STORIES);
+    return{label:it.q,speak:it.t+" "+it.q,
+      render:function(z){z.className="question";z.innerHTML='<div style="font-size:1.05rem;line-height:1.55;max-width:22rem;margin:0 auto;background:var(--bg2);padding:.8rem 1rem;border-radius:1rem">📖 '+it.t+'</div>';},
+      options:shuffle(it.a.slice()),correct:it.a[0],word:true,three:true};}
   var READ_LVL={
     1:{title:"Anlaute",desc:"Erster Buchstabe",set:[r_anlaut]},
     2:{title:"Wörter erkennen",desc:"Wort zum Bild finden",set:[r_word,r_anlaut]},
@@ -1310,7 +1475,9 @@
     7:{title:"Erste Sätze",desc:"Satz sinnvoll ergänzen",set:[r_sentence]},
     8:{title:"Profi: alles gemischt",desc:"Sätze, Reime, ä/ö/ü, groß/klein",set:[r_sentence,r_rhyme,r_umlaut,r_case]},
     9:{title:"Diktat (hören)",desc:"Wort hören, richtig schreiben",set:[r_dikt]},
-    10:{title:"Experte: Wortschatz",desc:"Zusammengesetzte Wörter & Synonyme",set:[r_compound,r_syn]}
+    10:{title:"Experte: Wortschatz",desc:"Zusammengesetzte Wörter & Synonyme",set:[r_compound,r_syn]},
+    11:{title:"Lückenwörter",desc:"ei/ie, sp/st, Doppel-Buchstaben",set:[r_gap]},
+    12:{title:"Lesen & verstehen",desc:"Text lesen, Frage beantworten",set:[r_read]}
   };
 
   /* ---------- FORMEN & FARBEN ---------- */
@@ -1560,7 +1727,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1604,9 +1771,12 @@
     var lastActivation=0;
     function activateAt(ev){
       if(!ev||typeof ev.clientX!=="number")return;
+      var ps=document.getElementById("profiles");if(!ps||ps.hidden)return; // nur auf dem Profil-Bildschirm aktiv
+      if(ev.clientX<=0&&ev.clientY<=0)return; // ungültige Koordinaten ignorieren
       var cards=document.querySelectorAll("#profileList button.pcard");
       for(var i=0;i<cards.length;i++){
         var b=cards[i],r=b.getBoundingClientRect();
+        if(r.width<=0||r.height<=0)continue;
         if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom){
           var now=Date.now();if(now-lastActivation<500)return;
           lastActivation=now;ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
@@ -1666,15 +1836,17 @@
   /* ---------- Spiel ---------- */
   var state=null;
   function startGame(){
-    state={key:curGame,level:curLevel,round:0,correct:0,current:null,tries:0,earned:0,streak:0};
+    state={key:curGame,level:curLevel,round:0,correct:0,current:null,tries:0,earned:0,streak:0,review:[]};
     $("#streak").hidden=true;show("play");nextRound();
   }
   function nextRound(){
     if(state.round>=ROUNDS)return finish();
     state.round++;state.tries=0;drawMascot("idle");
-    var set=GAMES[state.key].lvl[state.level].set;
-    state.current=pick(set)();
-    var q=state.current;
+    // Fehler-Wiederholung: eine früher falsch beantwortete Aufgabe erneut zeigen, wenn fällig
+    var q=null;
+    for(var ri=0;ri<state.review.length;ri++){if(state.review[ri].due<=state.round){q=state.review[ri].q;state.review.splice(ri,1);break;}}
+    if(!q){var set=GAMES[state.key].lvl[state.level].set;q=pick(set)();}
+    state.current=q;
     $("#qlabel").textContent=q.label;$("#roundLbl").textContent=state.round+"/"+ROUNDS;
     $("#progBar").style.width=((state.round-1)/ROUNDS*100)+"%";
     q.render($("#qzone"));
@@ -1719,6 +1891,8 @@
       state.streak=0;$("#streak").hidden=true;
       $("#feedback").className="feedback try";$("#feedback").textContent=pick(TRY);
       if(state.tries>=2){Array.prototype.forEach.call($("#answers").children,function(c){c.disabled=true;if(c.getAttribute("aria-label")===q.correct)c.classList.add("good");});
+        // Fehler-Wiederholung: diese Aufgabe kommt in 2 Runden noch einmal (einmalig)
+        if(state.review&&!q._rev){q._rev=1;state.review.push({q:q,due:state.round+2});}
         $("#feedback").innerHTML="Die Lösung ist <b>"+q.correct+"</b>";setTimeout(nextRound,1600);}
     }
   }
@@ -1853,7 +2027,13 @@
     {id:"malen",name:"Malen & Kritzeln",emoji:"🎨",cost:0,desc:"Frei malen mit vielen Farben."},
     {id:"quiz",name:"Quiz-Duell auf Zeit",emoji:"🦉",cost:4,desc:"So viele Wissensfragen wie möglich in 30 Sekunden."},
     {id:"rmem",name:"Rechen-Memory",emoji:"🧮",cost:5,desc:"Aufgabe und Ergebnis als Paar finden (3+4 und 7)."},
-    {id:"pyra",name:"Zahlen-Pyramide",emoji:"🔺",cost:0,desc:"Finde den fehlenden Stein – jeder Stein = die zwei darunter."}
+    {id:"pyra",name:"Zahlen-Pyramide",emoji:"🔺",cost:0,desc:"Finde den fehlenden Stein – jeder Stein = die zwei darunter."},
+    {id:"trace",name:"Nachspuren",emoji:"✏️",cost:0,desc:"Buchstaben & Zahlen mit dem Finger nachfahren – Schreiben üben."},
+    {id:"story",name:"Lesegeschichten",emoji:"📜",cost:0,desc:"Kurze Geschichte lesen und Fragen beantworten."},
+    {id:"sudoku",name:"Kinder-Sudoku",emoji:"🧩",cost:4,desc:"4×4-Sudoku mit Zahlen 1–4 – Logik & Konzentration."},
+    {id:"wordsearch",name:"Wortsuche",emoji:"🔎",cost:4,desc:"Versteckte Wörter im Buchstabengitter finden."},
+    {id:"snake",name:"Zahlen-Snake",emoji:"🐍",cost:5,desc:"Friss die Zahlen in der richtigen Reihenfolge."},
+    {id:"race",name:"Rechen-Rennen",emoji:"🏎️",cost:4,desc:"Rechne schnell und gewinne das Rennen gegen den Computer."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -1870,7 +2050,9 @@
         if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();
         else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();
         else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();
-        else if(g.id==="quiz")startQuiz();else if(g.id==="rmem")startRmem();else if(g.id==="pyra")startPyra();});
+        else if(g.id==="quiz")startQuiz();else if(g.id==="rmem")startRmem();else if(g.id==="pyra")startPyra();
+        else if(g.id==="trace")startTrace();else if(g.id==="story")startStory();else if(g.id==="sudoku")startSudoku();
+        else if(g.id==="wordsearch")startWordsearch();else if(g.id==="snake")startSnake();else if(g.id==="race")startRace();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -2213,6 +2395,152 @@
       if(p){p.stats.coins=(p.stats.coins||0)+1;persist();$("#coinCount").textContent=p.stats.coins;}$("#pyraFb").className="feedback ok";$("#pyraFb").innerHTML="⭐ Richtig! +1 🪙";setTimeout(pyraNext,850);}
     else{sWrong();btn.classList.add("bad");btn.disabled=true;$("#pyraFb").className="feedback try";$("#pyraFb").textContent="Zähl die zwei Steine darunter zusammen.";}}
   function pyraEnd(){PYRA.on=false;confetti();$("#pyraView").innerHTML="";$("#pyraAns").innerHTML="";$("#pyraFb").className="feedback ok";$("#pyraFb").innerHTML=PYRA.score+" von "+PYRA.total+" richtig! &nbsp;<button class=\"next\" id=\"pyraAgain\">Nochmal</button>";var ag=$("#pyraAgain");if(ag)ag.addEventListener("click",startPyra);}
+
+  /* ========== NEUE SPIELE ========== */
+  function reward(coins,stars){var p=active();if(!p)return;if(coins)p.stats.coins=(p.stats.coins||0)+coins;if(stars)p.stats.stars=(p.stats.stars||0)+stars;persist();var cc=$("#coinCount"),sc=$("#starCount");if(cc)cc.textContent=p.stats.coins;if(sc)sc.textContent=p.stats.stars;}
+
+  /* ---------- NACHSPUREN ---------- */
+  var TRACE={items:[],idx:0,drawing:false,ctx:null,drew:0,setup:false};
+  function startTrace(){TRACE.items=shuffle("A B C D E F G H L M N O R S T 1 2 3 4 5 6 7 8 9".split(" ")).slice(0,8);TRACE.idx=0;if(!TRACE.setup)traceSetup();show("trace");traceShow();}
+  function traceShow(){var c=$("#traceCanvas");TRACE.ctx=c.getContext("2d");TRACE.ctx.clearRect(0,0,c.width,c.height);TRACE.drew=0;
+    var ch=TRACE.items[TRACE.idx];$("#traceGhost").textContent=ch;$("#traceIdx").textContent=(TRACE.idx+1);
+    $("#traceHint").textContent=(/[0-9]/.test(ch)?"Fahre die Zahl „"+ch+"“ ":"Fahre den Buchstaben „"+ch+"“ ")+"mit dem Finger nach.";}
+  function traceSetup(){TRACE.setup=true;var c=$("#traceCanvas");
+    function pos(e){var r=c.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*c.width/r.width,y:(t.clientY-r.top)*c.height/r.height};}
+    c.addEventListener("pointerdown",function(e){e.preventDefault();TRACE.drawing=true;var ctx=TRACE.ctx;ctx.lineWidth=16;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#5865e8";var pt=pos(e);ctx.beginPath();ctx.moveTo(pt.x,pt.y);});
+    c.addEventListener("pointermove",function(e){if(!TRACE.drawing)return;e.preventDefault();var ctx=TRACE.ctx,pt=pos(e);ctx.lineTo(pt.x,pt.y);ctx.stroke();TRACE.drew++;});
+    window.addEventListener("pointerup",function(){TRACE.drawing=false;});}
+  function traceAdvance(){if(TRACE.drew<12){$("#traceHint").textContent="Fahre das Zeichen erst nach – dann „Weiter“.";return;}
+    reward(1,1);sStar();TRACE.idx++;if(TRACE.idx>=TRACE.items.length){confetti();toast("Super geschrieben! ✏️");openGames();}else traceShow();}
+
+  /* ---------- LESEGESCHICHTEN ---------- */
+  var STORYG={items:[],idx:0,score:0,cur:null,lock:false};
+  function startStory(){STORYG={items:shuffle(STORIES.slice()).slice(0,6),idx:0,score:0,cur:null,lock:false};show("story");storyShow();}
+  function storyShow(){var it=STORYG.items[STORYG.idx];STORYG.cur=it;STORYG.lock=false;$("#storyIdx").textContent=(STORYG.idx+1);
+    $("#storyText").innerHTML="📖 "+it.t;$("#storyQ").querySelector("span").textContent=it.q;$("#storyFb").textContent="";$("#storyFb").className="feedback";
+    var box=$("#storyAns");box.innerHTML="";shuffle(it.a.slice()).forEach(function(o){var b=document.createElement("button");b.className="opt";b.innerHTML='<span class="word">'+o+'</span>';b.addEventListener("click",function(){storyPick(o===it.a[0],b);});box.appendChild(b);});
+    setTimeout(function(){speak(it.t);},300);}
+  function storyPick(ok,b){if(STORYG.lock)return;var it=STORYG.cur;
+    if(ok){STORYG.lock=true;b.classList.add("good");Array.prototype.forEach.call($("#storyAns").children,function(c){c.disabled=true;});sCorrect();STORYG.score++;reward(1,1);$("#storyFb").className="feedback ok";$("#storyFb").innerHTML="⭐ Richtig!";
+      setTimeout(function(){STORYG.idx++;if(STORYG.idx>=STORYG.items.length){confetti();toast("Geschafft! "+STORYG.score+"/"+STORYG.items.length+" 📜");openGames();}else storyShow();},1100);}
+    else{b.classList.add("bad");b.disabled=true;sWrong();$("#storyFb").className="feedback try";$("#storyFb").textContent="Lies den Text nochmal genau.";}}
+
+  /* ---------- KINDER-SUDOKU 4x4 ---------- */
+  var SUD={sol:[],given:[],cur:[]};
+  function sudokuSolved(){var base=[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]];var perm=shuffle([1,2,3,4]);
+    var g=base.map(function(r){return r.map(function(v){return perm[v-1];});});
+    if(Math.random()<.5){var t=g[0];g[0]=g[1];g[1]=t;}if(Math.random()<.5){var u=g[2];g[2]=g[3];g[3]=u;}
+    if(Math.random()<.5){var a=g[0],b=g[1];g[0]=g[2];g[1]=g[3];g[2]=a;g[3]=b;}return g;}
+  function startSudoku(){var sol=sudokuSolved();SUD.sol=sol;var cells=[];for(var i=0;i<16;i++)cells.push(i);cells=shuffle(cells);var hide=cells.slice(0,7);
+    SUD.cur=[];SUD.given=[];for(var r=0;r<4;r++){SUD.cur.push([]);SUD.given.push([]);for(var c=0;c<4;c++){var idx=r*4+c,isGiven=hide.indexOf(idx)<0;SUD.given[r][c]=isGiven;SUD.cur[r][c]=isGiven?sol[r][c]:0;}}
+    show("sudoku");sudokuRender();$("#sudokuFb").textContent="";$("#sudokuFb").className="feedback";}
+  function sudokuRender(){var g=$("#sudokuGrid");g.innerHTML="";for(var r=0;r<4;r++)for(var c=0;c<4;c++){(function(r,c){var d=document.createElement("div");
+    d.className="sc"+(SUD.given[r][c]?" fixed":"")+(r===1?" rowline":"");d.textContent=SUD.cur[r][c]||"";
+    if(!SUD.given[r][c])d.addEventListener("click",function(){SUD.cur[r][c]=(SUD.cur[r][c]+1)%5;d.textContent=SUD.cur[r][c]||"";d.classList.remove("bad");});
+    g.appendChild(d);})(r,c);}}
+  function sudokuValid(){var i,j;for(i=0;i<4;i++){var row={},col={};for(j=0;j<4;j++){var rv=SUD.cur[i][j],cv=SUD.cur[j][i];if(!rv||row[rv])return false;row[rv]=1;if(!cv||col[cv])return false;col[cv]=1;}}
+    var boxes=[[0,0],[0,2],[2,0],[2,2]];for(i=0;i<4;i++){var seen={};var br=boxes[i][0],bc=boxes[i][1];for(j=0;j<4;j++){var v=SUD.cur[br+(j>>1)][bc+(j&1)];if(!v||seen[v])return false;seen[v]=1;}}return true;}
+  function sudokuCheck(){var filled=true;for(var r=0;r<4;r++)for(var c=0;c<4;c++)if(!SUD.cur[r][c])filled=false;
+    if(!filled){$("#sudokuFb").className="feedback try";$("#sudokuFb").textContent="Fülle noch alle Felder aus.";return;}
+    if(sudokuValid()){$("#sudokuFb").className="feedback ok";$("#sudokuFb").innerHTML="🎉 Gelöst! Toll gemacht!";confetti();sCorrect();reward(3,2);setTimeout(openGames,1500);}
+    else{$("#sudokuFb").className="feedback try";$("#sudokuFb").textContent="Noch nicht ganz – jede Zahl 1–4 nur einmal pro Zeile, Spalte und Block.";sWrong();}}
+
+  /* ---------- WORTSUCHE ---------- */
+  var WS={grid:[],words:[],found:[],first:null,size:7};
+  var WSWORDS=["HUND","KATZE","MAUS","BAUM","HAUS","BALL","SONNE","STERN","BLUME","FISCH","APFEL","VOGEL"];
+  function startWordsearch(){var size=7;WS.size=size;WS.found=[];WS.first=null;
+    var words=shuffle(WSWORDS.slice()).filter(function(w){return w.length<=size;}).slice(0,4);
+    var g=[];for(var r=0;r<size;r++){g.push([]);for(var c=0;c<size;c++)g[r].push("");}
+    words.forEach(function(w){var ok=false,tries=0;while(!ok&&tries<100){tries++;var horiz=Math.random()<.5,i,fits;
+      if(horiz){var rr=rnd(size),cc=rnd(size-w.length+1);fits=true;for(i=0;i<w.length;i++){var cu=g[rr][cc+i];if(cu&&cu!==w.charAt(i)){fits=false;break;}}if(fits){for(i=0;i<w.length;i++)g[rr][cc+i]=w.charAt(i);ok=true;}}
+      else{var r2=rnd(size-w.length+1),c2=rnd(size);fits=true;for(i=0;i<w.length;i++){var cu2=g[r2+i][c2];if(cu2&&cu2!==w.charAt(i)){fits=false;break;}}if(fits){for(i=0;i<w.length;i++)g[r2+i][c2]=w.charAt(i);ok=true;}}}});
+    var AB="ABCDEFGHIKLMNOPRSTUW";for(var r3=0;r3<size;r3++)for(var c3=0;c3<size;c3++)if(!g[r3][c3])g[r3][c3]=AB.charAt(rnd(AB.length));
+    WS.grid=g;WS.words=words;renderWordsearch();show("wordsearch");$("#wsFb").textContent="";$("#wsFb").className="feedback";}
+  function renderWordsearch(){var wl=$("#wsWords");wl.innerHTML="";WS.words.forEach(function(w){var s=document.createElement("span");s.textContent=w;s.setAttribute("data-w",w);if(WS.found.indexOf(w)>=0)s.className="found";wl.appendChild(s);});
+    $("#wsFound").textContent=WS.found.length;$("#wsTotal").textContent=WS.words.length;
+    var gr=$("#wsGrid");gr.style.gridTemplateColumns="repeat("+WS.size+",1fr)";gr.innerHTML="";
+    for(var r=0;r<WS.size;r++)for(var c=0;c<WS.size;c++){(function(r,c){var b=document.createElement("button");b.textContent=WS.grid[r][c];b.setAttribute("data-r",r);b.setAttribute("data-c",c);
+      b.addEventListener("click",function(){wsTap(r,c,b);});gr.appendChild(b);})(r,c);}}
+  function wsCellBtn(r,c){return $("#wsGrid").querySelector('button[data-r="'+r+'"][data-c="'+c+'"]');}
+  function wsTap(r,c,b){
+    if(!WS.first){WS.first={r:r,c:c,b:b};b.classList.add("sel");return;}
+    var f=WS.first;WS.first=null;f.b.classList.remove("sel");
+    if(!(f.r===r||f.c===c)){return;} // nur gerade Linien
+    var cells=[],str="";
+    if(f.r===r){var a=Math.min(f.c,c),z=Math.max(f.c,c);for(var x=a;x<=z;x++){cells.push([r,x]);str+=WS.grid[r][x];}}
+    else{var a2=Math.min(f.r,r),z2=Math.max(f.r,r);for(var y=a2;y<=z2;y++){cells.push([y,c]);str+=WS.grid[y][c];}}
+    var rev=str.split("").reverse().join(""),match=null;
+    WS.words.forEach(function(w){if(WS.found.indexOf(w)<0&&(w===str||w===rev))match=w;});
+    if(match){WS.found.push(match);cells.forEach(function(p){var cb=wsCellBtn(p[0],p[1]);if(cb)cb.classList.add("ok");});sCorrect();reward(1,1);
+      $("#wsFound").textContent=WS.found.length;var tag=$("#wsWords").querySelector('span[data-w="'+match+'"]');if(tag)tag.className="found";
+      if(WS.found.length>=WS.words.length){$("#wsFb").className="feedback ok";$("#wsFb").innerHTML="🎉 Alle Wörter gefunden!";confetti();reward(2,1);setTimeout(openGames,1500);}}
+    else{sWrong();}}
+
+  /* ---------- ZAHLEN-SNAKE ---------- */
+  var SNK={on:false,grid:12,snake:[],dir:null,nextDir:null,nums:[],target:1,max:9,timer:0,cell:0,setup:false};
+  function startSnake(){var c=$("#snakeCanvas"),G=12;SNK.grid=G;SNK.cell=c.width/G;SNK.on=true;SNK.target=1;SNK.max=9;
+    SNK.snake=[{x:3,y:6},{x:2,y:6}];SNK.dir={x:1,y:0};SNK.nextDir={x:1,y:0};
+    SNK.nums=[];var used={};used["3,6"]=1;used["2,6"]=1;
+    for(var n=1;n<=SNK.max;n++){var x,y,k,t=0;do{x=rnd(G);y=rnd(G);k=x+","+y;t++;}while(used[k]&&t<100);used[k]=1;SNK.nums.push({x:x,y:y,n:n});}
+    $("#snakeNext").textContent="1";$("#snakeScore").textContent="0";if(!SNK.setup)snakeSetup();
+    show("snake");snakeDraw();if(SNK.timer)clearInterval(SNK.timer);SNK.timer=setInterval(snakeStep,200);}
+  function snakeStop(){SNK.on=false;if(SNK.timer){clearInterval(SNK.timer);SNK.timer=0;}}
+  function snakeSetup(){SNK.setup=true;
+    Array.prototype.forEach.call(document.querySelectorAll(".snake-dir"),function(b){b.addEventListener("click",function(){snakeTurn(b.getAttribute("data-dir"));});});
+    var c=$("#snakeCanvas"),sx=0,sy=0;
+    c.addEventListener("pointerdown",function(e){var r=c.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;});
+    c.addEventListener("pointerup",function(e){var r=c.getBoundingClientRect(),dx=(e.clientX-r.left)-sx,dy=(e.clientY-r.top)-sy;if(Math.abs(dx)<15&&Math.abs(dy)<15)return;
+      if(Math.abs(dx)>Math.abs(dy))snakeTurn(dx>0?"right":"left");else snakeTurn(dy>0?"down":"up");});}
+  function snakeTurn(d){var map={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}},nd=map[d];if(!nd)return;
+    if(nd.x===-SNK.dir.x&&nd.y===-SNK.dir.y)return;SNK.nextDir=nd;}
+  function snakeStep(){if(!SNK.on)return;SNK.dir=SNK.nextDir;var h=SNK.snake[0],nx=h.x+SNK.dir.x,ny=h.y+SNK.dir.y;
+    if(nx<0||ny<0||nx>=SNK.grid||ny>=SNK.grid)return snakeOver();
+    for(var i=0;i<SNK.snake.length;i++)if(SNK.snake[i].x===nx&&SNK.snake[i].y===ny)return snakeOver();
+    var hit=null;for(var j=0;j<SNK.nums.length;j++)if(SNK.nums[j].x===nx&&SNK.nums[j].y===ny){hit=SNK.nums[j];break;}
+    SNK.snake.unshift({x:nx,y:ny});
+    if(hit){if(hit.n===SNK.target){sCorrect();SNK.nums.splice(SNK.nums.indexOf(hit),1);SNK.target++;$("#snakeNext").textContent=SNK.target;$("#snakeScore").textContent=(SNK.target-1);reward(1,0);
+        if(SNK.target>SNK.max){snakeStop();confetti();reward(0,3);toast("Alle Zahlen! 🐍⭐");snakeDraw();setTimeout(openGames,1400);return;}}
+      else{return snakeOver();}}
+    else SNK.snake.pop();
+    snakeDraw();}
+  function snakeOver(){snakeStop();var c=$("#snakeCanvas"),ctx=c.getContext("2d");snakeDraw();ctx.fillStyle="rgba(0,0,0,.55)";ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle="#fff";ctx.font="700 22px Fredoka,sans-serif";ctx.textAlign="center";ctx.fillText("Bis "+(SNK.target-1)+" geschafft!",c.width/2,c.height/2-6);ctx.font="15px Nunito,sans-serif";ctx.fillText("Tippe für neues Spiel",c.width/2,c.height/2+22);
+    c.onclick=function(){c.onclick=null;startSnake();};}
+  function snakeDraw(){var c=$("#snakeCanvas"),ctx=c.getContext("2d"),s=SNK.cell;ctx.clearRect(0,0,c.width,c.height);
+    SNK.nums.forEach(function(o){ctx.fillStyle=o.n===SNK.target?"#e8552d":"#c9d2e6";ctx.beginPath();ctx.arc(o.x*s+s/2,o.y*s+s/2,s/2-2,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.font="700 "+(s*0.6)+"px Nunito,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(o.n,o.x*s+s/2,o.y*s+s/2);});
+    SNK.snake.forEach(function(seg,i){ctx.fillStyle=i===0?"#2f9e57":"#52c07d";var pad=1.5;roundRect(ctx,seg.x*s+pad,seg.y*s+pad,s-2*pad,s-2*pad,5);ctx.fill();});}
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  /* ---------- RECHEN-RENNEN ---------- */
+  var RACE={round:0,you:0,cpu:0,total:10,cur:0,lock:false};
+  function startRace(){RACE={round:0,you:0,cpu:0,total:10,cur:0,lock:false};raceMove();show("race");raceNext();}
+  function raceMove(){$("#raceYou").style.left=(RACE.you/RACE.total*82)+"%";$("#raceCpu").style.left=(RACE.cpu/RACE.total*82)+"%";}
+  function raceNext(){if(RACE.you>=RACE.total||RACE.cpu>=RACE.total||RACE.round>=RACE.total)return raceEnd();
+    RACE.round++;RACE.lock=false;$("#raceRound").textContent=RACE.round;$("#raceFb").textContent="";$("#raceFb").className="feedback";
+    var op=pick(["+","−","×"]),a,b,res;if(op==="+"){a=2+rnd(30);b=2+rnd(30);res=a+b;}else if(op==="−"){a=10+rnd(40);b=1+rnd(a-1);res=a-b;}else{a=2+rnd(8);b=2+rnd(8);res=a*b;}
+    RACE.cur=res;$("#raceQ").textContent=a+" "+op+" "+b+" = ?";
+    var box=$("#raceAns");box.innerHTML="";shuffle(numOpts(res,4)).forEach(function(v){var btn=document.createElement("button");btn.className="opt";btn.textContent=v;btn.addEventListener("click",function(){raceAnswer(+v===res,btn);});box.appendChild(btn);});}
+  function raceAnswer(ok,btn){if(RACE.lock)return;RACE.lock=true;
+    Array.prototype.forEach.call($("#raceAns").children,function(c){c.disabled=true;});
+    if(ok){btn.classList.add("good");sCorrect();RACE.you++;$("#raceFb").className="feedback ok";$("#raceFb").textContent="⭐ Schnell!";}
+    else{btn.classList.add("bad");sWrong();Array.prototype.forEach.call($("#raceAns").children,function(c){if(+c.textContent===RACE.cur)c.classList.add("good");});$("#raceFb").className="feedback try";$("#raceFb").innerHTML="Richtig: <b>"+RACE.cur+"</b>";}
+    if(Math.random()<0.55)RACE.cpu++;raceMove();
+    setTimeout(raceNext,ok?850:1500);}
+  function raceEnd(){var win=RACE.you>=RACE.cpu;confetti();var fb=$("#raceFb");fb.className="feedback "+(win?"ok":"try");
+    fb.innerHTML=(win?"🏆 Du hast gewonnen!":"🚗 Knapp verloren – nochmal?")+' &nbsp;<button class="next" id="raceAgain">Nochmal</button>';
+    $("#raceAns").innerHTML="";$("#raceQ").textContent="";if(win)reward(3,2);var ag=$("#raceAgain");if(ag)ag.addEventListener("click",startRace);}
+
+  /* Zurück-/Steuer-Buttons der neuen Spiele (einmalig) */
+  $("#traceBack").addEventListener("click",openGames);
+  $("#traceNext").addEventListener("click",traceAdvance);
+  $("#traceClear").addEventListener("click",traceShow);
+  $("#storyBack").addEventListener("click",openGames);
+  $("#storySpeak").addEventListener("click",function(){if(STORYG.cur)speak(STORYG.cur.t+" "+STORYG.cur.q);});
+  $("#sudokuBack").addEventListener("click",openGames);
+  $("#sudokuNew").addEventListener("click",startSudoku);
+  $("#sudokuCheck").addEventListener("click",sudokuCheck);
+  $("#wsBack").addEventListener("click",openGames);
+  $("#snakeBack").addEventListener("click",function(){snakeStop();openGames();});
+  $("#raceBack").addEventListener("click",openGames);
 
   /* ---------- QUIZ-DUELL AUF ZEIT ---------- */
   var QUIZPOOL=[].concat(SACH_TIERE,SACH_KOERPER,SACH_JAHR,SACH_VERKEHR,GEO_WELT,GEO_FLAG,MUS_INSTR),QUIZ={on:false,score:0,time:30,timer:0};
