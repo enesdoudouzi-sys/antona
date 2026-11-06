@@ -540,6 +540,26 @@
   .curr-honest{background:var(--bg2);box-shadow:none}.curr-honest p{font-size:.85rem;line-height:1.5;margin:.4rem 0 0;color:var(--ink-soft)}
   .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   @media(max-width:460px){.curriculum-intro{align-items:flex-start;flex-direction:column}.quick-tools{grid-template-columns:1fr}}
+  /* Urkunde */
+  #urkunde{max-width:640px;margin:1rem auto;padding:.5rem}
+  .urk-border{border:10px double #d4af37;border-radius:18px;background:linear-gradient(135deg,#fffdf4,#fff6df);
+    padding:2rem 1.4rem;text-align:center;color:#4a3a10;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+  .urk-star{font-size:3rem;line-height:1}
+  .urk-head{font-family:"Fredoka",sans-serif;font-weight:700;font-size:2.4rem;letter-spacing:.18em;color:#b8860b;margin:.2rem 0}
+  .urk-sub{font-size:.95rem;color:#8a7a3a;margin-bottom:1.2rem}
+  .urk-for{font-size:1rem;color:#6a5a2a}
+  .urk-name{font-family:"Fredoka",sans-serif;font-weight:700;font-size:2.2rem;color:#2a2a2a;margin:.3rem 0 .2rem;
+    border-bottom:2px solid #d4af37;display:inline-block;padding:0 1rem .3rem}
+  .urk-text{font-size:1.1rem;margin:1rem auto;max-width:460px;color:#4a3a10}
+  .urk-stars{font-size:2rem;color:#f5a623;letter-spacing:.1em;margin:.6rem 0}
+  .urk-foot{display:flex;justify-content:space-between;margin-top:1.6rem;font-size:.95rem;color:#6a5a2a;font-weight:600}
+  @media print{
+    body *{visibility:hidden!important}
+    #urkundeOverlay,#urkundeOverlay *{visibility:visible!important}
+    #urkundeOverlay{position:absolute;left:0;top:0;width:100%}
+    .noprint{display:none!important}
+    .urk-border{box-shadow:none}
+  }
 
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -593,8 +613,12 @@
     <div class="grid">
       <button class="tile m" data-game="math"><span class="emoji">🔢</span><span class="name">Mathematik</span><span class="sub">Zahlen bis 100 · Plus · Minus · Einmaleins</span><span class="mini" id="best-math">★ 0</span></button>
       <button class="tile r" data-game="read"><span class="emoji">📖</span><span class="name">Deutsch</span><span class="sub">Lesen · Wörter · Sätze · Rechtschreibung</span><span class="mini" id="best-read">★ 0</span></button>
-      <button class="tile s" data-game="shape"><span class="emoji">📐</span><span class="name">Formen & Daten</span><span class="sub">Formen erkennen · vergleichen · ordnen</span><span class="mini" id="best-shape">★ 0</span></button>
       <button class="tile c" data-game="clock"><span class="emoji">🕒</span><span class="name">Zeit & Uhr</span><span class="sub">Volle · halbe · Viertelstunden</span><span class="mini" id="best-clock">★ 0</span></button>
+      <button class="tile e" data-game="english"><span class="emoji">🇬🇧</span><span class="name">Englisch</span><span class="sub">Farben · Tiere · Zahlen</span><span class="mini" id="best-english">★ 0</span></button>
+      <button class="tile d" data-game="denken"><span class="emoji">🧠</span><span class="name">Denken</span><span class="sub">Muster · Logik</span><span class="mini" id="best-denken">★ 0</span></button>
+      <button class="tile k" data-game="sach"><span class="emoji">🌍</span><span class="name">Sachkunde</span><span class="sub">Tiere · Körper · Natur</span><span class="mini" id="best-sach">★ 0</span></button>
+      <button class="tile mu" data-game="musik"><span class="emoji">🎵</span><span class="name">Musik</span><span class="sub">Instrumente · Töne · Noten</span><span class="mini" id="best-musik">★ 0</span></button>
+      <button class="tile geo" data-game="geo"><span class="emoji">🗺️</span><span class="name">Geografie</span><span class="sub">Flaggen · Länder</span><span class="mini" id="best-geo">★ 0</span></button>
     </div>
     <div class="quick-tools">
       <button class="quick-tool" id="focusEntry">🧠 <span><b>Fokus trainieren</b><small>Aufmerksamkeit und Gedächtnis</small></span></button>
@@ -628,7 +652,7 @@
     <section class="curr-card">
       <div class="curr-head"><span class="curr-icon">📏</span><div><h3>Messen, Formen und Daten</h3><p>Mathematik im Alltag</p></div></div>
       <ul><li>Längen in Meter und Zentimeter einschätzen</li><li>Mit Geld rechnen</li><li>Uhrzeiten und Zeitspannen verstehen</li><li>Formen und Körper erkennen und beschreiben</li><li>Lagebeziehungen und Spiegelbilder entdecken</li><li>Tabellen lesen und Daten eintragen</li></ul>
-      <div class="curr-actions"><button class="curr-btn" data-curr-game="math" data-curr-level="9">Mit Geld rechnen</button><button class="curr-btn" data-curr-game="clock" data-curr-level="2">Uhrzeiten üben</button><button class="curr-btn" data-curr-game="shape" data-curr-level="2">Formen erkennen</button><button class="curr-btn" data-curr-game="shape" data-curr-level="4">Formen für Fortgeschrittene</button></div>
+      <div class="curr-actions"><button class="curr-btn" data-curr-game="math" data-curr-level="9">Mit Geld rechnen</button><button class="curr-btn" data-curr-game="clock" data-curr-level="2">Uhrzeiten üben</button><button class="curr-btn" data-curr-game="clock" data-curr-level="5">Uhr für Fortgeschrittene</button></div>
       <p class="curr-note">Längen, Körper, Symmetrie und Tabellen werden als Lernziele geführt; dafür ergänzen wir anschließend eigene Aufgabenmodule.</p>
     </section>
     <section class="curr-card">
@@ -927,7 +951,25 @@
     <h2 class="title">Dein Zeugnis 🎓</h2>
     <p class="muted">So lief deine Lernzeit heute:</p>
     <div id="zeugGrid" class="schoolplan"></div>
-    <button class="next" id="zeugDone" style="margin-top:1rem;width:100%">Super gemacht! 🎉</button>
+    <button class="next" id="urkundeBtn" style="margin-top:1rem;width:100%;background:var(--star);color:#3a2a00">🏅 Urkunde als PDF drucken</button>
+    <button class="next" id="zeugDone" style="margin-top:.6rem;width:100%">Super gemacht! 🎉</button>
+  </div>
+
+  <!-- URKUNDE (druckbar / PDF) -->
+  <div id="urkundeOverlay" hidden>
+    <div class="bar noprint"><button class="back" id="urkBack">← Zurück</button><button class="next" id="urkPrint" style="width:auto;padding:.5rem 1.1rem">🖨️ Drucken / PDF speichern</button></div>
+    <div id="urkunde">
+      <div class="urk-border">
+        <div class="urk-star">⭐</div>
+        <div class="urk-head">URKUNDE</div>
+        <div class="urk-sub">Lernsterne · Lern-App</div>
+        <div class="urk-for">verliehen an</div>
+        <div class="urk-name" id="urkName">—</div>
+        <div class="urk-text" id="urkText">für fleißiges Lernen und tolle Leistungen!</div>
+        <div class="urk-stars" id="urkStars">★★★★★</div>
+        <div class="urk-foot"><span id="urkDate">—</span><span>🎓 Lernsterne</span></div>
+      </div>
+    </div>
   </div>
 
   <!-- LERNZEIT (Schule) -->
@@ -992,6 +1034,11 @@
         <p class="muted" style="margin:.2rem 0 .5rem">Je nach Gerät gibt es verschiedene Stimmen. Wähle die schönste – „online" klingt meist natürlicher.</p>
         <select id="voicePick" style="width:100%;padding:.55rem;border-radius:.6rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif"></select>
         <button class="back" id="voiceTest" style="margin-top:.5rem">🔊 Stimme testen</button>
+      </div>
+      <div class="sheet">
+        <h3>Urkunde 🏅</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Schöne Urkunde zum Ausdrucken oder als PDF speichern.</p>
+        <button class="primary" id="urkundeBtn2">🏅 Urkunde erstellen</button>
       </div>
       <div class="sheet">
         <h3>Anzeige</h3>
@@ -1074,10 +1121,14 @@
   /* ---------- Vorlesen: beste deutsche Stimme wählen ---------- */
   var deVoice=null,enVoice=null;
   function bestVoice(list,prefs){
+    // 1. Natürlichste Stimmen zuerst: Online-/Neural-/Natural-Stimmen klingen am menschlichsten
+    var natural=list.filter(function(v){return /natural|neural|online|wavenet|premium/i.test(v.name||"")||v.localService===false;});
+    for(var i=0;i<prefs.length;i++)for(var j=0;j<natural.length;j++)
+      if((natural[j].name||"").indexOf(prefs[i])!==-1)return natural[j];
+    if(natural.length)return natural[0];
     for(var i=0;i<prefs.length;i++)for(var j=0;j<list.length;j++)
       if((list[j].name||"").indexOf(prefs[i])!==-1)return list[j];
-    var online=list.filter(function(v){return v.localService===false}); // Online-Stimmen klingen meist natürlicher
-    return online[0]||list[0];
+    return list[0];
   }
   function chooseVoice(){
     try{var vs=window.speechSynthesis.getVoices();if(!vs||!vs.length)return;
@@ -1097,7 +1148,9 @@
     if(!deVoice&&!enVoice)chooseVoice();
     var en=(lang&&lang.indexOf("en")===0);
     var u=new SpeechSynthesisUtterance(t);u.lang=en?"en-US":"de-DE";var v=en?enVoice:deVoice;if(v)u.voice=v;
-    u.rate=en?.9:.92;u.pitch=1.1;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
+    // Ruhiger & deutlicher für Kinder; bei Online-Stimmen natürliche Tonhöhe lassen
+    var isNat=v&&(v.localService===false||/natural|neural|online|wavenet/i.test(v.name||""));
+    u.rate=en?.86:.9;u.pitch=isNat?1.0:1.08;u.volume=1;window.speechSynthesis.speak(u);}catch(e){}}
 
   /* ---------- Maskottchen ---------- */
   function drawMascot(mood){
@@ -1426,9 +1479,48 @@
   var MUS_PROFI=[{q:"Welches Instrument wird gestrichen?",e:"🎻",a:["Geige","Trommel","Trompete"]},{q:"Welches Instrument hat Tasten?",e:"🎹",a:["Klavier","Gitarre","Flöte"]},
     {q:"Welches Instrument wird geblasen?",e:"🎺",a:["Trompete","Trommel","Geige"]},{q:"Was ist laut?",e:"🔊",a:["Ein Donner","Ein Flüstern","Eine Feder"]},
     {q:"Womit gibt man den Takt an?",e:"🥁",a:["Trommel","Flöte","Geige"]}];
+  // Instrumentenfamilien
+  var MUS_FAM=[{q:"Die Geige gehört zu den …",e:"🎻",a:["Streichinstrumenten","Blasinstrumenten","Schlaginstrumenten"]},
+    {q:"Die Trompete gehört zu den …",e:"🎺",a:["Blasinstrumenten","Streichinstrumenten","Tasteninstrumenten"]},
+    {q:"Die Trommel gehört zu den …",e:"🥁",a:["Schlaginstrumenten","Streichinstrumenten","Blasinstrumenten"]},
+    {q:"Das Klavier gehört zu den …",e:"🎹",a:["Tasteninstrumenten","Blasinstrumenten","Streichinstrumenten"]},
+    {q:"Die Flöte gehört zu den …",e:"🪈",a:["Blasinstrumenten","Schlaginstrumenten","Tasteninstrumenten"]},
+    {q:"Welches ist ein Streichinstrument?",e:"🎼",a:["Cello","Trompete","Xylophon"]}];
+  // Noten- & Musik-Wissen
+  var MUS_NOTE=[{q:"Wie viele Viertel passen in einen 4/4-Takt?",e:"🎵",a:["4","2","6"]},
+    {q:"Was bedeutet eine Pause in den Noten?",e:"🤫",a:["Stille – nicht spielen","Ganz laut spielen","Schneller spielen"]},
+    {q:"„Laut“ heißt in der Musik …",e:"🔊",a:["Forte","Piano","Tempo"]},
+    {q:"„Leise“ heißt in der Musik …",e:"🔉",a:["Piano","Forte","Allegro"]},
+    {q:"Was zeigt der Notenschlüssel an?",e:"🎼",a:["Wie hoch die Töne liegen","Wie laut man spielt","Wie schnell man spielt"]},
+    {q:"Welche Note dauert am längsten?",e:"🎶",a:["Ganze Note","Viertelnote","Achtelnote"]},
+    {q:"Die 7 Stammtöne heißen …",e:"🎹",a:["C D E F G A H","A B C D E F G nur Zahlen","1 2 3 4 5 6 7"]}];
+  // Welcher der beiden Töne war höher?
+  function m_higher(){var a=200+rnd(5)*90,b=200+rnd(5)*90;while(Math.abs(a-b)<140)b=200+rnd(5)*90;var first=a,second=b;
+    function playBoth(){tone(first,.45);setTimeout(function(){tone(second,.45);},600);}
+    return{label:"Welcher Ton war höher – der 1. oder der 2.?",speak:"Höre genau hin. War der erste oder der zweite Ton höher?",speakLang:"",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">🎧 1️⃣ … 2️⃣</span><button class="read-btn" id="toneBtn" aria-label="Töne abspielen">🔊</button>';
+        setTimeout(function(){playBoth();var tb=document.getElementById("toneBtn");if(tb)tb.addEventListener("click",playBoth);},250);},
+      options:shuffle(["1. Ton","2. Ton"]),correct:first>second?"1. Ton":"2. Ton"};}
+  // In welche Richtung geht die Melodie?
+  function m_dir(){var up=Math.random()<0.5,base=260;var t=up?[base,base*1.25,base*1.5]:[base*1.5,base*1.25,base];
+    function playMel(){t.forEach(function(f,i){setTimeout(function(){tone(f,.4);},i*450);});}
+    return{label:"Geht die Melodie nach oben oder nach unten?",speak:"Höre die Melodie. Geht sie nach oben oder nach unten?",speakLang:"",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">'+(up?"🎵↗️":"🎵↘️")+'</span><button class="read-btn" id="toneBtn" aria-label="Melodie abspielen">🔊</button>';
+        setTimeout(function(){playMel();var tb=document.getElementById("toneBtn");if(tb)tb.addEventListener("click",playMel);},250);},
+      options:shuffle(["Nach oben","Nach unten"]),correct:up?"Nach oben":"Nach unten"};}
+  // Wie viele Schläge hast du gehört?
+  function m_count(){var n=2+rnd(4);
+    function playBeats(){for(var i=0;i<n;i++)(function(i){setTimeout(function(){tone(440,.14,"square");},i*430);})(i);}
+    return{label:"Wie viele Schläge hast du gehört?",speak:"Zähle mit. Wie viele Schläge hörst du?",speakLang:"",
+      render:function(z){z.className="question";z.innerHTML='<span class="em">🥁</span><button class="read-btn" id="toneBtn" aria-label="Schläge abspielen">🔊</button>';
+        setTimeout(function(){playBeats();var tb=document.getElementById("toneBtn");if(tb)tb.addEventListener("click",playBeats);},250);},
+      options:numOpts(n,3),correct:String(n)};}
   var MUSIK_LVL={1:{title:"Instrumente",desc:"Gitarre, Trommel …",set:[qa(MUS_INSTR)]},2:{title:"Hoch oder tief?",desc:"Töne hören",set:[m_pitch]},
     3:{title:"Gemischt",desc:"Instrumente & Töne",set:[qa(MUS_INSTR),m_pitch]},
-    4:{title:"Profi: Instrumenten-Arten",desc:"Streichen, blasen, Tasten …",set:[qa(MUS_PROFI),m_pitch,qa(MUS_INSTR)]}};
+    4:{title:"Instrumenten-Arten",desc:"Streichen, blasen, Tasten …",set:[qa(MUS_PROFI),m_pitch,qa(MUS_INSTR)]},
+    5:{title:"Instrumentenfamilien",desc:"Streicher, Bläser, Schlagwerk",set:[qa(MUS_FAM)]},
+    6:{title:"Genau hinhören",desc:"Welcher Ton ist höher? Melodie-Richtung",set:[m_higher,m_dir,m_count]},
+    7:{title:"Profi: Noten-Wissen",desc:"Takt, Noten, forte & piano",set:[qa(MUS_NOTE),m_higher,m_dir]}};
   /* ---------- GEOGRAFIE ---------- */
   var GEO_FLAG=[{q:"Zu welchem Land gehört die Flagge?",e:"🇩🇪",a:["Deutschland","Frankreich","Italien"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇫🇷",a:["Frankreich","Spanien","Türkei"]},
     {q:"Zu welchem Land gehört die Flagge?",e:"🇮🇹",a:["Italien","Deutschland","England"]},{q:"Zu welchem Land gehört die Flagge?",e:"🇹🇷",a:["Türkei","Spanien","Frankreich"]},
@@ -1456,20 +1548,19 @@
     5:{title:"Experte: Familie & Essen",desc:"Anne, Baba, Ekmek …",set:[qa(TR_FAM),qa(TR_FOOD)]}};
 
   var GAMES={math:{title:"Rechnen",lvl:MATH_LVL,color:"var(--math)"},read:{title:"Lesen",lvl:READ_LVL,color:"var(--read)"},
-    tr:{title:"Türkisch",lvl:TR_LVL,color:"#e30a17"},
-    shape:{title:"Formen & Farben",lvl:SHAPE_LVL,color:"var(--shape)"},clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
+    clock:{title:"Die Uhr",lvl:CLOCK_LVL,color:"var(--clock)"},
     english:{title:"Englisch",lvl:ENGLISH_LVL,color:"var(--accent-2)"},
     denken:{title:"Denken & Konzentration",lvl:DENK_LVL,color:"#00c2c2"},
     sach:{title:"Sachkunde",lvl:SACH_LVL,color:"#2bb673"},
     musik:{title:"Musik",lvl:MUSIK_LVL,color:"#ff7a3d"},
     geo:{title:"Geografie",lvl:GEO_LVL,color:"#2a9df4"}};
-  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"shape",e:"🔺",n:"Formen & Farben"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"tr",e:"🇹🇷",n:"Türkisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"},{k:"musik",e:"🎵",n:"Musik"},{k:"geo",e:"🗺️",n:"Geografie"}];
+  var SUBJ=[{k:"math",e:"🔢",n:"Rechnen"},{k:"read",e:"🔤",n:"Lesen"},{k:"clock",e:"🕐",n:"Die Uhr"},{k:"english",e:"🇬🇧",n:"Englisch"},{k:"denken",e:"🧠",n:"Denken"},{k:"sach",e:"🌍",n:"Sachkunde"},{k:"musik",e:"🎵",n:"Musik"},{k:"geo",e:"🗺️",n:"Geografie"}];
 
   var PRAISE=["Super!","Toll!","Richtig!","Klasse!","Bravo!","Stark!","Perfekt!","Juhu!"];
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1552,9 +1643,7 @@
     $("#whoAv").textContent=p.av;$("#whoName").textContent=p.name;
     $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins||0;
     $("#homeSub").textContent=(p.stats.streak>=2?("🔥 "+p.stats.streak+" Tage in Folge – weiter so!"):"Was üben wir heute?");
-    SUBJ.forEach(function(s){$("#best-"+s.k).textContent="★ "+(p.stats.best[s.k]||0);});
-    Array.prototype.forEach.call(document.querySelectorAll("#homeTabs .tab"),function(x){x.classList.toggle("on",x.getAttribute("data-tab")==="learn");});
-    $("#tab-learn").hidden=false;$("#tab-more").hidden=true;
+    SUBJ.forEach(function(s){var el=$("#best-"+s.k);if(el)el.textContent="★ "+(p.stats.best[s.k]||0);});
     renderGoal();show("home");
   }
 
@@ -2174,6 +2263,17 @@
     SCHOOL.results.forEach(function(r,i){var stars=r.earned>=9?"★★★":r.earned>=6?"★★":r.earned>=1?"★":"☆";var d=document.createElement("div");d.className="lessonrow";
       d.innerHTML='<span class="no">'+(i+1)+'</span><span class="ic">'+r.emoji+'</span><span class="lt">'+r.name+'</span><span class="lst" style="color:var(--star)">'+stars+' · '+r.earned+'/10</span>';g.appendChild(d);});
     show("zeugnis");}
+  /* Urkunde / Zertifikat (druckbar als PDF) */
+  var urkFrom="zeugnis";
+  function openUrkunde(){var p=active();if(!p)return;urkFrom=$("#parent")&&!$("#parent").hidden?"parent":"zeugnis";
+    var total=0,n=0;SCHOOL.results.forEach(function(r){total+=r.earned;n++;});
+    var avg=n?Math.round(total/n):0,stars=avg>=9?5:avg>=7?4:avg>=5?3:avg>=3?2:1;
+    $("#urkName").textContent=p.name;
+    var txt=n? ("für eine tolle Lernzeit mit "+total+" von "+(n*10)+" richtigen Aufgaben!") : ("für fleißiges Lernen – schon "+(p.stats.stars||0)+" Sterne gesammelt!");
+    $("#urkText").textContent=txt;
+    $("#urkStars").textContent=new Array(stars+1).join("★")+new Array(6-stars).join("☆");
+    var d=new Date();$("#urkDate").textContent=pad2(d.getDate())+"."+pad2(d.getMonth()+1)+"."+d.getFullYear();
+    show("urkundeOverlay");}
   /* Schatztruhe */
   function openChest(){var p=active();if(!p)return;
     if(p.stats.lastChest===dayKey()){$("#chestEmoji").textContent="📦";$("#chestTitle").textContent="Heute schon geöffnet";$("#chestText").textContent="Komm morgen wieder für ein neues Geschenk!";$("#chestOpen").style.display="none";}
@@ -2261,7 +2361,7 @@
   var CURR_GROUPS=[
     {name:"Mathematik · Zahlen und Rechnen",game:"math"},
     {name:"Deutsch · Lesen und Schreiben",game:"read"},
-    {name:"Messen, Formen und Daten",game:"shape"},
+    {name:"Englisch · Hören und Wörter",game:"english"},
     {name:"Uhrzeit und Zeitspannen",game:"clock"},
     {name:"Arbeiten, Denken und Konzentration",game:"denken"},
     {name:"Sachaufgaben und Alltag",game:"sach"}
@@ -2352,6 +2452,10 @@
   $("#petPet").addEventListener("click",petStreichel);
   $("#zeugBack").addEventListener("click",enterHome);
   $("#zeugDone").addEventListener("click",enterHome);
+  $("#urkundeBtn").addEventListener("click",openUrkunde);
+  $("#urkundeBtn2").addEventListener("click",openUrkunde);
+  $("#urkBack").addEventListener("click",function(){show(urkFrom);});
+  $("#urkPrint").addEventListener("click",function(){try{window.print();}catch(e){}});
   (function(){var bigBtn=$("#bigBtn");if(!bigBtn)return;function upd(){bigBtn.textContent="Große Schrift: "+(load("antona_big",false)?"An":"Aus");}
     bigBtn.addEventListener("click",function(){save("antona_big",!load("antona_big",false));applyBig();upd();});upd();})();
   $("#speakBtn").addEventListener("click",function(){if(state&&state.current)speak(state.current.speak,state.current.speakLang);});
