@@ -1508,6 +1508,29 @@
     box.appendChild(makeCard(null,true));
     profiles.forEach(function(p){box.appendChild(makeCard(p,false));});
   }
+  /* Globaler Fallback: fängt Klicks auch dann ab, wenn ein unsichtbares Element über einer Profilkarte liegt. */
+  (function(){
+    var lastActivation=0;
+    function activateAt(ev){
+      if(!ev||typeof ev.clientX!=="number")return;
+      var cards=document.querySelectorAll("#profileList button.pcard");
+      for(var i=0;i<cards.length;i++){
+        var b=cards[i],r=b.getBoundingClientRect();
+        if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom){
+          var now=Date.now();if(now-lastActivation<500)return;
+          lastActivation=now;ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+          if(b.classList.contains("add")){openNewProfile();}else{
+            var id=b.getAttribute("data-profile-id");
+            var p=profiles.filter(function(x){return String(x.id)===String(id);})[0];
+            if(p){activeId=p.id;persist();enterHome();}
+          }
+          return;
+        }
+      }
+    }
+    document.addEventListener("pointerup",activateAt,true);
+    document.addEventListener("click",activateAt,true);
+  })();
   var pickedAv=AVATARS[0];
   function openNewProfile(){
     pickedAv=pick(AVATARS);$("#npName").value="";
