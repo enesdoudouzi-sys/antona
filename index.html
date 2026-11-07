@@ -555,6 +555,18 @@
   .ws-grid button{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:5px;font:800 1.05rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer;padding:0}
   .ws-grid button.sel{background:var(--accent);color:#fff}
   .ws-grid button.ok{background:#bdebcf;color:var(--good)}
+  /* Tägliches Lesen */
+  .read-card{display:flex;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;border-radius:1.2rem;padding:.9rem 1rem;margin:.2rem 0 1rem;cursor:pointer;
+    background:linear-gradient(135deg,#7b86f5,#9d7bf0);color:#fff;box-shadow:0 10px 22px -12px rgba(88,101,232,.7)}
+  .read-card .read-ic{font-size:2rem}
+  .read-card .read-txt{flex:1;display:flex;flex-direction:column}
+  .read-card .read-txt b{font-size:1.1rem}
+  .read-card .read-txt small{opacity:.92;font-size:.85rem;margin-top:.1rem}
+  .read-card .read-go{font-size:1.1rem;opacity:.9}
+  .read-card.done{background:linear-gradient(135deg,#2fae6b,#57c08a)}
+  .read-timer{font:800 2.2rem 'Fredoka',sans-serif;text-align:center;color:var(--accent)}
+  .read-story{font-size:1.18rem;line-height:1.75;background:var(--bg2);border-radius:1rem;padding:1.1rem 1.2rem;max-width:34rem;margin:.3rem auto}
+  .read-story h3{font-family:'Fredoka',sans-serif;margin:.1rem 0 .5rem;font-size:1.3rem}
   /* Englisch-Memory */
   .enmem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;width:min(94vw,360px);margin:.4rem auto}
   .enmem-card{aspect-ratio:3/4;border:1px solid var(--line);border-radius:.7rem;background:var(--accent);color:#fff;font:800 1rem 'Nunito',sans-serif;cursor:pointer;display:grid;place-items:center;padding:2px}
@@ -657,6 +669,7 @@
       <div class="bubble"><div class="title" id="homeHi" style="font-size:1.35rem;margin:0">Hallo!</div><div class="muted" id="homeSub" style="margin:.1rem 0 0">Was üben wir heute?</div></div>
     </div>
     <div id="homeGoal" class="homegoal"></div>
+    <button id="readCard" class="read-card"><span class="read-ic">📖</span><span class="read-txt"><b id="readTitle">Tägliches Lesen – 10 Minuten</b><small id="readSub">Jeden Tag ein bisschen lesen macht stark!</small></span><span class="read-go">▶</span></button>
     <div class="curriculum-intro">
       <div><span class="eyebrow">LERNPLAN · KLASSE 2</span><h2 class="title" style="margin:.25rem 0">Was möchtest du heute üben?</h2><p class="muted" style="margin:0">Wähle ein Lerngebiet. Kleine Schritte bringen dich weiter.</p></div>
       <button class="back" id="curriculumOpen">Alle Lernziele</button>
@@ -1123,6 +1136,20 @@
     <div id="paintFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
   </div>
 
+  <!-- TÄGLICHES LESEN -->
+  <div id="reading" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="readBack">← Zurück</button><div class="spacer"></div><div class="gbadge">🔥 <span id="readStreak">0</span> Tage</div></div>
+    <h2 class="title" style="text-align:center;margin:.2rem">📖 10 Minuten Lesen</h2>
+    <div class="read-timer" id="readClock">10:00</div>
+    <div class="progress" style="max-width:34rem;margin:.1rem auto .4rem"><i id="readBar" style="width:0%"></i></div>
+    <div class="read-story" id="readText"></div>
+    <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin:.6rem auto;max-width:34rem">
+      <button class="back" id="readSpeak">🔊 Vorlesen</button>
+      <button class="back" id="readNext">➡️ Nächste Geschichte</button>
+    </div>
+    <div id="readFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+  </div>
+
   <!-- ERKLÄR-MODUS -->
   <div id="explain" hidden>
     <div class="bar"><button class="back" id="explainBack">← Zurück</button></div>
@@ -1349,7 +1376,7 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:"",adaptive:{},lernwoerter:[],weakness:{}};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:"",adaptive:{},lernwoerter:[],weakness:{},readStreak:0,readLastDay:"",readToday:{day:"",sec:0},readDaysCount:0};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
@@ -1357,6 +1384,7 @@
     if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
     if(p.stats.lastChest===undefined)p.stats.lastChest="";
     if(!p.stats.adaptive)p.stats.adaptive={};if(!p.stats.lernwoerter)p.stats.lernwoerter=[];if(!p.stats.weakness)p.stats.weakness={};
+    if(p.stats.readStreak===undefined)p.stats.readStreak=0;if(p.stats.readLastDay===undefined)p.stats.readLastDay="";if(!p.stats.readToday)p.stats.readToday={day:"",sec:0};if(p.stats.readDaysCount===undefined)p.stats.readDaysCount=0;
     ["math","read","shape","clock","english","tr","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
@@ -1924,7 +1952,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2011,7 +2039,7 @@
     $("#starCount").textContent=p.stats.stars;$("#coinCount").textContent=p.stats.coins||0;
     $("#homeSub").textContent=(p.stats.streak>=2?("🔥 "+p.stats.streak+" Tage in Folge – weiter so!"):"Was üben wir heute?");
     SUBJ.forEach(function(s){var el=$("#best-"+s.k);if(el)el.textContent="★ "+(p.stats.best[s.k]||0);});
-    renderGoal();show("home");
+    renderGoal();renderReadCard();show("home");
   }
 
   /* ---------- Stufen-UI ---------- */
@@ -2936,7 +2964,53 @@
   function lwReset(){LW.slots=[];LW.letters.forEach(function(L){L.used=false;});lwRender();}
   function lwEnd(){confetti();$("#lwFb").className="feedback ok";$("#lwFb").innerHTML=LW.score+"/"+LW.words.length+" richtig! 🎉";if(LW.score>=Math.ceil(LW.words.length*0.7))reward(2,1);setTimeout(openGames,1600);}
 
+  /* ---------- TÄGLICHES LESEN (10 Minuten) ---------- */
+  var READ_GOAL=600; // Sekunden = 10 Minuten
+  var READ_STORIES=[
+    {e:"🦊",t:"Der kleine Fuchs",x:"Es war einmal ein kleiner Fuchs. Er wohnte in einem warmen Bau am Waldrand. Jeden Morgen lief er zum Bach und trank frisches Wasser.\n\nEines Tages traf er einen Igel. Hallo, sagte der Fuchs, möchtest du mit mir spielen? Der Igel freute sich sehr. Von diesem Tag an waren sie die besten Freunde."},
+    {e:"🐻",t:"Bruno sucht Honig",x:"Der Bär Bruno hatte großen Hunger. Am liebsten mochte er Honig. Er lief durch den Wald und suchte einen Bienenstock.\n\nBald hörte er ein lautes Summen. Vorsichtig schaute er nach oben. Hoch im Baum hing ein Bienennest. Bruno kletterte langsam hinauf und naschte ein wenig süßen Honig. Wie lecker das schmeckte!"},
+    {e:"⭐",t:"Der Wunschstern",x:"Lena konnte nicht einschlafen. Sie schaute aus dem Fenster in den dunklen Himmel. Plötzlich sah sie eine Sternschnuppe.\n\nIch wünsche mir einen schönen Traum, flüsterte sie leise. Dann kuschelte sie sich in ihr Bett. Und wirklich: In dieser Nacht träumte sie vom Fliegen über bunte Wiesen."},
+    {e:"🐌",t:"Die mutige Schnecke",x:"Die kleine Schnecke Rosa wollte den großen Garten sehen. Alle sagten, das sei viel zu weit für sie. Aber Rosa gab nicht auf.\n\nLangsam, Stück für Stück, kroch sie über Steine und Blätter. Am Abend hatte sie es geschafft. Von oben auf dem Gartenzaun sah sie die ganze Welt. Rosa war sehr stolz."},
+    {e:"🌧️",t:"Ein Tag im Regen",x:"Es regnete den ganzen Tag. Tim durfte nicht nach draußen. Zuerst war er traurig.\n\nDann holte er seine Bausteine und baute eine riesige Burg. Seine Schwester half ihm. Zusammen bauten sie Türme und Brücken. Am Ende lachten beide. Auch ein Regentag kann schön sein!"},
+    {e:"🐦",t:"Pauls erstes Fliegen",x:"Der kleine Vogel Paul saß in seinem Nest. Heute wollte er zum ersten Mal fliegen. Sein Herz klopfte schnell.\n\nTrau dich, rief seine Mama. Paul breitete seine Flügel aus und sprang. Zuerst fiel er ein kleines Stück. Dann schlug er mit den Flügeln und flog! Der ganze Himmel gehörte ihm."},
+    {e:"🍎",t:"Der geteilte Apfel",x:"Mia hatte einen roten Apfel. Da kam ihr Freund Jonas. Er hatte Hunger, aber nichts dabei.\n\nMia überlegte kurz. Dann teilte sie den Apfel in zwei Hälften. Hier, für dich, sagte sie. Jonas strahlte. Geteilte Freude schmeckt doppelt so gut."}
+  ];
+  var readTimer=0,readIdx=0;
+  function openReading(){var p=active();if(!p)return;var today=dayKey();
+    if(!p.stats.readToday||p.stats.readToday.day!==today)p.stats.readToday={day:today,sec:0};
+    $("#readStreak").textContent=p.stats.readStreak||0;
+    readIdx=(new Date().getDate())%READ_STORIES.length;readShow();readPaint();
+    show("reading");$("#readFb").textContent="";$("#readFb").className="feedback";
+    if(readTimer)clearInterval(readTimer);readTimer=setInterval(readTick,1000);}
+  function readStop(){if(readTimer){clearInterval(readTimer);readTimer=0;}persist();}
+  function readShow(){var s=READ_STORIES[readIdx];$("#readText").innerHTML='<h3>'+s.e+' '+s.t+'</h3>'+s.x.split("\n\n").map(function(par){return '<p>'+par+'</p>';}).join("");}
+  function readNext(){readIdx=(readIdx+1)%READ_STORIES.length;readShow();try{$("#reading").scrollTop=0;}catch(e){}}
+  function readTick(){var p=active();if(!p)return;var today=dayKey();if(p.stats.readToday.day!==today)p.stats.readToday={day:today,sec:0};
+    if(p.stats.readToday.sec>=READ_GOAL){readPaint();return;}
+    p.stats.readToday.sec++;readPaint();
+    if(p.stats.readToday.sec%20===0)persist();
+    if(p.stats.readToday.sec>=READ_GOAL)readDone();}
+  function readPaint(){var p=active();if(!p)return;var sec=p.stats.readToday.sec||0,left=Math.max(0,READ_GOAL-sec);
+    $("#readClock").textContent=pad2(Math.floor(left/60))+":"+pad2(left%60);
+    $("#readBar").style.width=Math.min(100,Math.round(sec/READ_GOAL*100))+"%";}
+  function readDone(){var p=active();if(!p)return;var today=dayKey();
+    if(p.stats.readLastDay!==today){var y=new Date();y.setDate(y.getDate()-1);
+      p.stats.readStreak=(p.stats.readLastDay===dayKey(y))?(p.stats.readStreak||0)+1:1;
+      p.stats.readLastDay=today;p.stats.readDaysCount=(p.stats.readDaysCount||0)+1;reward(5,3);}
+    persist();$("#readStreak").textContent=p.stats.readStreak;$("#readClock").textContent="00:00";
+    $("#readFb").className="feedback ok";$("#readFb").innerHTML="🎉 Super! Du hast heute 10 Minuten gelesen! 🔥 "+p.stats.readStreak+" Tage in Folge.";confetti();sStar();}
+  function renderReadCard(){var p=active(),card=$("#readCard");if(!p||!card)return;var today=dayKey();
+    var sec=(p.stats.readToday&&p.stats.readToday.day===today)?p.stats.readToday.sec:0;
+    var doneToday=(p.stats.readLastDay===today)||sec>=READ_GOAL;
+    if(doneToday){card.classList.add("done");$("#readTitle").textContent="✅ Heute 10 Minuten gelesen!";$("#readSub").textContent="🔥 "+(p.stats.readStreak||0)+" Tage in Folge – weiter so!";}
+    else{card.classList.remove("done");$("#readTitle").textContent="Tägliches Lesen – 10 Minuten";
+      $("#readSub").textContent=sec>0?("Noch "+Math.ceil((READ_GOAL-sec)/60)+" Minuten – weiterlesen!"):"Jeden Tag ein bisschen lesen macht stark!";}}
+
   /* Erklär-Modus & Lernwörter Steuer-Buttons */
+  $("#readCard").addEventListener("click",openReading);
+  $("#readBack").addEventListener("click",function(){readStop();enterHome();});
+  $("#readSpeak").addEventListener("click",function(){var s=READ_STORIES[readIdx];speak(s.t+". "+s.x.replace(/\n+/g,". "));});
+  $("#readNext").addEventListener("click",readNext);
   $("#explainStart").addEventListener("click",function(){var cb=explainGo;explainGo=null;if(cb)cb();});
   $("#explainSpeak").addEventListener("click",function(){if(explainSpeakText)speak(explainSpeakText);});
   $("#explainBack").addEventListener("click",function(){explainGo=null;show("levels");});
