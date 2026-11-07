@@ -1123,6 +1123,30 @@
     <div id="paintFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
   </div>
 
+  <!-- ERKLÄR-MODUS -->
+  <div id="explain" hidden>
+    <div class="bar"><button class="back" id="explainBack">← Zurück</button></div>
+    <div class="card" style="gap:1rem;text-align:center">
+      <div style="font-size:3.6rem" id="explainEmoji">💡</div>
+      <h2 class="title" style="margin:0">Kleiner Tipp</h2>
+      <p id="explainText" style="font-size:1.12rem;line-height:1.55;max-width:24rem;margin:0 auto"></p>
+      <div style="display:flex;gap:.6rem;justify-content:center;width:100%"><button class="back" id="explainSpeak">🔊 Nochmal</button><button class="next" id="explainStart" style="flex:1">Los geht's →</button></div>
+    </div>
+  </div>
+
+  <!-- LERNWÖRTER ÜBEN -->
+  <div id="lwgame" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="lwBack">← Stopp</button><div class="spacer"></div><div class="gbadge">✍️ <span id="lwIdx">1</span>/<span id="lwTotal">0</span></div></div>
+    <div class="card" style="gap:.8rem">
+      <div class="muted" id="lwHint">Höre das Wort und lege es mit den Buchstaben richtig.</div>
+      <button class="back" id="lwHear" style="align-self:center">🔊 Wort hören</button>
+      <div id="lwSlots" class="an-slots"></div>
+      <div id="lwLetters" class="an-letters"></div>
+      <button class="back" id="lwReset" style="align-self:center">↺ Neu legen</button>
+      <div id="lwFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
   <!-- SCHATZTRUHE -->
   <div id="chest" hidden>
     <div class="bar"><button class="back" id="chestBack">← Zurück</button></div>
@@ -1258,6 +1282,19 @@
           <p class="muted" style="margin:.4rem 0 0;font-size:.85rem;line-height:1.5">Die Stimme kommt vom Gerät, nicht von der App.<br>• <b>Android:</b> Einstellungen → „Sprachausgabe" → „Google Sprachausgabe" wählen und deutsche Stimme herunterladen.<br>• <b>iPhone/iPad:</b> Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch → eine <b>(Premium/Erweitert)</b>-Stimme laden.<br>• <b>Windows/Chrome:</b> meist ist „Google Deutsch" schon natürlich – oben auswählen.</p></details>
       </div>
       <div class="sheet">
+        <h3>Lernwörter der Woche ✍️</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Gib die Übungswörter deines Kindes ein (ein Wort pro Zeile oder mit Komma). Dein Kind übt sie im Spiel „Lernwörter üben".</p>
+        <textarea id="lwInput" rows="4" placeholder="Haus&#10;Blume&#10;Schule&#10;Freund" style="width:100%;padding:.55rem;border-radius:.6rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif"></textarea>
+        <div style="display:flex;gap:.6rem;align-items:center;margin-top:.5rem"><button class="primary" id="lwSave">Speichern</button><span class="muted" id="lwCount"></span></div>
+      </div>
+      <div class="sheet">
+        <h3>Erklär-Modus 💡</h3>
+        <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
+          <input type="checkbox" id="explainChk" style="width:1.3rem;height:1.3rem;accent-color:var(--accent)">
+          <span>Kurze Erklärung vor neuen Aufgaben zeigen <span class="muted">(empfohlen)</span></span>
+        </label>
+      </div>
+      <div class="sheet">
         <h3>Urkunde 🏅</h3>
         <p class="muted" style="margin:.2rem 0 .5rem">Schöne Urkunde zum Ausdrucken oder als PDF speichern.</p>
         <button class="primary" id="urkundeBtn2">🏅 Urkunde erstellen</button>
@@ -1312,13 +1349,14 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:""};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:"",adaptive:{},lernwoerter:[],weakness:{}};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
     if(p.stats.streak===undefined)p.stats.streak=0;if(p.stats.lastDay===undefined)p.stats.lastDay="";if(p.stats.badges===undefined)p.stats.badges={};
     if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
     if(p.stats.lastChest===undefined)p.stats.lastChest="";
+    if(!p.stats.adaptive)p.stats.adaptive={};if(!p.stats.lernwoerter)p.stats.lernwoerter=[];if(!p.stats.weakness)p.stats.weakness={};
     ["math","read","shape","clock","english","tr","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
   function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
@@ -1886,7 +1924,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -1978,18 +2016,52 @@
 
   /* ---------- Stufen-UI ---------- */
   var curGame=null,curLevel=1;
+  /* ---- Automatischer Schwierigkeitsgrad ---- */
+  function levelOrder(key){return Object.keys(GAMES[key].lvl).map(Number).sort(function(a,b){return a-b;});}
+  function adaptiveLevel(key){var p=active(),ord=levelOrder(key);var cur=p&&p.stats.adaptive&&p.stats.adaptive[key];if(cur&&ord.indexOf(cur)>=0)return cur;return ord[Math.min(1,ord.length-1)];}
+  function setAdaptiveFromResult(key,level,earned){var p=active();if(!p)return;if(!p.stats.adaptive)p.stats.adaptive={};var ord=levelOrder(key),idx=ord.indexOf(level);if(idx<0)idx=0;var ni=idx;if(earned>=8)ni=Math.min(ord.length-1,idx+1);else if(earned<=3)ni=Math.max(0,idx-1);p.stats.adaptive[key]=ord[ni];}
   function openLevels(key){
     if(key==="spiele")return openGames();
     curGame=key;var g=GAMES[key];
     $("#lvlTitle").textContent=g.title;
     var list=$("#lvlList");list.innerHTML="";
+    // Automatik-Knopf oben: wählt die passende Stufe selbst
+    var al=adaptiveLevel(key),aL=g.lvl[al];
+    var auto=document.createElement("button");auto.className="lvl";auto.style.boxShadow="0 0 0 2px "+g.color;
+    auto.innerHTML='<span class="num" style="background:'+g.color+'">🤖</span><span><span class="lt">Automatik – passt sich an dein Kind an</span><br><span class="ld">Startet bei: '+aL.title+'</span></span><span class="chev">▶</span>';
+    auto.addEventListener("click",function(){var lv=adaptiveLevel(key);curLevel=lv;maybeExplain(key,lv,startGame);});
+    list.appendChild(auto);
     Object.keys(g.lvl).forEach(function(n){
       var L=g.lvl[n];var b=document.createElement("button");b.className="lvl";
       b.innerHTML='<span class="num" style="background:'+g.color+'">'+n+'</span><span><span class="lt">'+L.title+'</span><br><span class="ld">'+L.desc+'</span></span><span class="chev">▶</span>';
-      b.addEventListener("click",function(){curLevel=+n;startGame();});
+      b.addEventListener("click",function(){curLevel=+n;maybeExplain(key,+n,startGame);});
       list.appendChild(b);
     });
     show("levels");
+  }
+  /* ---- Erklär-Modus: kurze Erklärung vor neuen Stufen ---- */
+  var explainMode=load("antona_explain",true), explained={}, explainGo=null, explainSpeakText="";
+  var TIPS={
+    math:{2:{e:"➕",t:"Zähle die Punkte zusammen. Tipp: Fang bei der größeren Zahl an und zähle weiter."},
+      4:{e:"💯",t:"Rechne erst die Zehner, dann die Einer. Beispiel: 23 plus 14. 20 plus 10 ist 30, 3 plus 4 ist 7, zusammen 37."},
+      6:{e:"✖️",t:"Beim Einmaleins zählst du eine Zahl mehrmals dazu. 3 mal 5 heißt: 5 plus 5 plus 5 ist 15. Die 5er-Reihe endet immer auf 0 oder 5."},
+      12:{e:"🔟",t:"Zehnerübergang: Mache zuerst die 10 voll. 8 plus 5: erst 8 plus 2 ist 10, dann noch 3 dazu ist 13."},
+      14:{e:"📖",t:"Sachaufgabe: Lies ganz genau. Bekommt das Kind etwas dazu? Dann rechne plus. Gibt es etwas ab? Dann rechne minus."}},
+    read:{4:{e:"🔤",t:"ä, ö, ü und ß sind besondere Buchstaben. Höre genau hin, wie das Wort klingt."},
+      5:{e:"🔠",t:"Namenwörter schreibt man groß: der Hund, die Blume, das Haus."},
+      11:{e:"✍️",t:"Höre, welche Buchstaben fehlen. ei klingt wie bei Ei. ie klingt wie bei Biene."},
+      12:{e:"📖",t:"Lies den kurzen Text in Ruhe. Dann beantworte die Frage. Du darfst noch einmal nachlesen."}},
+    clock:{1:{e:"🕐",t:"Der kurze Zeiger zeigt die Stunde. Der lange Zeiger zeigt die Minuten."}},
+    english:{1:{e:"🇬🇧",t:"Höre auf das englische Wort und suche das passende Bild. Tippe auf den Lautsprecher zum Nochmal-Hören."}},
+    musik:{1:{e:"🎵",t:"Schau dir das Bild genau an und erkenne das Instrument."}},
+    geo:{1:{e:"🗺️",t:"Schau dir die Flagge oder das Land an und wähle die richtige Antwort."}}
+  };
+  function maybeExplain(key,level,cb){
+    var tip=TIPS[key]&&TIPS[key][level],seen=key+"_"+level;
+    if(!explainMode||!tip||explained[seen]){cb();return;}
+    explained[seen]=true;explainGo=cb;explainSpeakText=tip.t;
+    $("#explainEmoji").textContent=tip.e;$("#explainText").textContent=tip.t;show("explain");
+    setTimeout(function(){speak(tip.t);},250);
   }
 
   /* ---------- Spiel ---------- */
@@ -2058,6 +2130,8 @@
   function finish(){
     var p=active();p.stats.rounds++;
     if(state.earned>p.stats.best[state.key])p.stats.best[state.key]=state.earned;
+    if(GAMES[state.key])setAdaptiveFromResult(state.key,state.level,state.earned); // Automatik lernt mit
+    if(state.correct<=4){p.stats.weakness=p.stats.weakness||{};p.stats.weakness[state.key]=(p.stats.weakness[state.key]||0)+1;} // Schwäche merken
     p.stats.coins=(p.stats.coins||0)+state.correct; // 1 Münze je richtige Antwort
     bumpStreak(p);
     var dk=dayKey();if(!p.stats.history)p.stats.history={};var h=p.stats.history[dk]||{rounds:0,correct:0,stars:0};
@@ -2096,6 +2170,7 @@
     renderCurriculumProgress();
     var p=active();if(!p)return;
     $("#parentWho").textContent="Fortschritt von "+p.name;
+    var lta=$("#lwInput");if(lta)lta.value=(p.stats.lernwoerter||[]).join("\n");var lc=$("#lwCount");if(lc){lc.textContent=(p.stats.lernwoerter||[]).length+" Wörter";lc.style.color="var(--ink-soft)";}
     $("#pStars").textContent=p.stats.stars;$("#pRounds").textContent=p.stats.rounds;$("#pCorrect").textContent=p.stats.correct;
     focusStats(p);$("#pFocusSessions").textContent=p.stats.focusSessions;$("#pFocusMinutes").textContent=p.stats.focusMinutes;$("#pFocusLevel").textContent=p.stats.focusLevel;
     // 7-Tage-Diagramm (Sterne pro Tag)
@@ -2210,7 +2285,8 @@
     {id:"anagram",name:"Buchstabensalat",emoji:"🔤",cost:0,desc:"Bringe die Buchstaben in die richtige Reihenfolge."},
     {id:"maze",name:"Labyrinth",emoji:"🧭",cost:4,desc:"Finde den Weg durch das Labyrinth zum Ziel."},
     {id:"enmem",name:"Englisch-Memory",emoji:"🇬🇧",cost:4,desc:"Finde die Paare: Bild und englisches Wort."},
-    {id:"paint",name:"Malen nach Zahlen",emoji:"🎨",cost:0,desc:"Färbe die Felder nach Zahlen und enthülle ein Bild."}
+    {id:"paint",name:"Malen nach Zahlen",emoji:"🎨",cost:0,desc:"Färbe die Felder nach Zahlen und enthülle ein Bild."},
+    {id:"lwgame",name:"Lernwörter üben",emoji:"✍️",cost:0,desc:"Deine Lernwörter der Woche – hören und richtig schreiben."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -2232,7 +2308,7 @@
         else if(g.id==="wordsearch")startWordsearch();else if(g.id==="snake")startSnake();else if(g.id==="race")startRace();
         else if(g.id==="clockset")startClockset();else if(g.id==="money")startMoney();else if(g.id==="simon")startSimon();
         else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();
-        else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();});
+        else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();else if(g.id==="lwgame")startLw();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -2839,6 +2915,35 @@
       if(PAINT.done>=PAINT.total){sCorrect();confetti();reward(2,1);$("#paintFb").className="feedback ok";$("#paintFb").innerHTML="🎉 Fertig gemalt: "+PAINT.pic.name+"!";setTimeout(openGames,1700);}}
     else{sWrong();b.animate?b.animate([{transform:"translateX(-2px)"},{transform:"translateX(2px)"},{transform:"translateX(0)"}],120):0;}}
 
+  /* ---------- LERNWÖRTER ÜBEN ---------- */
+  var LW={words:[],idx:0,word:"",slots:[],letters:[],score:0};
+  function startLw(){var p=active();var words=((p&&p.stats.lernwoerter)||[]).filter(function(w){return w&&w.length;});
+    if(!words.length){show("lwgame");$("#lwHint").innerHTML="Noch keine Lernwörter eingetragen. Bitte im <b>Eltern-Bereich</b> unter Lernwörter der Woche eingeben. 🙂";$("#lwSlots").innerHTML="";$("#lwLetters").innerHTML="";$("#lwFb").textContent="";$("#lwTotal").textContent="0";$("#lwIdx").textContent="0";return;}
+    LW.words=shuffle(words.slice()).slice(0,8);LW.idx=0;LW.score=0;$("#lwTotal").textContent=LW.words.length;$("#lwHint").textContent="Höre das Wort und lege es mit den Buchstaben richtig.";show("lwgame");lwNext();}
+  function lwNext(){if(LW.idx>=LW.words.length)return lwEnd();LW.word=LW.words[LW.idx].toUpperCase();LW.idx++;$("#lwIdx").textContent=LW.idx;$("#lwFb").textContent="";$("#lwFb").className="feedback";
+    var letters=LW.word.split(""),scr;do{scr=shuffle(letters);}while(scr.join("")===LW.word&&LW.word.length>1);
+    LW.letters=scr.map(function(ch,i){return {ch:ch,used:false,id:i};});LW.slots=[];lwRender();speak(LW.words[LW.idx-1]);}
+  function lwRender(){var slots=$("#lwSlots");slots.innerHTML="";
+    for(var i=0;i<LW.word.length;i++){(function(i){var fid=LW.slots[i],filled=(fid!=null);var d=document.createElement("div");d.className="slot"+(filled?" filled":"");d.textContent=filled?LW.letters[fid].ch:"";
+      d.addEventListener("click",function(){if(LW.slots[i]!=null){LW.letters[LW.slots[i]].used=false;LW.slots[i]=null;lwRender();}});slots.appendChild(d);})(i);}
+    var lets=$("#lwLetters");lets.innerHTML="";
+    LW.letters.forEach(function(L){var b=document.createElement("button");b.textContent=L.ch;b.disabled=L.used;
+      b.addEventListener("click",function(){var free=-1;for(var k=0;k<LW.word.length;k++)if(LW.slots[k]==null){free=k;break;}if(free<0)return;L.used=true;LW.slots[free]=L.id;lwRender();lwCheck();});lets.appendChild(b);});}
+  function lwCheck(){for(var i=0;i<LW.word.length;i++)if(LW.slots[i]==null)return;
+    var guess="";for(var j=0;j<LW.word.length;j++)guess+=LW.letters[LW.slots[j]].ch;
+    if(guess===LW.word){LW.score++;sCorrect();reward(1,1);$("#lwFb").className="feedback ok";$("#lwFb").innerHTML="⭐ Richtig: "+LW.word;setTimeout(lwNext,1200);}
+    else{sWrong();$("#lwFb").className="feedback try";$("#lwFb").textContent="Noch nicht – tippe einen Buchstaben zum Zurücklegen.";}}
+  function lwReset(){LW.slots=[];LW.letters.forEach(function(L){L.used=false;});lwRender();}
+  function lwEnd(){confetti();$("#lwFb").className="feedback ok";$("#lwFb").innerHTML=LW.score+"/"+LW.words.length+" richtig! 🎉";if(LW.score>=Math.ceil(LW.words.length*0.7))reward(2,1);setTimeout(openGames,1600);}
+
+  /* Erklär-Modus & Lernwörter Steuer-Buttons */
+  $("#explainStart").addEventListener("click",function(){var cb=explainGo;explainGo=null;if(cb)cb();});
+  $("#explainSpeak").addEventListener("click",function(){if(explainSpeakText)speak(explainSpeakText);});
+  $("#explainBack").addEventListener("click",function(){explainGo=null;show("levels");});
+  $("#lwBack").addEventListener("click",openGames);
+  $("#lwHear").addEventListener("click",function(){if(LW.idx>0&&LW.words[LW.idx-1])speak(LW.words[LW.idx-1]);});
+  $("#lwReset").addEventListener("click",lwReset);
+
   /* Zurück-/Steuer-Buttons der neuen Spiele (einmalig) */
   $("#traceBack").addEventListener("click",openGames);
   $("#traceNext").addEventListener("click",traceAdvance);
@@ -3116,6 +3221,12 @@
   $("#urkPrint").addEventListener("click",function(){try{window.print();}catch(e){}});
   (function(){var bigBtn=$("#bigBtn");if(!bigBtn)return;function upd(){bigBtn.textContent="Große Schrift: "+(load("antona_big",false)?"An":"Aus");}
     bigBtn.addEventListener("click",function(){save("antona_big",!load("antona_big",false));applyBig();upd();});upd();})();
+  // Lernwörter der Woche
+  (function(){var ta=$("#lwInput"),btn=$("#lwSave"),cnt=$("#lwCount");if(!ta||!btn)return;
+    function parseW(s){return s.split(/[\n,;]+/).map(function(w){return w.trim();}).filter(function(w){return w.length>0&&w.length<=16;});}
+    btn.addEventListener("click",function(){var p=active();if(!p)return;var words=parseW(ta.value);p.stats.lernwoerter=words;persist();if(cnt){cnt.textContent="✓ "+words.length+" Wörter gespeichert";cnt.style.color="var(--good)";}toast("Lernwörter gespeichert ✍️");});})();
+  // Erklär-Modus-Schalter
+  (function(){var chk=$("#explainChk");if(!chk)return;chk.checked=!!explainMode;chk.addEventListener("change",function(){explainMode=chk.checked;save("antona_explain",explainMode);});})();
   $("#speakBtn").addEventListener("click",function(){if(state&&state.current)speak(state.current.speak,state.current.speakLang);});
   $("#whoBtn").addEventListener("click",function(){renderProfiles();show("profiles");});
   $("#parentBtn").addEventListener("click",openParent);
