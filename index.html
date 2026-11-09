@@ -555,6 +555,11 @@
   .ws-grid button{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:5px;font:800 1.05rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer;padding:0}
   .ws-grid button.sel{background:var(--accent);color:#fff}
   .ws-grid button.ok{background:#bdebcf;color:var(--good)}
+  /* Simon sagt */
+  .ss-actions{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+  .ss-actions button{display:flex;flex-direction:column;align-items:center;gap:.2rem;border:1px solid var(--line);background:var(--panel);border-radius:1rem;padding:.8rem;font:800 .95rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer}
+  .ss-actions button .e{font-size:2rem}
+  .ss-actions button:active{transform:scale(.97)}
   /* Tägliches Lesen */
   .read-card{display:flex;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;border-radius:1.2rem;padding:.9rem 1rem;margin:.2rem 0 1rem;cursor:pointer;
     background:linear-gradient(135deg,#7b86f5,#9d7bf0);color:#fff;box-shadow:0 10px 22px -12px rgba(88,101,232,.7)}
@@ -1134,6 +1139,19 @@
     <div id="paintLegend" class="paint-legend"></div>
     <div id="paintGrid" class="paint-grid"></div>
     <div id="paintFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+  </div>
+
+  <!-- SIMON SAGT -->
+  <div id="simonsays" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="ssBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🙋 <span id="ssRound">1</span>/10</div><div class="gbadge">⭐ <span id="ssScore">0</span></div></div>
+    <div class="card" style="gap:1rem">
+      <div id="ssBig" style="font-size:3.4rem;text-align:center">🙋</div>
+      <div id="ssCmd" class="qlabel" style="justify-content:center;font-size:1.3rem;text-align:center"></div>
+      <div class="muted" style="text-align:center">Mach die Bewegung nur, wenn <b>„Simon sagt"</b> davor steht!</div>
+      <div id="ssActions" class="ss-actions"></div>
+      <button class="next" id="ssDont" style="width:100%;background:var(--bad)">✋ Nicht machen!</button>
+      <div id="ssFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
   </div>
 
   <!-- TÄGLICHES LESEN -->
@@ -1952,7 +1970,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2293,7 +2311,6 @@
     {id:"blitz",name:"Blitz-Rechnen",emoji:"⚡",cost:4,desc:"So viele Aufgaben wie möglich in 30 Sekunden."},
     {id:"memory",name:"Sternen-Memory",emoji:"🧠",cost:5,desc:"Finde die passenden Paare."},
     {id:"uno",name:"UNO (Kinder)",emoji:"🎴",cost:6,desc:"Karten gegen den Computer: Farbe oder Zahl passend legen."},
-    {id:"schach",name:"Schach (Kinder)",emoji:"♟️",cost:6,desc:"Schlage den König des Computers."},
     {id:"shop",name:"Kaufladen & Kasse",emoji:"🛒",cost:0,desc:"Live gegen den Computer kassieren: Preis, Rückgeld, bar oder Karte."},
     {id:"vier",name:"Vier gewinnt",emoji:"🔴",cost:5,desc:"Bringe vier Steine in eine Reihe – gegen den Computer."},
     {id:"galgen",name:"Galgenmännchen",emoji:"🔤",cost:4,desc:"Errate das Wort Buchstabe für Buchstabe."},
@@ -2314,7 +2331,8 @@
     {id:"maze",name:"Labyrinth",emoji:"🧭",cost:4,desc:"Finde den Weg durch das Labyrinth zum Ziel."},
     {id:"enmem",name:"Englisch-Memory",emoji:"🇬🇧",cost:4,desc:"Finde die Paare: Bild und englisches Wort."},
     {id:"paint",name:"Malen nach Zahlen",emoji:"🎨",cost:0,desc:"Färbe die Felder nach Zahlen und enthülle ein Bild."},
-    {id:"lwgame",name:"Lernwörter üben",emoji:"✍️",cost:0,desc:"Deine Lernwörter der Woche – hören und richtig schreiben."}
+    {id:"lwgame",name:"Lernwörter üben",emoji:"✍️",cost:0,desc:"Deine Lernwörter der Woche – hören und richtig schreiben."},
+    {id:"simonsays",name:"Simon sagt",emoji:"🙋",cost:0,desc:"Mach die Bewegung nur, wenn Simon sagt davor steht!"}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -2329,14 +2347,15 @@
         +'<span class="chev">'+(g.cost>0?'🪙 '+g.cost:'Gratis')+'</span>';
       b.addEventListener("click",function(){if(!canPlay)return;p.stats.coins-=g.cost;persist();$("#coinCount").textContent=p.stats.coins;
         if(g.id==="ballons")startBallon();else if(g.id==="blitz")startBlitz();else if(g.id==="memory")startMemory();
-        else if(g.id==="uno")startUno();else if(g.id==="schach")startChess();else if(g.id==="shop")startShop();
+        else if(g.id==="uno")startUno();else if(g.id==="shop")startShop();
         else if(g.id==="vier")startVier();else if(g.id==="galgen")startGalgen();else if(g.id==="malen")startMalen();
         else if(g.id==="quiz")startQuiz();else if(g.id==="rmem")startRmem();else if(g.id==="pyra")startPyra();
         else if(g.id==="trace")startTrace();else if(g.id==="story")startStory();else if(g.id==="sudoku")startSudoku();
         else if(g.id==="wordsearch")startWordsearch();else if(g.id==="snake")startSnake();else if(g.id==="race")startRace();
         else if(g.id==="clockset")startClockset();else if(g.id==="money")startMoney();else if(g.id==="simon")startSimon();
         else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();
-        else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();else if(g.id==="lwgame")startLw();});
+        else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();else if(g.id==="lwgame")startLw();
+        else if(g.id==="simonsays")startSimonSays();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -3010,6 +3029,24 @@
   $("#readBack").addEventListener("click",function(){readStop();enterHome();});
   $("#readSpeak").addEventListener("click",function(){var s=READ_STORIES[readIdx];speak(s.t+". "+s.x.replace(/\n+/g,". "));});
   $("#readNext").addEventListener("click",readNext);
+
+  /* ---------- SIMON SAGT ---------- */
+  var SS={round:0,score:0,simonSaid:false,action:null,lock:false,actions:[]};
+  var SS_ACTIONS=[{id:"nase",e:"👃",l:"Nase anfassen"},{id:"klatsch",e:"👏",l:"Klatschen"},{id:"arme",e:"🙌",l:"Arme hoch"},{id:"stampf",e:"🦶",l:"Stampfen"},{id:"dreh",e:"🔄",l:"Dreh dich"},{id:"lache",e:"😀",l:"Lachen"},{id:"kopf",e:"🙆",l:"Kopf fassen"},{id:"winke",e:"👋",l:"Winken"}];
+  function startSimonSays(){SS={round:0,score:0,simonSaid:false,action:null,lock:false,actions:shuffle(SS_ACTIONS.slice()).slice(0,4)};$("#ssScore").textContent="0";renderSSButtons();show("simonsays");ssNext();}
+  function renderSSButtons(){var box=$("#ssActions");box.innerHTML="";SS.actions.forEach(function(a){var b=document.createElement("button");b.innerHTML='<span class="e">'+a.e+'</span>'+a.l;b.addEventListener("click",function(){ssAnswer(a.id);});box.appendChild(b);});}
+  function ssNext(){if(SS.round>=10)return ssEnd();SS.round++;SS.lock=false;$("#ssRound").textContent=SS.round;$("#ssFb").textContent="";$("#ssFb").className="feedback";
+    SS.action=pick(SS.actions);SS.simonSaid=Math.random()<0.6;$("#ssBig").textContent=SS.action.e;
+    $("#ssCmd").innerHTML=SS.simonSaid?('<b>Simon sagt:</b> '+SS.action.l+'!'):(SS.action.l+'!');
+    setTimeout(function(){speak(SS.simonSaid?("Simon sagt: "+SS.action.l):(SS.action.l));},200);}
+  function ssResolve(ok){SS.lock=true;if(ok){SS.score++;$("#ssScore").textContent=SS.score;sCorrect();reward(1,1);$("#ssFb").className="feedback ok";$("#ssFb").innerHTML="⭐ Richtig!";}
+    else{sWrong();$("#ssFb").className="feedback try";$("#ssFb").innerHTML=SS.simonSaid?"Simon hat es gesagt – das durftest du machen!":"Simon hat das <b>nicht</b> gesagt!";}
+    setTimeout(ssNext,1250);}
+  function ssAnswer(id){if(SS.lock)return;if(SS.simonSaid)ssResolve(id===SS.action.id);else ssResolve(false);}
+  function ssDont(){if(SS.lock)return;ssResolve(!SS.simonSaid);}
+  function ssEnd(){confetti();$("#ssFb").className="feedback ok";$("#ssFb").innerHTML=SS.score+"/10 richtig! 🎉";if(SS.score>=7)reward(3,2);setTimeout(openGames,1700);}
+  $("#ssBack").addEventListener("click",openGames);
+  $("#ssDont").addEventListener("click",ssDont);
   $("#explainStart").addEventListener("click",function(){var cb=explainGo;explainGo=null;if(cb)cb();});
   $("#explainSpeak").addEventListener("click",function(){if(explainSpeakText)speak(explainSpeakText);});
   $("#explainBack").addEventListener("click",function(){explainGo=null;show("levels");});
