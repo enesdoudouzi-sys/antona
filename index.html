@@ -623,11 +623,25 @@
   .urk-foot{display:flex;justify-content:space-between;margin-top:1.6rem;font-size:.95rem;color:#6a5a2a;font-weight:600}
   @media print{
     body *{visibility:hidden!important}
-    #urkundeOverlay,#urkundeOverlay *{visibility:visible!important}
-    #urkundeOverlay{position:absolute;left:0;top:0;width:100%}
+    #urkundeOverlay,#urkundeOverlay *,#reportOverlay,#reportOverlay *{visibility:visible!important}
+    #urkundeOverlay,#reportOverlay{position:absolute;left:0;top:0;width:100%}
     .noprint{display:none!important}
     .urk-border{box-shadow:none}
   }
+  /* Lernbericht */
+  #report{max-width:700px;margin:1rem auto;padding:.5rem 1rem;color:#1f2433}
+  .rep-head{display:flex;align-items:center;gap:.7rem;border-bottom:3px solid #5865e8;padding-bottom:.6rem;margin-bottom:1rem}
+  .rep-head .rep-logo{font-size:2.2rem}
+  .rep-head h2{margin:0;font-family:'Fredoka',sans-serif;font-size:1.6rem}
+  .rep-head .rep-date{margin-left:auto;color:#748097;font-size:.9rem}
+  .rep-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:.8rem 0}
+  .rep-stat>div{background:#f2f5fb;border-radius:.7rem;padding:.7rem;text-align:center}
+  .rep-stat b{display:block;font:700 1.5rem 'Fredoka',sans-serif;color:#5865e8}
+  .rep-sub h3{margin:1rem 0 .4rem;font-size:1.1rem}
+  .rep-row{display:grid;grid-template-columns:8rem 1fr auto;gap:.5rem;align-items:center;padding:.3rem 0}
+  .rep-bar{height:.7rem;background:#e8ecf5;border-radius:999px;overflow:hidden}
+  .rep-bar>i{display:block;height:100%;background:linear-gradient(90deg,#5865e8,#35b9a0)}
+  .rep-note{font-size:.85rem;color:#748097;margin-top:1rem;border-top:1px solid #e5eaf3;padding-top:.6rem}
 
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1163,7 +1177,12 @@
     <div class="read-story" id="readText"></div>
     <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin:.6rem auto;max-width:34rem">
       <button class="back" id="readSpeak">🔊 Vorlesen</button>
+      <button class="back" id="readQuizBtn">❓ Frage zur Geschichte</button>
       <button class="back" id="readNext">➡️ Nächste Geschichte</button>
+    </div>
+    <div id="readQuiz" hidden style="max-width:34rem;margin:.3rem auto">
+      <div class="qlabel" id="readQ" style="justify-content:center;text-align:center"></div>
+      <div id="readQAns" class="answers three"></div>
     </div>
     <div id="readFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
   </div>
@@ -1239,6 +1258,24 @@
         <div class="urk-stars" id="urkStars">★★★★★</div>
         <div class="urk-foot"><span id="urkDate">—</span><span>🎓 Lernsterne</span></div>
       </div>
+    </div>
+  </div>
+
+  <!-- LERNBERICHT (druckbar) -->
+  <div id="reportOverlay" hidden>
+    <div class="bar noprint"><button class="back" id="repBack">← Zurück</button><button class="next" id="repPrint" style="width:auto;padding:.5rem 1.1rem">🖨️ Drucken / PDF speichern</button></div>
+    <div id="report">
+      <div class="rep-head"><span class="rep-logo">⭐</span><h2>Lernbericht – Lernsterne</h2><span class="rep-date" id="repDate"></span></div>
+      <p id="repWho" style="font-weight:700;font-size:1.1rem;margin:.2rem 0"></p>
+      <div class="rep-stat">
+        <div><b id="repStars">0</b><span>Sterne gesamt</span></div>
+        <div><b id="repRounds">0</b><span>Übungsrunden</span></div>
+        <div><b id="repRead">0</b><span>Lese-Tage 🔥</span></div>
+      </div>
+      <div class="rep-sub"><h3>Fortschritt pro Fach</h3><div id="repSubjects"></div></div>
+      <div class="rep-sub"><h3>Diese Woche geübt</h3><div id="repWeek"></div></div>
+      <p id="repFocus" style="margin:.6rem 0 0"></p>
+      <p class="rep-note">Dieser Bericht zeigt Übungsergebnisse aus der App „Lernsterne". Die Punkte sind ein Übungsindikator (0–10 pro Fach), keine Schulnote. Erstellt am <span id="repDate2"></span>.</p>
     </div>
   </div>
 
@@ -1343,6 +1380,21 @@
         <h3>Urkunde 🏅</h3>
         <p class="muted" style="margin:.2rem 0 .5rem">Schöne Urkunde zum Ausdrucken oder als PDF speichern.</p>
         <button class="primary" id="urkundeBtn2">🏅 Urkunde erstellen</button>
+      </div>
+      <div class="sheet">
+        <h3>Lernbericht 📄</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Übersicht für dich oder die Lehrerin – zum Ausdrucken oder als PDF.</p>
+        <button class="primary" id="reportBtn">📄 Lernbericht erstellen</button>
+      </div>
+      <div class="sheet">
+        <h3>Fortschritt sichern 💾</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Wichtig! Speichere den Lernstand als Datei. So geht nichts verloren, wenn der Browser-Speicher gelöscht wird oder du das Gerät wechselst.</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="primary" id="backupSave">💾 Sichern (Datei speichern)</button>
+          <button class="back" id="backupLoadBtn">📂 Sicherung laden</button>
+          <input type="file" id="backupFile" accept="application/json,.json" style="display:none">
+        </div>
+        <div id="backupMsg" class="muted" style="margin-top:.4rem"></div>
       </div>
       <div class="sheet">
         <h3>Anzeige</h3>
@@ -1970,7 +2022,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays","reportOverlay"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -3001,7 +3053,7 @@
     show("reading");$("#readFb").textContent="";$("#readFb").className="feedback";
     if(readTimer)clearInterval(readTimer);readTimer=setInterval(readTick,1000);}
   function readStop(){if(readTimer){clearInterval(readTimer);readTimer=0;}persist();}
-  function readShow(){var s=READ_STORIES[readIdx];$("#readText").innerHTML='<h3>'+s.e+' '+s.t+'</h3>'+s.x.split("\n\n").map(function(par){return '<p>'+par+'</p>';}).join("");}
+  function readShow(){var s=READ_STORIES[readIdx];$("#readText").innerHTML='<h3>'+s.e+' '+s.t+'</h3>'+s.x.split("\n\n").map(function(par){return '<p>'+par+'</p>';}).join("");var q=$("#readQuiz");if(q)q.hidden=true;}
   function readNext(){readIdx=(readIdx+1)%READ_STORIES.length;readShow();try{$("#reading").scrollTop=0;}catch(e){}}
   function readTick(){var p=active();if(!p)return;var today=dayKey();if(p.stats.readToday.day!==today)p.stats.readToday={day:today,sec:0};
     if(p.stats.readToday.sec>=READ_GOAL){readPaint();return;}
@@ -3029,6 +3081,24 @@
   $("#readBack").addEventListener("click",function(){readStop();enterHome();});
   $("#readSpeak").addEventListener("click",function(){var s=READ_STORIES[readIdx];speak(s.t+". "+s.x.replace(/\n+/g,". "));});
   $("#readNext").addEventListener("click",readNext);
+  /* Verständnisfragen (eine je Geschichte, gleiche Reihenfolge wie READ_STORIES) */
+  var READ_QUESTIONS=[
+    {q:"Was fand der kleine Fuchs Felix im Gras?",a:["Einen goldenen Schlüssel","Eine Haselnuss","Einen bunten Fisch"]},
+    {q:"Wie machte Mia die Katze ungefährlich?",a:["Sie band ihr ein Glöckchen an","Sie jagte sie laut weg","Sie versteckte das Essen"]},
+    {q:"Warum gewann Theo das Wettrennen?",a:["Er gab nicht auf und machte keine Pause","Er war schneller als der Hase","Der Hase half ihm"]},
+    {q:"Wen hat der kleine Ritter Max gerettet?",a:["Ein Kätzchen aus dem Baum","Einen Hund aus dem Wasser","Einen Vogel aus dem Nest"]},
+    {q:"Was suchte der Delfin Finn im Meer?",a:["Einen roten Ball","Eine glitzernde Muschel","Einen kleinen Fisch"]},
+    {q:"Warum wurde Sophie so eine schöne Sonnenblume?",a:["Weil Hanna sich liebevoll um sie kümmerte","Weil sie von Anfang an groß war","Weil es jeden Tag regnete"]}
+  ];
+  var readQDone={};
+  function readShowQuiz(){var qd=READ_QUESTIONS[readIdx];if(!qd)return;$("#readQuiz").hidden=false;$("#readQ").textContent=qd.q;
+    var box=$("#readQAns");box.innerHTML="";shuffle(qd.a.slice()).forEach(function(o){var b=document.createElement("button");b.className="opt";b.innerHTML='<span class="word">'+o+'</span>';b.addEventListener("click",function(){readQPick(o===qd.a[0],b,qd);});box.appendChild(b);});
+    setTimeout(function(){speak(qd.q);},150);}
+  function readQPick(ok,b,qd){Array.prototype.forEach.call($("#readQAns").children,function(c){c.disabled=true;});
+    if(ok){b.classList.add("good");sCorrect();if(!readQDone[readIdx]){readQDone[readIdx]=true;reward(1,1);}$("#readFb").className="feedback ok";$("#readFb").innerHTML="⭐ Richtig verstanden!";}
+    else{b.classList.add("bad");sWrong();Array.prototype.forEach.call($("#readQAns").children,function(c){if(c.textContent===qd.a[0])c.classList.add("good");});$("#readFb").className="feedback try";$("#readFb").textContent="Schau noch einmal in die Geschichte.";}
+    setTimeout(function(){$("#readQuiz").hidden=true;$("#readFb").textContent="";$("#readFb").className="feedback";},2600);}
+  $("#readQuizBtn").addEventListener("click",readShowQuiz);
 
   /* ---------- SIMON SAGT ---------- */
   var SS={round:0,score:0,simonSaid:false,action:null,lock:false,actions:[]};
@@ -3329,6 +3399,47 @@
   $("#urkundeBtn2").addEventListener("click",openUrkunde);
   $("#urkBack").addEventListener("click",function(){show(urkFrom);});
   $("#urkPrint").addEventListener("click",function(){try{window.print();}catch(e){}});
+
+  /* ---------- LERNBERICHT (PDF) ---------- */
+  function openReport(){var p=active();if(!p)return;var d=new Date(),ds=pad2(d.getDate())+"."+pad2(d.getMonth()+1)+"."+d.getFullYear();
+    $("#repDate").textContent=ds;$("#repDate2").textContent=ds;$("#repWho").textContent="Kind: "+p.name;
+    $("#repStars").textContent=p.stats.stars||0;$("#repRounds").textContent=p.stats.rounds||0;$("#repRead").textContent=(p.stats.readStreak||0)+" Tage";
+    var rows="";SUBJ.forEach(function(s){var v=(p.stats.best&&p.stats.best[s.k])||0,pct=Math.round(v/10*100);
+      rows+='<div class="rep-row"><span>'+s.e+' '+s.n+'</span><span class="rep-bar"><i style="width:'+pct+'%"></i></span><span>'+v+'/10</span></div>';});
+    $("#repSubjects").innerHTML=rows;
+    // Woche: Sterne der letzten 7 Tage
+    var hist=p.stats.history||{},wk="",total=0,d0=new Date(),LBL=["So","Mo","Di","Mi","Do","Fr","Sa"];
+    for(var i=6;i>=0;i--){var x=new Date(d0);x.setDate(d0.getDate()-i);var v=(hist[dayKey(x)]||{}).stars||0;total+=v;wk+='<div class="rep-row"><span>'+LBL[x.getDay()]+', '+pad2(x.getDate())+'.'+pad2(x.getMonth()+1)+'.</span><span class="rep-bar"><i style="width:'+Math.min(100,v*10)+'%"></i></span><span>'+v+' ⭐</span></div>';}
+    $("#repWeek").innerHTML=wk+'<div class="rep-row" style="font-weight:700"><span>Summe</span><span></span><span>'+total+' ⭐</span></div>';
+    // Stärken & Üben
+    var best=null,worst=null;SUBJ.forEach(function(s){var v=(p.stats.best&&p.stats.best[s.k])||0;if(best===null||v>best.v)best={n:s.n,v:v};if(worst===null||v<worst.v)worst={n:s.n,v:v};});
+    var txt="";if(best&&best.v>0)txt+="💪 Stark in: <b>"+best.n+"</b> ("+best.v+"/10). ";if(worst)txt+="📌 Noch üben: <b>"+worst.n+"</b> ("+worst.v+"/10).";
+    $("#repFocus").innerHTML=txt;show("reportOverlay");}
+  $("#reportBtn").addEventListener("click",openReport);
+  $("#repBack").addEventListener("click",function(){show("parent");});
+  $("#repPrint").addEventListener("click",function(){try{window.print();}catch(e){}});
+
+  /* ---------- FORTSCHRITT SICHERN (Export/Import) ---------- */
+  function backupSave(){try{
+    var data={app:"lernsterne",version:1,date:new Date().toISOString(),profiles:profiles,active:activeId};
+    var blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+    var url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="lernsterne-sicherung-"+dayKey()+".json";document.body.appendChild(a);a.click();
+    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},500);
+    var m=$("#backupMsg");if(m){m.textContent="✅ Sicherung gespeichert. Bewahre die Datei gut auf!";m.style.color="var(--good)";}
+  }catch(e){var m2=$("#backupMsg");if(m2){m2.textContent="Konnte nicht speichern: "+e;m2.style.color="var(--bad)";}}}
+  function backupLoad(file){var r=new FileReader();r.onload=function(){try{
+    var data=JSON.parse(r.result);if(!data||data.app!=="lernsterne"||!Array.isArray(data.profiles))throw "Keine gültige Lernsterne-Sicherung.";
+    if(!confirm("Sicherung laden? Der aktuelle Lernstand auf diesem Gerät wird ersetzt."))return;
+    profiles=data.profiles;activeId=data.active||(profiles[0]&&profiles[0].id)||null;
+    profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();});persist();
+    var m=$("#backupMsg");if(m){m.textContent="✅ Sicherung geladen! "+profiles.length+" Profil(e) wiederhergestellt.";m.style.color="var(--good)";}
+    renderProfiles();
+  }catch(e){var m2=$("#backupMsg");if(m2){m2.textContent="Fehler beim Laden: "+e;m2.style.color="var(--bad)";}}};r.readAsText(file);}
+  $("#backupSave").addEventListener("click",backupSave);
+  $("#backupLoadBtn").addEventListener("click",function(){$("#backupFile").click();});
+  $("#backupFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])backupLoad(e.target.files[0]);e.target.value="";});
+
   (function(){var bigBtn=$("#bigBtn");if(!bigBtn)return;function upd(){bigBtn.textContent="Große Schrift: "+(load("antona_big",false)?"An":"Aus");}
     bigBtn.addEventListener("click",function(){save("antona_big",!load("antona_big",false));applyBig();upd();});upd();})();
   // Lernwörter der Woche
