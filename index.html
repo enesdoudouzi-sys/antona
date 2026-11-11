@@ -1397,6 +1397,32 @@
         <div id="backupMsg" class="muted" style="margin-top:.4rem"></div>
       </div>
       <div class="sheet">
+        <h3>Geräte-Sync 🔄</h3>
+        <p class="muted" style="margin:.2rem 0 .5rem">Gleicher Lernstand auf Handy und Tablet. Einmalig einrichten (kostenloses Supabase-Konto). Dann auf jedem Gerät den gleichen <b>Sync-Code</b> eintragen.</p>
+        <label class="muted" style="display:block;margin:.3rem 0 .1rem">Supabase Projekt-URL</label>
+        <input id="syncUrl" placeholder="https://xxxx.supabase.co" style="width:100%;padding:.5rem;border-radius:.5rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-family:'Nunito',sans-serif">
+        <label class="muted" style="display:block;margin:.4rem 0 .1rem">Supabase anon key</label>
+        <input id="syncKey" placeholder="eyJhbGci..." style="width:100%;padding:.5rem;border-radius:.5rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-family:'Nunito',sans-serif">
+        <label class="muted" style="display:block;margin:.4rem 0 .1rem">Sync-Code (gleich auf allen Geräten)</label>
+        <div style="display:flex;gap:.5rem"><input id="syncCode" placeholder="z. B. lina-2026" style="flex:1;padding:.5rem;border-radius:.5rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-family:'Nunito',sans-serif"><button class="back" id="syncGen">🎲</button></div>
+        <div style="display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap">
+          <button class="primary" id="syncUp">⬆️ Hochladen</button>
+          <button class="back" id="syncDown">⬇️ Herunterladen</button>
+          <button class="back" id="syncSaveCfg">Speichern</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;cursor:pointer"><input type="checkbox" id="syncAuto" style="width:1.2rem;height:1.2rem;accent-color:var(--accent)"><span class="muted">Automatisch hochladen nach dem Üben</span></label>
+        <div id="syncMsg" class="muted" style="margin-top:.4rem"></div>
+        <details style="margin-top:.5rem"><summary class="muted" style="cursor:pointer">📖 Anleitung: Supabase in 5 Schritten einrichten</summary>
+          <ol class="muted" style="font-size:.85rem;line-height:1.6;padding-left:1.2rem;margin:.4rem 0">
+            <li>Auf <b>supabase.com</b> kostenlos registrieren (kein Kreditkarte nötig) und ein neues Projekt anlegen.</li>
+            <li>Links auf <b>SQL Editor</b> → den Code aus Claude einfügen → <b>Run</b>.</li>
+            <li>Links auf <b>Project Settings → API</b>: dort findest du die <b>Project URL</b> und den <b>anon public key</b>.</li>
+            <li>Beide hier oben eintragen, einen <b>Sync-Code</b> wählen und <b>Speichern</b>.</li>
+            <li>Auf dem ersten Gerät <b>⬆️ Hochladen</b>, auf dem zweiten Gerät denselben Code eintragen und <b>⬇️ Herunterladen</b>.</li>
+          </ol>
+        </details>
+      </div>
+      <div class="sheet">
         <h3>Anzeige</h3>
         <p class="muted" style="margin:.2rem 0 .5rem">Für bessere Lesbarkeit – gut bei Lese-Schwäche.</p>
         <button class="primary" id="bigBtn">Große Schrift: Aus</button>
@@ -2249,6 +2275,7 @@
       $("#homeBtn").style.display=last?"none":"";$("#homeBtn").textContent="Lernzeit abbrechen";
     } else {$("#againBtn").textContent="Nochmal";$("#homeBtn").style.display="";$("#homeBtn").textContent="Zur Startseite";}
     show("done");if(got>=6||SCHOOL.on)confetti();speak($("#doneTitle").textContent);
+    try{if(typeof syncAutoUpload==="function")syncAutoUpload();}catch(e){}
   }
 
   /* ---------- Eltern-Bereich ---------- */
@@ -2269,6 +2296,7 @@
     var p=active();if(!p)return;
     $("#parentWho").textContent="Fortschritt von "+p.name;
     var lta=$("#lwInput");if(lta)lta.value=(p.stats.lernwoerter||[]).join("\n");var lc=$("#lwCount");if(lc){lc.textContent=(p.stats.lernwoerter||[]).length+" Wörter";lc.style.color="var(--ink-soft)";}
+    if(typeof syncFill==="function")syncFill();
     $("#pStars").textContent=p.stats.stars;$("#pRounds").textContent=p.stats.rounds;$("#pCorrect").textContent=p.stats.correct;
     focusStats(p);$("#pFocusSessions").textContent=p.stats.focusSessions;$("#pFocusMinutes").textContent=p.stats.focusMinutes;$("#pFocusLevel").textContent=p.stats.focusLevel;
     // 7-Tage-Diagramm (Sterne pro Tag)
@@ -3439,6 +3467,36 @@
   $("#backupSave").addEventListener("click",backupSave);
   $("#backupLoadBtn").addEventListener("click",function(){$("#backupFile").click();});
   $("#backupFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])backupLoad(e.target.files[0]);e.target.value="";});
+
+  /* ---------- GERÄTE-SYNC (Supabase) ---------- */
+  function syncCfg(){return {url:(load("antona_sync_url","")||"").replace(/\/+$/,""),key:load("antona_sync_key",""),code:load("antona_sync_code",""),auto:load("antona_sync_auto",false)};}
+  function syncMsg(t,ok){var m=$("#syncMsg");if(m){m.textContent=t;m.style.color=ok===true?"var(--good)":ok===false?"var(--bad)":"var(--ink-soft)";}}
+  function syncFill(){var c=syncCfg();if($("#syncUrl"))$("#syncUrl").value=c.url;if($("#syncKey"))$("#syncKey").value=c.key;if($("#syncCode"))$("#syncCode").value=c.code;if($("#syncAuto"))$("#syncAuto").checked=!!c.auto;}
+  function syncSaveCfg(){save("antona_sync_url",($("#syncUrl").value||"").trim());save("antona_sync_key",($("#syncKey").value||"").trim());save("antona_sync_code",($("#syncCode").value||"").trim().toLowerCase());save("antona_sync_auto",!!$("#syncAuto").checked);syncMsg("Einstellungen gespeichert ✓",true);}
+  function syncReady(){var c=syncCfg();return c.url&&c.key&&c.code;}
+  function syncHeaders(c){return {"apikey":c.key,"Authorization":"Bearer "+c.key,"Content-Type":"application/json"};}
+  function syncUpload(silent){var c=syncCfg();if(!syncReady()){if(!silent)syncMsg("Bitte URL, Key und Sync-Code ausfüllen.",false);return;}
+    if(!silent)syncMsg("⏳ Lade hoch …");
+    var body=[{code:c.code,data:{profiles:profiles,active:activeId},updated_at:new Date().toISOString()}];
+    fetch(c.url+"/rest/v1/lernsterne_sync?on_conflict=code",{method:"POST",headers:Object.assign(syncHeaders(c),{"Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify(body)})
+      .then(function(r){if(r.ok)syncMsg("✅ Hochgeladen! Auf dem anderen Gerät jetzt herunterladen.",true);else r.text().then(function(t){syncMsg("Fehler beim Hochladen: "+r.status+" "+t.slice(0,120),false);});})
+      .catch(function(e){syncMsg("Keine Verbindung: "+e,false);});}
+  function syncDownload(){var c=syncCfg();if(!syncReady()){syncMsg("Bitte URL, Key und Sync-Code ausfüllen.",false);return;}
+    syncMsg("⏳ Lade herunter …");
+    fetch(c.url+"/rest/v1/lernsterne_sync?code=eq."+encodeURIComponent(c.code)+"&select=data,updated_at",{headers:syncHeaders(c)})
+      .then(function(r){return r.ok?r.json():r.text().then(function(t){throw r.status+" "+t.slice(0,120);});})
+      .then(function(rows){if(!rows||!rows.length||!rows[0].data||!rows[0].data.profiles){syncMsg("Noch keine Daten zu diesem Code gefunden.",false);return;}
+        if(!confirm("Lernstand von diesem Sync-Code laden? Der aktuelle Stand auf diesem Gerät wird ersetzt."))return;
+        profiles=rows[0].data.profiles;activeId=rows[0].data.active||(profiles[0]&&profiles[0].id)||null;
+        profiles.forEach(function(p){if(!p.stats)p.stats=blankStats();});persist();renderProfiles();
+        syncMsg("✅ Lernstand geladen! ("+profiles.length+" Profil(e))",true);})
+      .catch(function(e){syncMsg("Fehler: "+e,false);});}
+  $("#syncGen").addEventListener("click",function(){var a=active();var base=(a&&a.name?a.name.toLowerCase().replace(/[^a-z0-9]/g,""):"sync");$("#syncCode").value=base+"-"+Math.random().toString(36).slice(2,7);});
+  $("#syncSaveCfg").addEventListener("click",syncSaveCfg);
+  $("#syncUp").addEventListener("click",function(){syncSaveCfg();syncUpload(false);});
+  $("#syncDown").addEventListener("click",function(){syncSaveCfg();syncDownload();});
+  var syncAutoTimer=0;
+  function syncAutoUpload(){var c=syncCfg();if(!c.auto||!syncReady())return;if(syncAutoTimer)clearTimeout(syncAutoTimer);syncAutoTimer=setTimeout(function(){syncUpload(true);},4000);}
 
   (function(){var bigBtn=$("#bigBtn");if(!bigBtn)return;function upd(){bigBtn.textContent="Große Schrift: "+(load("antona_big",false)?"An":"Aus");}
     bigBtn.addEventListener("click",function(){save("antona_big",!load("antona_big",false));applyBig();upd();});upd();})();
