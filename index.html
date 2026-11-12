@@ -555,6 +555,23 @@
   .ws-grid button{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:5px;font:800 1.05rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer;padding:0}
   .ws-grid button.sel{background:var(--accent);color:#fff}
   .ws-grid button.ok{background:#bdebcf;color:var(--good)}
+  /* Anziehpuppe */
+  .du-controls{max-width:30rem;margin:.3rem auto;display:flex;flex-direction:column;gap:.6rem}
+  .du-row{background:var(--bg2);border-radius:.9rem;padding:.6rem .7rem}
+  .du-row .du-lbl{font-weight:800;font-size:.9rem;margin-bottom:.35rem}
+  .du-opts{display:flex;gap:.45rem;flex-wrap:wrap}
+  .du-sw{width:2.2rem;height:2.2rem;border-radius:999px;border:2px solid var(--line);cursor:pointer}
+  .du-sw.sel{border-color:var(--ink);box-shadow:0 0 0 2px var(--accent)}
+  .du-opt{border:1px solid var(--line);background:var(--panel);border-radius:.7rem;padding:.4rem .6rem;font:800 1.1rem 'Nunito',sans-serif;cursor:pointer;min-width:2.6rem}
+  .du-opt.sel{border-color:var(--accent);background:var(--bg)}
+  /* Finde den Unterschied */
+  .df-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:min(90vw,340px);margin:.1rem auto}
+  .df-grid>div,.df-grid>button{aspect-ratio:1;display:grid;place-items:center;font-size:1.7rem;background:var(--panel);border:1px solid var(--line);border-radius:.5rem;padding:0}
+  .df-grid>button{cursor:pointer}
+  .df-grid>button.ok{background:#bdebcf;border-color:var(--good)}
+  .df-grid>button.no{background:#ffd9d9}
+  /* Pizza-Bruchteile */
+  #pzPie svg{width:min(70vw,230px);height:auto}
   /* Simon sagt */
   .ss-actions{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
   .ss-actions button{display:flex;flex-direction:column;align-items:center;gap:.2rem;border:1px solid var(--line);background:var(--panel);border-radius:1rem;padding:.8rem;font:800 .95rem 'Nunito',sans-serif;color:var(--ink);cursor:pointer}
@@ -1153,6 +1170,37 @@
     <div id="paintLegend" class="paint-legend"></div>
     <div id="paintGrid" class="paint-grid"></div>
     <div id="paintFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+  </div>
+
+  <!-- ANZIEHPUPPE / AVATAR GESTALTEN -->
+  <div id="dressup" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="duBack">← Zurück</button><div class="spacer"></div><button class="next" id="duSave" style="width:auto;padding:.5rem 1rem">✅ Fertig</button></div>
+    <h2 class="title" style="text-align:center;margin:.2rem">💅 Mein Avatar</h2>
+    <div id="duFigure" style="text-align:center"></div>
+    <div id="duControls" class="du-controls"></div>
+    <div id="duFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+  </div>
+
+  <!-- FINDE DEN UNTERSCHIED -->
+  <div id="diff" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="dfBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🦋 <span id="dfFound">0</span>/<span id="dfTotal">3</span></div></div>
+    <div class="muted" style="text-align:center;margin:.2rem">Finde die Unterschiede! Tippe sie im <b>unteren</b> Bild an.</div>
+    <div style="text-align:center;font-weight:800;color:var(--ink-soft);margin:.2rem">Bild 1</div>
+    <div id="dfGridA" class="df-grid"></div>
+    <div style="text-align:center;font-weight:800;color:var(--ink-soft);margin:.2rem">Bild 2 – was ist anders?</div>
+    <div id="dfGridB" class="df-grid"></div>
+    <div id="dfFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+  </div>
+
+  <!-- PIZZA-BRUCHTEILE -->
+  <div id="pizza" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="pzBack">← Stopp</button><div class="spacer"></div><div class="gbadge">🍰 <span id="pzScore">0</span>/8</div></div>
+    <div class="card" style="gap:1rem">
+      <div class="qlabel" id="pzQ" style="justify-content:center;text-align:center">Wie viel ist rot?</div>
+      <div id="pzPie" style="text-align:center"></div>
+      <div id="pzAns" class="answers three"></div>
+      <div id="pzFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
   </div>
 
   <!-- SIMON SAGT -->
@@ -2048,7 +2096,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays","reportOverlay"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays","reportOverlay","dressup","diff","pizza"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2406,7 +2454,10 @@
     {id:"enmem",name:"Englisch-Memory",emoji:"🇬🇧",cost:4,desc:"Finde die Paare: Bild und englisches Wort."},
     {id:"paint",name:"Malen nach Zahlen",emoji:"🎨",cost:0,desc:"Färbe die Felder nach Zahlen und enthülle ein Bild."},
     {id:"lwgame",name:"Lernwörter üben",emoji:"✍️",cost:0,desc:"Deine Lernwörter der Woche – hören und richtig schreiben."},
-    {id:"simonsays",name:"Simon sagt",emoji:"🙋",cost:0,desc:"Mach die Bewegung nur, wenn Simon sagt davor steht!"}
+    {id:"simonsays",name:"Simon sagt",emoji:"🙋",cost:0,desc:"Mach die Bewegung nur, wenn Simon sagt davor steht!"},
+    {id:"dressup",name:"Mein Avatar gestalten",emoji:"💅",cost:0,desc:"Haare, Kleid und Schmuck aussuchen – mach deinen eigenen Avatar."},
+    {id:"diff",name:"Finde den Unterschied",emoji:"🦋",cost:4,desc:"Vergleiche zwei Bilder und finde, was anders ist."},
+    {id:"pizza",name:"Pizza-Bruchteile",emoji:"🍰",cost:0,desc:"Hälfte, Viertel, Drittel – lerne Bruchteile mit Pizza."}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -2429,7 +2480,8 @@
         else if(g.id==="clockset")startClockset();else if(g.id==="money")startMoney();else if(g.id==="simon")startSimon();
         else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();
         else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();else if(g.id==="lwgame")startLw();
-        else if(g.id==="simonsays")startSimonSays();});
+        else if(g.id==="simonsays")startSimonSays();
+        else if(g.id==="dressup")startDressup();else if(g.id==="diff")startDiff();else if(g.id==="pizza")startPizza();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -3139,6 +3191,83 @@
   function ssEnd(){confetti();$("#ssFb").className="feedback ok";$("#ssFb").innerHTML=SS.score+"/10 richtig! 🎉";if(SS.score>=7)reward(3,2);setTimeout(openGames,1700);}
   $("#ssBack").addEventListener("click",openGames);
   $("#ssDont").addEventListener("click",ssDont);
+
+  /* ---------- ANZIEHPUPPE / AVATAR GESTALTEN ---------- */
+  var DU_SKIN=["#ffd9b8","#f0b48a","#c98a5a","#8a5a3a"];
+  var DU_HAIR=["#5a3a22","#1f1a17","#e8c060","#c0502a","#ff7fb0","#7a4fff"];
+  var DU_DRESS=["#ff6b9d","#5b8cff","#4bd07d","#ffc02e","#b07bff","#ff8a3d"];
+  var DU_STYLE=[{id:0,n:"Kurz"},{id:1,n:"Lang"},{id:2,n:"Zöpfe"}];
+  var DU_ACC=[{id:"none",e:"∅"},{id:"bow",e:"🎀"},{id:"crown",e:"👑"},{id:"glasses",e:"🕶️"},{id:"flower",e:"🌸"}];
+  var DU={hair:0,dress:0,skin:0,style:1,acc:"none"};
+  function startDressup(){var p=active();DU=(p&&p.stats.dress)?JSON.parse(JSON.stringify(p.stats.dress)):{hair:0,dress:0,skin:0,style:1,acc:"none"};duRender();duControls();$("#duFb").textContent="";$("#duFb").className="feedback";show("dressup");}
+  function duFigureSVG(){var skin=DU_SKIN[DU.skin],hair=DU_HAIR[DU.hair],dress=DU_DRESS[DU.dress];
+    var s='<svg viewBox="0 0 160 220" style="width:min(55vw,200px)">';
+    s+='<path d="M80 96 L122 205 L38 205 Z" fill="'+dress+'"/>';
+    if(DU.style===1)s+='<path d="M80 30 q-46 10 -40 95 l18 0 q-10 -62 22 -72 q32 10 22 72 l18 0 q6 -85 -40 -95 Z" fill="'+hair+'"/>';
+    s+='<circle cx="80" cy="70" r="34" fill="'+skin+'"/>';
+    s+='<path d="M46 66 q0 -46 34 -46 q34 0 34 46 q-10 -22 -34 -22 q-24 0 -34 22 Z" fill="'+hair+'"/>';
+    if(DU.style===2)s+='<circle cx="44" cy="82" r="11" fill="'+hair+'"/><circle cx="116" cy="82" r="11" fill="'+hair+'"/>';
+    s+='<circle cx="68" cy="70" r="3.6" fill="#2a2740"/><circle cx="92" cy="70" r="3.6" fill="#2a2740"/>';
+    s+='<path d="M70 84 q10 8 20 0" stroke="#c0392b" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    s+='<circle cx="60" cy="80" r="4" fill="#ffb3b3" opacity=".7"/><circle cx="100" cy="80" r="4" fill="#ffb3b3" opacity=".7"/>';
+    var acc=DU_ACC.filter(function(a){return a.id===DU.acc;})[0];
+    if(acc&&acc.id!=="none"){if(acc.id==="glasses")s+='<text x="80" y="78" font-size="26" text-anchor="middle">🕶️</text>';else s+='<text x="80" y="40" font-size="30" text-anchor="middle">'+acc.e+'</text>';}
+    s+='</svg>';return s;}
+  function duRender(){$("#duFigure").innerHTML=duFigureSVG();}
+  function duControls(){var box=$("#duControls");box.innerHTML="";
+    function row(lbl,html){var d=document.createElement("div");d.className="du-row";d.innerHTML='<div class="du-lbl">'+lbl+'</div><div class="du-opts">'+html+'</div>';return d;}
+    function sw(arr,cur,cb,pfx){return arr.map(function(c,i){return '<button class="du-sw'+(i===cur?' sel':'')+'" data-i="'+i+'" data-k="'+pfx+'" style="background:'+c+'"></button>';}).join("");}
+    box.appendChild(row("🎨 Hautfarbe",sw(DU_SKIN,DU.skin,0,"skin")));
+    box.appendChild(row("💇 Haarfarbe",sw(DU_HAIR,DU.hair,0,"hair")));
+    box.appendChild(row("✂️ Frisur",DU_STYLE.map(function(st){return '<button class="du-opt'+(st.id===DU.style?' sel':'')+'" data-k="style" data-i="'+st.id+'">'+st.n+'</button>';}).join("")));
+    box.appendChild(row("👗 Kleidfarbe",sw(DU_DRESS,DU.dress,0,"dress")));
+    box.appendChild(row("💍 Schmuck",DU_ACC.map(function(a){return '<button class="du-opt'+(a.id===DU.acc?' sel':'')+'" data-k="acc" data-i="'+a.id+'">'+a.e+'</button>';}).join("")));
+    Array.prototype.forEach.call(box.querySelectorAll("[data-k]"),function(b){b.addEventListener("click",function(){var k=b.getAttribute("data-k"),v=b.getAttribute("data-i");DU[k]=(k==="acc")?v:+v;duRender();duControls();});});}
+  function dressSave(){var p=active();if(p){p.stats.dress=DU;persist();}sStar();$("#duFb").className="feedback ok";$("#duFb").innerHTML="✨ Dein Avatar ist gespeichert!";setTimeout(openGames,1300);}
+  $("#duBack").addEventListener("click",openGames);
+  $("#duSave").addEventListener("click",dressSave);
+
+  /* ---------- FINDE DEN UNTERSCHIED ---------- */
+  var DF_SETS=[["🐶","🐱","🐭","🐰","🦊","🐻","🐼","🐨","🦁","🐯","🐮","🐷","🐸","🐵","🦄","🐔"],
+    ["🍎","🍌","🍇","🍓","🍊","🍐","🍑","🍒","🥝","🍍","🥥","🍉"],
+    ["🌸","🌼","🌻","🌷","🌹","🌺","💐","🍀","🌵","🌴"],
+    ["⭐","🌙","☀️","⚡","❄️","🔥","💧","🌈","☁️","🌟"]];
+  var DF={a:[],b:[],diffs:[],found:[],total:3};
+  function startDiff(){var pool=pick(DF_SETS),n=12,a=[],i;for(i=0;i<n;i++)a.push(pick(pool));
+    var b=a.slice(),diffs=[],tries=0;while(diffs.length<3&&tries<120){tries++;var idx=rnd(n);if(diffs.indexOf(idx)>=0)continue;var ne=pick(pool);if(ne===a[idx])continue;b[idx]=ne;diffs.push(idx);}
+    DF={a:a,b:b,diffs:diffs,found:[],total:diffs.length};$("#dfTotal").textContent=DF.total;$("#dfFound").textContent="0";$("#dfFb").textContent="";$("#dfFb").className="feedback";renderDiff();show("diff");}
+  function renderDiff(){var ga=$("#dfGridA");ga.innerHTML="";DF.a.forEach(function(e){var d=document.createElement("div");d.textContent=e;ga.appendChild(d);});
+    var gb=$("#dfGridB");gb.innerHTML="";DF.b.forEach(function(e,i){var btn=document.createElement("button");btn.textContent=e;btn.addEventListener("click",function(){dfTap(i,btn);});gb.appendChild(btn);});}
+  function dfTap(i,btn){if(DF.found.indexOf(i)>=0)return;
+    if(DF.diffs.indexOf(i)>=0){DF.found.push(i);btn.classList.add("ok");sCorrect();reward(1,1);$("#dfFound").textContent=DF.found.length;
+      if(DF.found.length>=DF.total){confetti();reward(2,1);$("#dfFb").className="feedback ok";$("#dfFb").innerHTML="🎉 Alle Unterschiede gefunden!";setTimeout(openGames,1500);}}
+    else{sWrong();btn.classList.add("no");setTimeout(function(){btn.classList.remove("no");},500);}}
+
+  /* ---------- PIZZA-BRUCHTEILE ---------- */
+  function pieSVG(n,k){var cx=80,cy=80,r=72,s='<svg viewBox="0 0 160 160">',i;
+    for(i=0;i<n;i++){var a0=(i/n)*2*Math.PI-Math.PI/2,a1=((i+1)/n)*2*Math.PI-Math.PI/2;
+      var x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+      var fill=(i<k)?"#e8552d":"#ffe0b0";
+      s+='<path d="M'+cx+' '+cy+' L'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 0 1 '+x1.toFixed(1)+' '+y1.toFixed(1)+' Z" fill="'+fill+'" stroke="#c0763a" stroke-width="2"/>';}
+    s+='<circle cx="80" cy="80" r="72" fill="none" stroke="#b5651d" stroke-width="4"/></svg>';return s;}
+  var FRAC={"1/2":"die Hälfte (1/2)","2/4":"die Hälfte (1/2)","1/4":"ein Viertel (1/4)","3/4":"drei Viertel (3/4)","1/3":"ein Drittel (1/3)","2/3":"zwei Drittel (2/3)"};
+  function fracName(k,n){return FRAC[k+"/"+n]||(k+" von "+n);}
+  var PZ={round:0,score:0};
+  function startPizza(){PZ={round:0,score:0};$("#pzScore").textContent="0";pzNext();show("pizza");}
+  function pzNext(){if(PZ.round>=8)return pzEnd();PZ.round++;$("#pzScore").textContent=PZ.score;$("#pzFb").textContent="";$("#pzFb").className="feedback";
+    var combos=[[2,1],[4,1],[4,2],[4,3],[3,1],[3,2]],c=pick(combos),n=c[0],k=c[1];
+    $("#pzPie").innerHTML=pieSVG(n,k);var correct=fracName(k,n);
+    var poolAll=["die Hälfte (1/2)","ein Viertel (1/4)","drei Viertel (3/4)","ein Drittel (1/3)","zwei Drittel (2/3)"];
+    var opts=[correct],rest=shuffle(poolAll.filter(function(x){return x!==correct;}));for(var i=0;i<2&&i<rest.length;i++)opts.push(rest[i]);
+    $("#pzAns").innerHTML="";shuffle(opts).forEach(function(o){var b=document.createElement("button");b.className="opt";b.innerHTML='<span class="word">'+o+'</span>';b.addEventListener("click",function(){pzPick(o===correct,b,correct);});$("#pzAns").appendChild(b);});
+    setTimeout(function(){speak("Wie viel von der Pizza ist rot?");},150);}
+  function pzPick(ok,btn,correct){Array.prototype.forEach.call($("#pzAns").children,function(c){c.disabled=true;});
+    if(ok){PZ.score++;$("#pzScore").textContent=PZ.score;btn.classList.add("good");sCorrect();reward(1,1);$("#pzFb").className="feedback ok";$("#pzFb").innerHTML="⭐ Richtig!";}
+    else{btn.classList.add("bad");sWrong();Array.prototype.forEach.call($("#pzAns").children,function(c){if(c.textContent===correct)c.classList.add("good");});$("#pzFb").className="feedback try";$("#pzFb").innerHTML="Richtig: <b>"+correct+"</b>";}
+    setTimeout(pzNext,1300);}
+  function pzEnd(){confetti();$("#pzFb").className="feedback ok";$("#pzFb").innerHTML=PZ.score+"/8 richtig! 🎉";if(PZ.score>=5)reward(2,1);setTimeout(openGames,1600);}
+  $("#dfBack").addEventListener("click",openGames);
+  $("#pzBack").addEventListener("click",openGames);
   $("#explainStart").addEventListener("click",function(){var cb=explainGo;explainGo=null;if(cb)cb();});
   $("#explainSpeak").addEventListener("click",function(){if(explainSpeakText)speak(explainSpeakText);});
   $("#explainBack").addEventListener("click",function(){explainGo=null;show("levels");});
