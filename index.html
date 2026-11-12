@@ -1386,9 +1386,20 @@
       </div>
       <div class="sheet">
         <h3>Vorlese-Stimme</h3>
+        <div style="background:linear-gradient(135deg,#fff6df,#ffeccb);border:1px solid #f0d090;border-radius:.9rem;padding:.7rem;margin-bottom:.7rem">
+          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
+            <input type="checkbox" id="premiumVoiceChk" style="width:1.3rem;height:1.3rem;accent-color:#c79400">
+            <span><b>🌟 Echte Premium-Stimme</b> <span class="muted">(klingt wie ein echter Mensch – über deinen Supabase-Server)</span></span>
+          </label>
+          <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
+            <button class="back" id="premiumTest">🔊 Premium-Stimme testen</button>
+          </div>
+          <div id="premiumMsg" style="margin-top:.4rem;font-weight:800;font-size:.9rem"></div>
+          <div class="muted" style="font-size:.82rem;margin-top:.3rem">Braucht einmalige Einrichtung (ElevenLabs + Supabase-Funktion). Claude hilft dir Schritt für Schritt.</div>
+        </div>
         <label style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .5rem;cursor:pointer">
           <input type="checkbox" id="onlineVoiceChk" style="width:1.3rem;height:1.3rem;accent-color:var(--accent)">
-          <span><b>Natürliche Online-Stimme</b> <span class="muted">(empfohlen – klingt echt, braucht Internet)</span></span>
+          <span><b>Natürliche Online-Stimme</b> <span class="muted">(gratis, klingt gut, braucht Internet)</span></span>
         </label>
         <div id="onlineVoiceRow" style="margin:.2rem 0 .6rem">
           <div class="muted" style="margin-bottom:.3rem">Online-Stimme auswählen (antippen & 🔊 testen):</div>
@@ -1605,8 +1616,25 @@
   ];
   var onTtsStatus=null; // optional Rückmeldung für den Eltern-Test
   function ttsReport(kind,info){try{if(onTtsStatus)onTtsStatus(kind,info);}catch(e){}}
+  // Echte Premium-Stimme (ElevenLabs über Supabase Edge Function)
+  var premiumVoice=load("antona_premium_voice",false), premiumFailed=false, premiumVoiceId=load("antona_premium_voiceid","");
+  function premiumSpeak(t,lang,onFail){
+    var c=(typeof syncCfg==="function")?syncCfg():null;
+    if(!c||!c.url||!c.key){onFail();return;}
+    if(t.length>300){onFail();return;} // lange Texte über Gerät/Gratis (schont das Kontingent)
+    try{window.speechSynthesis.cancel();}catch(e){}
+    if(ttsAudio){try{ttsAudio.pause();}catch(e){}}
+    fetch(c.url+"/functions/v1/tts",{method:"POST",headers:{"apikey":c.key,"Authorization":"Bearer "+c.key,"Content-Type":"application/json"},body:JSON.stringify({text:t,lang:(lang&&lang.indexOf("en")===0)?"en":"de",voice:premiumVoiceId||undefined})})
+      .then(function(r){if(!r.ok)return r.text().then(function(x){throw r.status+" "+x.slice(0,140);});return r.blob();})
+      .then(function(blob){if(blob.size<300){throw "kein Audio";}var url=URL.createObjectURL(blob);var a=ttsAudio=new Audio(url);a.onended=function(){try{URL.revokeObjectURL(url);}catch(e){}};a.onerror=function(){onFail();};a.play();ttsReport("premium");})
+      .catch(function(e){premiumFailed=true;ttsReport("premiumfail",e);onFail();});
+  }
   function speak(t,lang){
     if(!t)return;var en=(lang&&lang.indexOf("en")===0);
+    if(premiumVoice && !premiumFailed && navigator.onLine!==false){premiumSpeak(t,lang,function(){speakOnlineOrDevice(t,lang,en);});return;}
+    speakOnlineOrDevice(t,lang,en);
+  }
+  function speakOnlineOrDevice(t,lang,en){
     if(onlineVoice && !ttsFailed && navigator.onLine!==false){
       try{window.speechSynthesis.cancel();}catch(e){}
       if(ttsAudio){ttsAudio.onerror=null;ttsAudio.onplaying=null;try{ttsAudio.pause();}catch(e){}}
@@ -2389,6 +2417,15 @@
   Array.prototype.forEach.call(document.querySelectorAll("#goalPick button"),function(btn){btn.addEventListener("click",function(){var p=active();if(!p)return;p.stats.goal=+btn.getAttribute("data-g");persist();renderParent();});});
   (function(){var vsel=$("#voicePick");if(vsel)vsel.addEventListener("change",function(){save("antona_voice",vsel.value);chooseVoice();});
     var vt=$("#voiceTest");if(vt)vt.addEventListener("click",function(){speak("Hallo! Ich bin deine Lese-Stimme und helfe dir beim Lernen.");});
+    var pv=$("#premiumVoiceChk");if(pv){pv.checked=!!premiumVoice;
+      pv.addEventListener("change",function(){premiumVoice=pv.checked;premiumFailed=false;save("antona_premium_voice",premiumVoice);var m=$("#premiumMsg");if(m){m.textContent=premiumVoice?"🌟 Premium-Stimme an – zum Prüfen auf Testen tippen.":"Premium-Stimme aus.";m.style.color="var(--ink-soft)";}});}
+    var pt=$("#premiumTest");if(pt)pt.addEventListener("click",function(){premiumFailed=false;premiumVoice=true;if($("#premiumVoiceChk"))$("#premiumVoiceChk").checked=true;save("antona_premium_voice",true);
+      var m=$("#premiumMsg");if(m){m.style.color="var(--ink-soft)";m.textContent="⏳ Teste Premium-Stimme …";}
+      onTtsStatus=function(kind,info){var m=$("#premiumMsg");if(!m){onTtsStatus=null;return;}
+        if(kind==="premium"){m.style.color="var(--good)";m.textContent="✅ Premium-Stimme läuft! 🌟";}
+        else if(kind==="premiumfail"){m.style.color="var(--bad)";m.innerHTML="⚠️ Premium-Stimme noch nicht bereit: "+String(info).slice(0,80)+"<br><span style=\"font-weight:600;color:var(--ink-soft)\">Sag das Claude – wir prüfen die Einrichtung.</span>";}
+        onTtsStatus=null;};
+      speak("Hallo Lina. Ich bin deine neue Stimme und freue mich, mit dir zu lernen.");});
     var ov=$("#onlineVoiceChk");if(ov){ov.checked=!!onlineVoice;$("#onlineVoiceRow").style.opacity=onlineVoice?"1":".45";
       ov.addEventListener("change",function(){onlineVoice=ov.checked;ttsFailed=false;save("antona_tts_online",onlineVoice);$("#onlineVoiceRow").style.opacity=onlineVoice?"1":".45";setTimeout(function(){speak(onlineVoice?"Super! So klinge ich jetzt.":"Jetzt nutze ich die Gerätestimme.");},150);});}
     var tv=$("#ttsVoicePick");if(tv){tv.value=ttsDeVoice;tv.addEventListener("change",function(){ttsDeVoice=tv.value;ttsFailed=false;onlineVoice=true;if($("#onlineVoiceChk"))$("#onlineVoiceChk").checked=true;save("antona_tts_online",true);save("antona_tts_voice",ttsDeVoice);setTimeout(function(){speak("Hallo Lina, so klinge ich. Lass uns zusammen lernen!");},150);});}
