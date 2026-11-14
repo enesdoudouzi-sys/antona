@@ -2500,30 +2500,18 @@
 
   /* ---------- SPIELE (Anton-Prinzip: Münzen verdienen & verspielen) ---------- */
   var GAME_LIST=[
-    {id:"ballons",name:"Zahlen-Ballons",emoji:"🎈",cost:5,desc:"Platze den Ballon mit dem richtigen Ergebnis."},
-    {id:"memory",name:"Sternen-Memory",emoji:"🧠",cost:5,desc:"Finde die passenden Paare."},
-    {id:"uno",name:"UNO (Kinder)",emoji:"🎴",cost:6,desc:"Karten gegen den Computer: Farbe oder Zahl passend legen."},
-    {id:"shop",name:"Kaufladen & Kasse",emoji:"🛒",cost:0,desc:"Live gegen den Computer kassieren: Preis, Rückgeld, bar oder Karte."},
-    {id:"malen",name:"Malen & Kritzeln",emoji:"🎨",cost:0,desc:"Frei malen mit vielen Farben."},
-    {id:"pyra",name:"Zahlen-Pyramide",emoji:"🔺",cost:0,desc:"Finde den fehlenden Stein – jeder Stein = die zwei darunter."},
-    {id:"trace",name:"Nachspuren",emoji:"✏️",cost:0,desc:"Buchstaben & Zahlen mit dem Finger nachfahren – Schreiben üben."},
+    {id:"olympia",name:"Lern-Olympiade",emoji:"🏅",cost:0,desc:"Sport-Wettkampf: gewinne mit richtigen Antworten Gold, Silber & Bronze!"},
+    {id:"lwgame",name:"Lernwörter üben",emoji:"✍️",cost:0,desc:"Deine Lernwörter der Woche – hören und richtig schreiben."},
+    {id:"anagram",name:"Buchstabensalat",emoji:"🔤",cost:0,desc:"Bringe die Buchstaben in die richtige Reihenfolge."},
     {id:"story",name:"Lesegeschichten",emoji:"📜",cost:0,desc:"Kurze Geschichte lesen und Fragen beantworten."},
-    {id:"sudoku",name:"Kinder-Sudoku",emoji:"🧩",cost:4,desc:"4×4-Sudoku mit Zahlen 1–4 – Logik & Konzentration."},
-    {id:"wordsearch",name:"Wortsuche",emoji:"🔎",cost:4,desc:"Versteckte Wörter im Buchstabengitter finden."},
-    {id:"snake",name:"Zahlen-Snake",emoji:"🐍",cost:5,desc:"Friss die Zahlen in der richtigen Reihenfolge."},
-    {id:"race",name:"Rechen-Rennen",emoji:"🏎️",cost:4,desc:"Rechne schnell und gewinne das Rennen gegen den Computer."},
+    {id:"pizza",name:"Pizza-Bruchteile",emoji:"🍰",cost:0,desc:"Hälfte, Viertel, Drittel – lerne Bruchteile mit Pizza."},
     {id:"clockset",name:"Uhr stellen",emoji:"🕐",cost:0,desc:"Stelle die Zeiger auf die richtige Uhrzeit."},
     {id:"money",name:"Geld bezahlen",emoji:"💶",cost:0,desc:"Lege den genauen Betrag mit Münzen und Scheinen."},
-    {id:"anagram",name:"Buchstabensalat",emoji:"🔤",cost:0,desc:"Bringe die Buchstaben in die richtige Reihenfolge."},
-    {id:"maze",name:"Labyrinth",emoji:"🧭",cost:4,desc:"Finde den Weg durch das Labyrinth zum Ziel."},
-    {id:"enmem",name:"Englisch-Memory",emoji:"🇬🇧",cost:4,desc:"Finde die Paare: Bild und englisches Wort."},
-    {id:"paint",name:"Malen nach Zahlen",emoji:"🎨",cost:0,desc:"Färbe die Felder nach Zahlen und enthülle ein Bild."},
-    {id:"lwgame",name:"Lernwörter üben",emoji:"✍️",cost:0,desc:"Deine Lernwörter der Woche – hören und richtig schreiben."},
-    {id:"simonsays",name:"Simon sagt",emoji:"🙋",cost:0,desc:"Mach die Bewegung nur, wenn Simon sagt davor steht!"},
-    {id:"dressup",name:"Mein Avatar gestalten",emoji:"💅",cost:0,desc:"Haare, Kleid und Schmuck aussuchen – mach deinen eigenen Avatar."},
+    {id:"sudoku",name:"Kinder-Sudoku",emoji:"🧩",cost:4,desc:"4×4-Sudoku mit Zahlen 1–4 – Logik & Konzentration."},
+    {id:"trace",name:"Nachspuren",emoji:"✏️",cost:0,desc:"Buchstaben & Zahlen mit dem Finger nachfahren – Schreiben üben."},
     {id:"diff",name:"Finde den Unterschied",emoji:"🦋",cost:4,desc:"Vergleiche zwei Bilder und finde, was anders ist."},
-    {id:"pizza",name:"Pizza-Bruchteile",emoji:"🍰",cost:0,desc:"Hälfte, Viertel, Drittel – lerne Bruchteile mit Pizza."},
-    {id:"olympia",name:"Lern-Olympiade",emoji:"🏅",cost:0,desc:"Sport-Wettkampf: gewinne mit richtigen Antworten Gold, Silber & Bronze!"}
+    {id:"simonsays",name:"Simon sagt",emoji:"🙋",cost:0,desc:"Mach die Bewegung nur, wenn Simon sagt davor steht!"},
+    {id:"dressup",name:"Mein Avatar gestalten",emoji:"💅",cost:0,desc:"Haare, Kleid und Schmuck aussuchen – mach deinen eigenen Avatar."}
   ];
   function openGames(){
     var p=active();if(!p)return;
