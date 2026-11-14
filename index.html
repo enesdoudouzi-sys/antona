@@ -620,6 +620,13 @@
   .an-letters{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
   .an-letters button{width:2.9rem;height:3.1rem;border:1px solid var(--line);background:var(--bg2);border-radius:.6rem;font:800 1.5rem 'Fredoka',sans-serif;color:var(--ink);cursor:pointer}
   .an-letters button:disabled{opacity:.3}
+  /* Lern-Olympiade */
+  .oly-discs{display:flex;flex-direction:column;gap:.6rem;max-width:32rem;margin:.3rem auto;width:100%}
+  .oly-disc{display:flex;align-items:center;gap:.8rem;width:100%;text-align:left;border:1px solid var(--line);border-radius:1.1rem;padding:.9rem 1rem;cursor:pointer;background:var(--panel);box-shadow:var(--shadow-sm)}
+  .oly-disc .oly-e{font-size:2.1rem}
+  .oly-disc b{display:block;font-size:1.1rem}
+  .oly-disc small{color:var(--ink-soft);font-weight:800}
+  .oly-disc .oly-med{margin-left:auto;font-size:1.1rem}
   /* Rechen-Rennen */
   .race-track{display:flex;flex-direction:column;gap:.5rem;width:100%}
   .race-lane{position:relative;width:100%;height:2.6rem;background:var(--bg2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
@@ -1259,6 +1266,26 @@
     </div>
   </div>
 
+  <!-- LERN-OLYMPIADE: Disziplin wählen -->
+  <div id="olyPick" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="olyBack">← Zurück</button><div class="spacer"></div><div class="gbadge" id="olyMedals">🥇 0 · 🥈 0 · 🥉 0</div></div>
+    <h2 class="title" style="text-align:center;margin:.2rem">🏅 Lern-Olympiade</h2>
+    <p class="muted" style="text-align:center;margin:0 0 .4rem">Wähle eine Disziplin. Jede richtige Antwort bringt deinen Sportler nach vorn – gewinne Medaillen!</p>
+    <div id="olyDiscs" class="oly-discs"></div>
+  </div>
+
+  <!-- LERN-OLYMPIADE: Wettkampf -->
+  <div id="oly" hidden style="flex:1;display:flex;flex-direction:column">
+    <div class="bar"><button class="back" id="olyStop">← Stopp</button><div class="spacer"></div><div class="gbadge" id="olyTitle">🏃</div><div class="gbadge">🏁 <span id="olyRound">1</span>/8</div></div>
+    <div class="card" style="gap:.8rem">
+      <div class="race-track"><div class="race-lane"><span id="olyYou" class="race-car">🏃</span><span class="race-flag">🏁</span></div><div class="race-lane"><span id="olyCpu" class="race-car">🤖</span><span class="race-flag">🏁</span></div></div>
+      <div class="qlabel" id="olyQLabel" style="justify-content:center"><span></span><button class="read-btn" id="olySpeak" aria-label="Vorlesen">🔊</button></div>
+      <div class="question" id="olyQ"></div>
+      <div id="olyAns" class="answers three"></div>
+      <div id="olyFb" class="feedback" aria-live="polite" style="justify-content:center"></div>
+    </div>
+  </div>
+
   <!-- SCHATZTRUHE -->
   <div id="chest" hidden>
     <div class="bar"><button class="back" id="chestBack">← Zurück</button></div>
@@ -1531,7 +1558,7 @@
   var activeId=load("antona_active",null);
   function active(){return profiles.filter(function(p){return p.id===activeId})[0]||null;}
   function persist(){save("antona_profiles",profiles);save("antona_active",activeId);}
-  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:"",adaptive:{},lernwoerter:[],weakness:{},readStreak:0,readLastDay:"",readToday:{day:"",sec:0},readDaysCount:0};}
+  function blankStats(){return {stars:0,coins:0,rounds:0,correct:0,best:{math:0,read:0,shape:0,clock:0,english:0,tr:0,denken:0,sach:0,musik:0,geo:0},history:{},ballonBest:0,streak:0,lastDay:"",quizBest:0,goal:10,unlocked:[],lastChest:"",adaptive:{},lernwoerter:[],weakness:{},readStreak:0,readLastDay:"",readToday:{day:"",sec:0},readDaysCount:0,medals:{gold:0,silver:0,bronze:0}};}
   profiles.forEach(function(p){ // alte Profile um neue Felder ergänzen
     if(!p.stats)p.stats=blankStats();if(!p.stats.best)p.stats.best={};if(!p.stats.history)p.stats.history={};
     if(p.stats.coins===undefined)p.stats.coins=0;if(p.stats.ballonBest===undefined)p.stats.ballonBest=0;if(p.stats.blitzBest===undefined)p.stats.blitzBest=0;
@@ -1539,6 +1566,7 @@
     if(p.stats.quizBest===undefined)p.stats.quizBest=0;if(p.stats.goal===undefined)p.stats.goal=10;if(!p.stats.unlocked)p.stats.unlocked=[];
     if(p.stats.lastChest===undefined)p.stats.lastChest="";
     if(!p.stats.adaptive)p.stats.adaptive={};if(!p.stats.lernwoerter)p.stats.lernwoerter=[];if(!p.stats.weakness)p.stats.weakness={};
+    if(!p.stats.medals)p.stats.medals={gold:0,silver:0,bronze:0};
     if(p.stats.readStreak===undefined)p.stats.readStreak=0;if(p.stats.readLastDay===undefined)p.stats.readLastDay="";if(!p.stats.readToday)p.stats.readToday={day:"",sec:0};if(p.stats.readDaysCount===undefined)p.stats.readDaysCount=0;
     ["math","read","shape","clock","english","tr","denken","sach","musik","geo"].forEach(function(k){if(p.stats.best[k]===undefined)p.stats.best[k]=0;});
   });
@@ -2124,7 +2152,7 @@
   var TRY=["Fast! Versuch es nochmal.","Nicht ganz – probier noch mal!","Schau nochmal genau hin."];
 
   /* ---------- Screens ---------- */
-  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays","reportOverlay","dressup","diff","pizza"];
+  var SCREENS=["profiles","newProfile","home","curriculum","focus","coach","levels","play","done","parent","games","ballons","blitz","memory","uno","schach","shop","vier","galgen","malen","badges","quiz","avatar","rmem","pyra","school","chest","pet","zeugnis","urkundeOverlay","trace","story","sudoku","wordsearch","snake","race","clockset","money","simon","anagram","maze","enmem","paint","explain","lwgame","reading","simonsays","reportOverlay","dressup","diff","pizza","olyPick","oly"];
   function show(id){var fixedAdd=document.getElementById("profileAddFixed");if(fixedAdd)fixedAdd.style.display="none";SCREENS.forEach(function(s){$("#"+s).hidden=(s!==id);});
     var hasActive=!!active(),pre=(id==="profiles"||id==="newProfile");
     $("#whoBtn").hidden=!hasActive||pre;
@@ -2494,7 +2522,8 @@
     {id:"simonsays",name:"Simon sagt",emoji:"🙋",cost:0,desc:"Mach die Bewegung nur, wenn Simon sagt davor steht!"},
     {id:"dressup",name:"Mein Avatar gestalten",emoji:"💅",cost:0,desc:"Haare, Kleid und Schmuck aussuchen – mach deinen eigenen Avatar."},
     {id:"diff",name:"Finde den Unterschied",emoji:"🦋",cost:4,desc:"Vergleiche zwei Bilder und finde, was anders ist."},
-    {id:"pizza",name:"Pizza-Bruchteile",emoji:"🍰",cost:0,desc:"Hälfte, Viertel, Drittel – lerne Bruchteile mit Pizza."}
+    {id:"pizza",name:"Pizza-Bruchteile",emoji:"🍰",cost:0,desc:"Hälfte, Viertel, Drittel – lerne Bruchteile mit Pizza."},
+    {id:"olympia",name:"Lern-Olympiade",emoji:"🏅",cost:0,desc:"Sport-Wettkampf: gewinne mit richtigen Antworten Gold, Silber & Bronze!"}
   ];
   function openGames(){
     var p=active();if(!p)return;
@@ -2518,7 +2547,8 @@
         else if(g.id==="anagram")startAnagram();else if(g.id==="maze")startMaze();
         else if(g.id==="enmem")startEnmem();else if(g.id==="paint")startPaint();else if(g.id==="lwgame")startLw();
         else if(g.id==="simonsays")startSimonSays();
-        else if(g.id==="dressup")startDressup();else if(g.id==="diff")startDiff();else if(g.id==="pizza")startPizza();});
+        else if(g.id==="dressup")startDressup();else if(g.id==="diff")startDiff();else if(g.id==="pizza")startPizza();
+        else if(g.id==="olympia")startOlympia();});
       list.appendChild(b);
     });
     var note=document.createElement("p");note.className="muted";note.style.marginTop=".7rem";
@@ -3305,6 +3335,45 @@
   function pzEnd(){confetti();$("#pzFb").className="feedback ok";$("#pzFb").innerHTML=PZ.score+"/8 richtig! 🎉";if(PZ.score>=5)reward(2,1);setTimeout(openGames,1600);}
   $("#dfBack").addEventListener("click",openGames);
   $("#pzBack").addEventListener("click",openGames);
+
+  /* ---------- LERN-OLYMPIADE ---------- */
+  var OLY_DISC=[
+    {id:"lauf",e:"🏃",n:"100-Meter-Lauf",sub:"Rechnen bis 100",key:"math",lvl:4},
+    {id:"schwimm",e:"🏊",n:"Schwimmen",sub:"Lesen & Wörter",key:"read",lvl:2},
+    {id:"bogen",e:"🏹",n:"Bogenschießen",sub:"Englisch",key:"english",lvl:1},
+    {id:"turnen",e:"🤸",n:"Turnen",sub:"Denken & Logik",key:"denken",lvl:1},
+    {id:"rad",e:"🚴",n:"Radrennen",sub:"Mathe (schwerer)",key:"math",lvl:10},
+    {id:"fussball",e:"⚽",n:"Elfmeterschießen",sub:"Sachkunde",key:"sach",lvl:1}
+  ];
+  var OLY={disc:null,round:0,you:0,cpu:0,total:8,correct:0,lock:false,cur:null};
+  function startOlympia(){renderOlyDiscs();show("olyPick");}
+  function renderOlyMedals(){var p=active(),m=(p&&p.stats.medals)||{gold:0,silver:0,bronze:0};$("#olyMedals").textContent="🥇 "+(m.gold||0)+" · 🥈 "+(m.silver||0)+" · 🥉 "+(m.bronze||0);}
+  function renderOlyDiscs(){renderOlyMedals();var box=$("#olyDiscs");box.innerHTML="";OLY_DISC.forEach(function(d){var b=document.createElement("button");b.className="oly-disc";
+    b.innerHTML='<span class="oly-e">'+d.e+'</span><span><b>'+d.n+'</b><small>'+d.sub+'</small></span><span class="oly-med">▶</span>';
+    b.addEventListener("click",function(){olyStart(d);});box.appendChild(b);});}
+  function olyStart(d){OLY={disc:d,round:0,you:0,cpu:0,total:8,correct:0,lock:false,cur:null};$("#olyTitle").textContent=d.e+" "+d.n;$("#olyYou").textContent=d.e;olyMove();show("oly");olyNext();}
+  function olyMove(){$("#olyYou").style.left=(OLY.you/OLY.total*82)+"%";$("#olyCpu").style.left=(OLY.cpu/OLY.total*82)+"%";}
+  function olyNext(){if(OLY.round>=OLY.total||OLY.you>=OLY.total||OLY.cpu>=OLY.total)return olyEnd();
+    OLY.round++;OLY.lock=false;$("#olyRound").textContent=OLY.round;$("#olyFb").textContent="";$("#olyFb").className="feedback";
+    var set=GAMES[OLY.disc.key].lvl[OLY.disc.lvl].set,q=OLY.cur=pick(set)();
+    $("#olyQLabel").querySelector("span").textContent=q.label;q.render($("#olyQ"));
+    var box=$("#olyAns");box.innerHTML="";box.className="answers"+(q.three?" three":"");
+    q.options.forEach(function(o){var btn=document.createElement("button");btn.className="opt";if(q.word)btn.innerHTML='<span class="word">'+o+'</span>';else btn.textContent=o;btn.setAttribute("aria-label",o);btn.addEventListener("click",function(){olyAnswer(o===q.correct,btn,q);});box.appendChild(btn);});
+    if(q.speakLang)setTimeout(function(){speak(q.speak,q.speakLang);},250);}
+  function olyAnswer(ok,btn,q){if(OLY.lock)return;OLY.lock=true;Array.prototype.forEach.call($("#olyAns").children,function(c){c.disabled=true;});
+    if(ok){btn.classList.add("good");sCorrect();OLY.you++;OLY.correct++;$("#olyFb").className="feedback ok";$("#olyFb").innerHTML="⭐ Schnell!";}
+    else{btn.classList.add("bad");sWrong();Array.prototype.forEach.call($("#olyAns").children,function(c){if(c.getAttribute("aria-label")===q.correct)c.classList.add("good");});$("#olyFb").className="feedback try";$("#olyFb").innerHTML="Lösung: <b>"+q.correct+"</b>";}
+    if(Math.random()<0.5)OLY.cpu++;olyMove();setTimeout(olyNext,ok?800:1400);}
+  function olyEnd(){var p=active(),c=OLY.correct,medal=c>=7?"gold":c>=5?"silver":c>=3?"bronze":null;
+    if(p&&medal){p.stats.medals[medal]=(p.stats.medals[medal]||0)+1;persist();}
+    confetti();var txt=medal==="gold"?"🥇 GOLD! Fantastisch – "+c+"/8 richtig!":medal==="silver"?"🥈 Silber! Super – "+c+"/8 richtig!":medal==="bronze"?"🥉 Bronze! Gut gemacht – "+c+"/8 richtig!":"Teilnahme – "+c+"/8. Nächstes Mal klappt die Medaille!";
+    reward(c, medal==="gold"?3:medal==="silver"?2:medal==="bronze"?1:0);
+    $("#olyQ").innerHTML="";$("#olyAns").innerHTML="";$("#olyQLabel").querySelector("span").textContent="";
+    $("#olyFb").className="feedback ok";$("#olyFb").innerHTML=txt+' &nbsp;<button class="next" id="olyAgain">Weiter</button>';
+    renderOlyMedals();var ag=$("#olyAgain");if(ag)ag.addEventListener("click",function(){renderOlyDiscs();show("olyPick");});speak(txt);}
+  $("#olyBack").addEventListener("click",openGames);
+  $("#olyStop").addEventListener("click",function(){renderOlyDiscs();show("olyPick");});
+  $("#olySpeak").addEventListener("click",function(){if(OLY.cur)speak(OLY.cur.speak,OLY.cur.speakLang);});
   $("#explainStart").addEventListener("click",function(){var cb=explainGo;explainGo=null;if(cb)cb();});
   $("#explainSpeak").addEventListener("click",function(){if(explainSpeakText)speak(explainSpeakText);});
   $("#explainBack").addEventListener("click",function(){explainGo=null;show("levels");});
