@@ -3748,4 +3748,197 @@
 })();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+
+<!-- KI-Aufgaben: Gemini Backend Integration -->
+<style>
+  #ki-fab{position:fixed;bottom:max(1.5rem,env(safe-area-inset-bottom,0px)+1rem);right:max(1.2rem,env(safe-area-inset-right,0px));
+    background:linear-gradient(135deg,#5b6cff,#8a5bff);color:#fff;border:none;border-radius:50%;
+    width:3.4rem;height:3.4rem;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(91,108,255,.45);
+    display:none;align-items:center;justify-content:center;z-index:200;transition:transform .15s;}
+  #ki-fab:hover{transform:scale(1.08);}
+  #ki-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:center;justify-content:center;padding:1rem;}
+  #ki-box{background:var(--panel,#fff);border-radius:1.2rem;padding:1.5rem;width:min(100%,460px);
+    box-shadow:0 8px 40px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;}
+  #ki-box h2{margin:0 0 1rem;font-size:1.1rem;color:var(--ink,#1f2433);}
+  .ki-themen{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
+  .ki-themen button{border:1px solid var(--line,#e6e9f2);background:var(--bg2,#f3f5fb);
+    color:var(--ink,#1f2433);padding:.4rem .8rem;border-radius:2rem;cursor:pointer;font:.85rem inherit;transition:all .15s;}
+  .ki-themen button.sel{border-color:#5b6cff;background:#ede9ff;color:#5b6cff;font-weight:700;}
+  #ki-frage{font-size:1.3rem;font-weight:700;margin:1rem 0;line-height:1.4;color:var(--ink,#1f2433);min-height:2.5rem;}
+  #ki-hinweis{font-size:.85rem;color:var(--ink-soft,#6b7488);margin:.5rem 0;min-height:1.2rem;}
+  .ki-answers{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.75rem 0;}
+  .ki-answers button{border:1px solid var(--line,#e6e9f2);background:var(--panel,#fff);
+    color:var(--ink,#1f2433);padding:.7rem .6rem;border-radius:.7rem;cursor:pointer;font:.9rem inherit;
+    font-weight:600;transition:all .15s;text-align:center;}
+  .ki-answers button:hover:not(:disabled){border-color:#5b6cff;background:#ede9ff;color:#5b6cff;}
+  .ki-answers button.richtig{background:#d4f0dc;border-color:#1a7f37;color:#1a7f37;}
+  .ki-answers button.falsch{background:#fce8e8;border-color:#d1242f;color:#d1242f;}
+  .ki-answers button:disabled{cursor:not-allowed;opacity:.85;}
+  #ki-feedback{text-align:center;font-size:1.1rem;font-weight:700;min-height:1.5rem;margin:.5rem 0;}
+  #ki-next{width:100%;padding:.8rem;background:#5b6cff;color:#fff;border:none;border-radius:.7rem;
+    cursor:pointer;font:600 1rem inherit;margin-top:.5rem;display:none;}
+  #ki-next:hover{background:#4a5bdd;}
+  #ki-loader{text-align:center;padding:1.5rem;font-size:.9rem;color:var(--ink-soft,#6b7488);}
+  .ki-row{display:flex;gap:.5rem;margin-top:.75rem;}
+  .ki-row button{flex:1;padding:.5rem;border:1px solid var(--line,#e6e9f2);background:var(--bg2,#f3f5fb);
+    color:var(--ink-soft,#6b7488);border-radius:.6rem;cursor:pointer;font:.82rem inherit;}
+  .ki-schwer{display:flex;gap:.4rem;margin-bottom:.5rem;}
+  .ki-schwer button{border:1px solid var(--line,#e6e9f2);background:var(--bg2,#f3f5fb);
+    color:var(--ink,#1f2433);padding:.3rem .7rem;border-radius:2rem;cursor:pointer;font:.8rem inherit;}
+  .ki-schwer button.sel{border-color:#ff6b6b;background:#fce8e8;color:#d1242f;font-weight:700;}
+  #ki-punkte{font-size:.8rem;color:#5b6cff;font-weight:600;text-align:right;margin-bottom:.5rem;}
+</style>
+
+<button id="ki-fab" title="KI-Aufgaben mit Gemini">🤖</button>
+
+<div id="ki-modal">
+  <div id="ki-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+      <h2 style="margin:0">🤖 KI-Aufgaben</h2>
+      <button onclick="kiClose()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--ink-soft,#6b7488)">✕</button>
+    </div>
+    <div id="ki-punkte">⭐ Punkte: <span id="ki-score">0</span></div>
+    <div class="ki-themen" id="ki-themen"></div>
+    <div class="ki-schwer" id="ki-schwer">
+      <button class="sel" data-s="leicht" onclick="kiSetSchwer(this)">Leicht</button>
+      <button data-s="mittel" onclick="kiSetSchwer(this)">Mittel</button>
+      <button data-s="schwer" onclick="kiSetSchwer(this)">Schwer</button>
+    </div>
+    <div id="ki-loader" hidden>⏳ Gemini denkt nach…</div>
+    <div id="ki-frage"></div>
+    <div id="ki-hinweis"></div>
+    <div class="ki-answers" id="ki-ans"></div>
+    <div id="ki-feedback"></div>
+    <button id="ki-next" onclick="kiNext()">Nächste Aufgabe →</button>
+    <div class="ki-row">
+      <button onclick="kiClose()">✕ Schließen</button>
+      <button onclick="kiGen()">🔄 Neue Aufgabe</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var API = 'http://localhost:8000';
+  var THEMEN = [
+    {id:'addition_ohne_ueberschreitung', label:'➕ Plus ohne Übergang'},
+    {id:'addition_mit_ueberschreitung',  label:'➕ Plus mit Übergang'},
+    {id:'subtraktion_ohne_ueberschreitung', label:'➖ Minus ohne Übergang'},
+    {id:'subtraktion_mit_ueberschreitung',  label:'➖ Minus mit Übergang'},
+    {id:'einmaleins',  label:'✖️ Einmaleins'},
+    {id:'division',    label:'➗ Division'},
+    {id:'geld',        label:'💰 Geld'},
+    {id:'uhrzeit',     label:'🕐 Uhrzeit'},
+  ];
+  var curThema = THEMEN[0].id;
+  var curSchwer = 'leicht';
+  var curRichtig = '';
+  var score = 0;
+  var fab = document.getElementById('ki-fab');
+  var modal = document.getElementById('ki-modal');
+
+  // Themen-Buttons aufbauen
+  var tc = document.getElementById('ki-themen');
+  THEMEN.forEach(function(t, i){
+    var b = document.createElement('button');
+    b.textContent = t.label;
+    if(i===0) b.classList.add('sel');
+    b.onclick = function(){
+      tc.querySelectorAll('button').forEach(function(x){x.classList.remove('sel');});
+      b.classList.add('sel');
+      curThema = t.id;
+      kiGen();
+    };
+    tc.appendChild(b);
+  });
+
+  // FAB anzeigen wenn Home sichtbar ist
+  var observer = new MutationObserver(function(){
+    var home = document.getElementById('home');
+    fab.style.display = (home && !home.hidden) ? 'flex' : 'none';
+  });
+  observer.observe(document.body, {subtree:true, attributes:true, attributeFilter:['hidden']});
+  setTimeout(function(){
+    var home = document.getElementById('home');
+    if(home && !home.hidden) fab.style.display = 'flex';
+  }, 500);
+
+  fab.onclick = function(){ modal.style.display = 'flex'; kiGen(); };
+
+  window.kiClose = function(){ modal.style.display = 'none'; };
+  window.kiSetSchwer = function(btn){
+    document.querySelectorAll('.ki-schwer button').forEach(function(b){b.classList.remove('sel');});
+    btn.classList.add('sel');
+    curSchwer = btn.dataset.s;
+    kiGen();
+  };
+
+  window.kiGen = function(){
+    var loader = document.getElementById('ki-loader');
+    var frage  = document.getElementById('ki-frage');
+    var hinweis= document.getElementById('ki-hinweis');
+    var ans    = document.getElementById('ki-ans');
+    var fb     = document.getElementById('ki-feedback');
+    var nxt    = document.getElementById('ki-next');
+
+    loader.hidden = false;
+    frage.textContent = '';
+    hinweis.textContent = '';
+    ans.innerHTML = '';
+    fb.textContent = '';
+    nxt.style.display = 'none';
+
+    fetch(API + '/aufgaben/generieren', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({thema: curThema, schwierigkeit: curSchwer, alter: 8})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      loader.hidden = true;
+      frage.textContent = data.frage;
+      hinweis.textContent = '💡 ' + data.hinweis;
+      curRichtig = data.richtige_antwort;
+
+      var alle = [data.richtige_antwort].concat(data.falsche_antworten || []);
+      alle = alle.sort(function(){ return Math.random()-.5; });
+      alle.forEach(function(opt){
+        var b = document.createElement('button');
+        b.textContent = opt;
+        b.onclick = function(){ kiCheck(b, opt, data.richtige_antwort, ans); };
+        ans.appendChild(b);
+      });
+    })
+    .catch(function(){
+      loader.hidden = true;
+      frage.textContent = '⚠️ Backend nicht erreichbar. Starte: uvicorn app.main:app --reload';
+      hinweis.textContent = 'cd /home/enes/projects/antona-backend && source .venv/bin/activate && uvicorn app.main:app --reload';
+    });
+  };
+
+  function kiCheck(btn, antwort, richtig, ans){
+    ans.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+    var fb = document.getElementById('ki-feedback');
+    var nxt = document.getElementById('ki-next');
+    var scoreEl = document.getElementById('ki-score');
+    if(antwort === richtig){
+      btn.classList.add('richtig');
+      fb.textContent = '🌟 Richtig! Super gemacht!';
+      score += 10;
+      scoreEl.textContent = score;
+    } else {
+      btn.classList.add('falsch');
+      ans.querySelectorAll('button').forEach(function(b){
+        if(b.textContent === richtig) b.classList.add('richtig');
+      });
+      fb.textContent = '❌ Leider falsch. Die Antwort war: ' + richtig;
+    }
+    nxt.style.display = 'block';
+  }
+
+  window.kiNext = kiGen;
+
+  modal.onclick = function(e){ if(e.target === modal) kiClose(); };
+})();
+</script>
 </html>
