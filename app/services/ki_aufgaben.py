@@ -3,18 +3,11 @@ import os
 import uuid
 
 from google import genai
+from google.genai import types
 
 from app.models.aufgabe import Aufgabe, AufgabeAnfrage, Thema
 
-_client = None
-
-
-def _get_client():
-    global _client
-    if _client is None:
-        _client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
-    return _client
-
+MODEL = "gemini-3.5-flash"
 
 THEMA_BESCHREIBUNG = {
     Thema.hunderterraum: "Zahlen von 1 bis 100 erkennen, darstellen und vergleichen",
@@ -52,20 +45,17 @@ Wichtig:
 - Falsche Antworten sollen plausibel aber eindeutig falsch sein
 - Hinweis soll helfen ohne die Lösung zu verraten"""
 
-    client = _get_client()
+    client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
     response = client.models.generate_content(
-        model="models/gemini-2.0-flash",
+        model=MODEL,
         contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.7,
+        ),
     )
 
-    text = response.text.strip()
-    if text.startswith("```"):
-        text = text.split("```")[1]
-        if text.startswith("json"):
-            text = text[4:]
-    text = text.strip()
-
-    data = json.loads(text)
+    data = json.loads(response.text)
     return Aufgabe(
         id=str(uuid.uuid4()),
         thema=anfrage.thema,
