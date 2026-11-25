@@ -3819,16 +3819,24 @@
 
 <script>
 (function(){
-  var API = 'http://localhost:8000';
+  var API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000'
+    : 'https://antona-backend.onrender.com';
   var THEMEN = [
-    {id:'addition_ohne_ueberschreitung', label:'➕ Plus ohne Übergang'},
-    {id:'addition_mit_ueberschreitung',  label:'➕ Plus mit Übergang'},
+    {id:'addition_ohne_ueberschreitung',    label:'➕ Plus ohne Übergang'},
+    {id:'addition_mit_ueberschreitung',     label:'➕ Plus mit Übergang'},
     {id:'subtraktion_ohne_ueberschreitung', label:'➖ Minus ohne Übergang'},
     {id:'subtraktion_mit_ueberschreitung',  label:'➖ Minus mit Übergang'},
-    {id:'einmaleins',  label:'✖️ Einmaleins'},
-    {id:'division',    label:'➗ Division'},
-    {id:'geld',        label:'💰 Geld'},
-    {id:'uhrzeit',     label:'🕐 Uhrzeit'},
+    {id:'einmaleins',   label:'✖️ Einmaleins'},
+    {id:'division',     label:'➗ Division'},
+    {id:'geld',         label:'💰 Geld'},
+    {id:'uhrzeit',      label:'🕐 Uhrzeit'},
+    {id:'sachaufgaben', label:'📖 Sachaufgaben'},
+    {id:'geometrie',    label:'📐 Geometrie'},
+    {id:'zahlenstrahl', label:'📏 Zahlenstrahl'},
+    {id:'groessen',     label:'⚖️ Größen & Einheiten'},
+    {id:'brueche',      label:'🍕 Brüche'},
+    {id:'muster',       label:'🔢 Muster & Folgen'},
   ];
   var curThema = THEMEN[0].id;
   var curSchwer = 'leicht';
@@ -3911,8 +3919,8 @@
     })
     .catch(function(){
       loader.hidden = true;
-      frage.textContent = '⚠️ Backend nicht erreichbar. Starte: uvicorn app.main:app --reload';
-      hinweis.textContent = 'cd /home/enes/projects/antona-backend && source .venv/bin/activate && uvicorn app.main:app --reload';
+      frage.textContent = '😔 Ups! Die Aufgabe konnte nicht geladen werden.';
+      hinweis.textContent = '💡 Bitte prüfe deine Internetverbindung und versuche es nochmal.';
     });
   };
 
@@ -3921,9 +3929,11 @@
     var fb = document.getElementById('ki-feedback');
     var nxt = document.getElementById('ki-next');
     var scoreEl = document.getElementById('ki-score');
+    var ermutigung_richtig = ['Wow, super gemacht! 🌟','Fantastisch! Du bist ein Mathe-Profi! 🎉','Perfekt! Weiter so! ⭐','Ja! Das hast du toll gelöst! 🚀','Klasse! Du wirst immer besser! 💪'];
+    var ermutigung_falsch  = ['Fast! Du schaffst das! Versuch es nochmal 💪','Nicht schlimm — aus Fehlern lernt man! 🤔','Gib nicht auf, du bist auf dem richtigen Weg! 🌈','Puh, das war knifflig! Schau dir den Hinweis an 😊','Nächstes Mal klappt\'s! Du machst Fortschritte! ⭐'];
     if(antwort === richtig){
       btn.classList.add('richtig');
-      fb.textContent = '🌟 Richtig! Super gemacht!';
+      fb.textContent = ermutigung_richtig[Math.floor(Math.random()*ermutigung_richtig.length)];
       score += 10;
       scoreEl.textContent = score;
     } else {
@@ -3931,7 +3941,7 @@
       ans.querySelectorAll('button').forEach(function(b){
         if(b.textContent === richtig) b.classList.add('richtig');
       });
-      fb.textContent = '❌ Leider falsch. Die Antwort war: ' + richtig;
+      fb.textContent = ermutigung_falsch[Math.floor(Math.random()*ermutigung_falsch.length)] + ' — Richtig wäre: ' + richtig;
     }
     nxt.style.display = 'block';
   }

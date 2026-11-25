@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 
 class Thema(str, Enum):
+    # Bestehende Themen
     hunderterraum = "hunderterraum"
     addition_ohne = "addition_ohne_ueberschreitung"
     addition_mit = "addition_mit_ueberschreitung"
@@ -13,6 +14,13 @@ class Thema(str, Enum):
     division = "division"
     geld = "geld"
     uhrzeit = "uhrzeit"
+    # Neue Themen
+    sachaufgaben = "sachaufgaben"
+    geometrie = "geometrie"
+    zahlenstrahl = "zahlenstrahl"
+    groessen = "groessen"
+    brueche = "brueche"
+    muster = "muster"
 
 
 class Schwierigkeit(str, Enum):
@@ -47,6 +55,7 @@ class AntwortErgebnis(BaseModel):
     richtig: bool
     punkte: int
     erklaerung: str
+    ermutigung: str = ""
 
 
 class Profil(BaseModel):
@@ -59,3 +68,10 @@ class FortschrittEintrag(BaseModel):
     thema: Thema
     richtig: bool
     punkte: int
+    schwierigkeit: Schwierigkeit = Schwierigkeit.mittel
+
+
+class AdaptiveAnfrage(BaseModel):
+    profil_name: str
+    thema: Thema
+    alter: int = 8
