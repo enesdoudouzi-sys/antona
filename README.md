@@ -7,31 +7,13 @@
 
 Eine KI-gestützte Lernapp für Grundschulkinder (Klasse 1–4), die Mathematikaufgaben individuell generiert — mit adaptivem Schwierigkeitsgrad, Spaced Repetition und kindgerechtem Feedback.
 
+> **🌐 Live-Demo:** [Frontend](https://enesdoudouzi-sys.github.io/antona) · [API Docs](https://antona-backend.onrender.com/docs)
+
 ---
 
-## 📸 App-Übersicht
+## 📸 Vorschau
 
-```
-┌─────────────────────────────────────────────────┐
-│  🌟 Lernsterne                                  │
-│                                                 │
-│  Thema wählen:                                  │
-│  ➕ Plus   ➖ Minus   ✖️ Einmaleins   ➗ Division  │
-│  📖 Sachaufgaben   📐 Geometrie   🍕 Brüche      │
-│  ⚖️ Größen   📏 Zahlenstrahl   🔢 Muster         │
-│                                                 │
-│  Schwierigkeit: [ Leicht ] [ Mittel ] [ Schwer ] │
-│                                                 │
-│  ┌───────────────────────────────────────────┐  │
-│  │  Mia hat 24 Murmeln und bekommt 13 dazu.  │  │
-│  │  Wie viele hat sie jetzt?                 │  │
-│  │                                           │  │
-│  │  [ 37 ]   [ 36 ]   [ 47 ]   [ 27 ]       │  │
-│  └───────────────────────────────────────────┘  │
-│                                                 │
-│  🌟 Fantastisch! Du bist ein Mathe-Profi!       │
-└─────────────────────────────────────────────────┘
-```
+![Lernsterne App Vorschau](frontend/preview.svg)
 
 ---
 
@@ -66,13 +48,32 @@ Eine KI-gestützte Lernapp für Grundschulkinder (Klasse 1–4), die Mathematika
 
 ---
 
+## 📁 Projektstruktur
+
+```
+antona/
+├── backend/          # FastAPI + Gemini KI
+│   ├── app/
+│   │   ├── api/      # Endpoints
+│   │   ├── models/   # Pydantic-Modelle
+│   │   └── services/ # KI-Aufgaben-Generator
+│   ├── requirements.txt
+│   └── .env.example
+├── frontend/         # PWA (HTML/CSS/JS)
+│   ├── index.html
+│   ├── manifest.webmanifest
+│   ├── sw.js
+│   └── preview.svg
+└── README.md
+```
+
 ## 🚀 Quickstart
 
 ### Backend lokal starten
 
 ```bash
 git clone https://github.com/enesdoudouzi-sys/antona
-cd antona
+cd antona/backend
 cp .env.example .env     # GOOGLE_API_KEY eintragen
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -85,10 +86,10 @@ API Docs: http://localhost:8000/docs
 
 ```bash
 # Direkt im Browser öffnen:
-open index.html
+open frontend/index.html
 
 # Oder mit lokalem Server:
-python3 -m http.server 3000
+cd frontend && python3 -m http.server 3000
 # → http://localhost:3000
 ```
 
