@@ -7,7 +7,7 @@ from google.genai import types
 
 from app.models.aufgabe import Aufgabe, AufgabeAnfrage, Thema
 
-MODEL = "gemini-3.5-flash"
+MODEL = "gemini-3.5-flash-lite"
 
 THEMA_BESCHREIBUNG = {
     Thema.hunderterraum:    "Zahlen von 1 bis 100 erkennen, darstellen und vergleichen",
