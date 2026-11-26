@@ -7,7 +7,7 @@
 
 Eine KI-gestützte Lernapp für Grundschulkinder (Klasse 1–4), die Mathematikaufgaben individuell generiert — mit adaptivem Schwierigkeitsgrad, Spaced Repetition und kindgerechtem Feedback.
 
-> **🌐 Live-Demo:** [Frontend](https://enesdoudouzi-sys.github.io/antona) · [API Docs](https://antona-backend.onrender.com/docs)
+> **🌐 Live-Demo:** [Frontend](https://enesdoudouzi-sys.github.io/antona) · [API](https://antona.onrender.com/health) · [API Docs](https://antona.onrender.com/docs)
 
 ---
 
